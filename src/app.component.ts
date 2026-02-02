@@ -1,8 +1,8 @@
-
 import { Component, ElementRef, ViewChild, AfterViewInit, inject, signal } from '@angular/core';
 import { Engine2DService } from './services/engine-2d.service';
 import { EngineState2DService } from './services/engine-state-2d.service';
 import { DecimalPipe } from '@angular/common';
+import { SCENES } from './data/scene-presets';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +17,8 @@ export class AppComponent implements AfterViewInit {
   
   engine = inject(Engine2DService);
   state = inject(EngineState2DService);
+  
+  scenes = SCENES;
 
   private isDragging = false;
   private lastX = 0;
@@ -25,7 +27,8 @@ export class AppComponent implements AfterViewInit {
   private initialZoom = 0;
 
   async ngAfterViewInit() {
-    await this.engine.init(this.canvasRef.nativeElement);
+    // Pass the first scene as default
+    await this.engine.init(this.canvasRef.nativeElement, this.scenes[0]);
     
     const observer = new ResizeObserver(() => {
        this.engine['renderer'].resize();

@@ -1,4 +1,3 @@
-
 <div class="flex flex-col h-screen w-screen bg-slate-950 overflow-hidden text-slate-200 font-sans">
   
   <!-- Main Viewport -->
@@ -24,6 +23,11 @@
       <div class="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-[10px] font-mono border border-white/5">
         ENTITIES: {{ engine.ecs.entityCount() }}
       </div>
+      @if (engine.currentScene(); as s) {
+        <div class="px-3 py-1.5 bg-amber-500/10 backdrop-blur-md rounded-full text-[10px] font-mono border border-amber-500/20 text-amber-500 uppercase">
+          {{ s.name }}
+        </div>
+      }
     </div>
 
     <!-- Engine Boot Loader -->
@@ -103,6 +107,28 @@
       <div class="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
         @if (state.activePanel() === 'settings') {
            <div class="space-y-4">
+             <!-- Scene Selection -->
+             <div class="p-4 bg-slate-950/50 rounded-2xl border border-slate-800 space-y-3">
+               <label class="block text-slate-500 text-[9px] uppercase font-bold tracking-widest">Active Scene</label>
+               @for (s of scenes; track s.id) {
+                 <button 
+                   (click)="engine.loadScene(s)"
+                   class="w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between group"
+                   [class.bg-slate-800]="engine.currentScene()?.id === s.id"
+                   [class.border-blue-500]="engine.currentScene()?.id === s.id"
+                   [class.border-transparent]="engine.currentScene()?.id !== s.id"
+                   [class.hover:bg-slate-800]="engine.currentScene()?.id !== s.id">
+                   <div>
+                     <div class="text-xs font-bold" [class.text-blue-400]="engine.currentScene()?.id === s.id">{{ s.name }}</div>
+                     <div class="text-[9px] text-slate-500 mt-1">{{ s.description }}</div>
+                   </div>
+                   @if (engine.currentScene()?.id === s.id) {
+                     <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+                   }
+                 </button>
+               }
+             </div>
+
              <div class="p-4 bg-slate-950/50 rounded-2xl border border-slate-800">
                <label class="block text-slate-500 text-[9px] mb-3 uppercase font-bold tracking-widest">Gravity Y</label>
                <input type="range" min="-20" max="20" step="0.1" [value]="state.gravityY()" (input)="state.updateGravity($any($event.target).value)" class="w-full accent-amber-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">

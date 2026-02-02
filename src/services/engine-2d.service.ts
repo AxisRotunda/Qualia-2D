@@ -1,26 +1,48 @@
-
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 import { Physics2DService } from './physics-2d.service';
 import { Renderer2DService } from './renderer-2d.service';
 import { GameLoopService } from '../engine/runtime/game-loop.service';
 import { EntityGenerator, EntityId } from '../engine/ecs/entity';
+import type { ScenePreset2D } from '../engine/scene.types';
 
 @Injectable({ providedIn: 'root' })
 export class Engine2DService {
   readonly state = inject(EngineState2DService);
   readonly ecs = inject(ComponentStoreService);
-  private physics = inject(Physics2DService);
+  public physics = inject(Physics2DService);
   private renderer = inject(Renderer2DService);
   private loop = inject(GameLoopService);
 
-  async init(canvas: HTMLCanvasElement) {
+  readonly currentScene = signal<ScenePreset2D | null>(null);
+
+  async init(canvas: HTMLCanvasElement, initialScene: ScenePreset2D) {
     this.renderer.attach(canvas);
     await this.physics.init();
-    this.loadPlayground();
-    this.state.setLoading(false);
+    
+    // Load initial scene
+    this.loadScene(initialScene);
+    
     this.loop.start((dt) => this.tick(dt));
+  }
+
+  loadScene(scene: ScenePreset2D) {
+    this.state.setLoading(true);
+    this.state.mode.set('edit');
+    this.state.isPaused.set(false);
+    
+    // Reset World
+    this.physics.reset();
+    this.ecs.clear();
+    EntityGenerator.reset();
+    
+    // Slight delay to allow UI to show loading state and clear stack
+    setTimeout(() => {
+        scene.load(this);
+        this.currentScene.set(scene);
+        this.state.setLoading(false);
+    }, 50);
   }
 
   private tick(dt: number) {
@@ -39,23 +61,20 @@ export class Engine2DService {
   }
 
   resetScene() {
-    this.physics.reset();
-    this.ecs.clear();
-    EntityGenerator.reset();
-    this.loadPlayground();
-    this.state.mode.set('edit');
-    this.state.selectedEntityId.set(null);
+    const s = this.currentScene();
+    if (s) this.loadScene(s);
   }
 
-  spawnBox(x = (Math.random() - 0.5) * 5, y = 5 + Math.random() * 5, color = '#60a5fa') {
+  spawnBox(x = (Math.random() - 0.5) * 5, y = 5 + Math.random() * 5, color = '#60a5fa', w = 1, h = 1) {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
     this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
-    this.ecs.sprites.set(id, { color, width: 1, height: 1, layer: 1, opacity: 1 });
+    this.ecs.sprites.set(id, { color, width: w, height: h, layer: 1, opacity: 1 });
     this.ecs.tags.set(id, { name: `Box_${id}`, tags: new Set(['physics_object']) });
     
     const rb = this.physics.createBody(id, 'dynamic', x, y);
-    this.physics.createCollider(id, rb!, 1, 1);
+    // Ensure the collider matches the visual size
+    if (rb) this.physics.createCollider(id, rb, w, h);
     return id;
   }
 
@@ -87,11 +106,13 @@ export class Engine2DService {
 
     let foundId: number | null = null;
     const entities = this.ecs.entitiesList();
+    // Reverse iterate to find top-most
     for (let i = entities.length - 1; i >= 0; i--) {
         const id = entities[i];
         const t = this.ecs.getTransform(id);
         const s = this.ecs.getSprite(id);
         if (t && s) {
+            // Simple AABB check for selection (rotation ignored for selection box for simplicity)
             const minX = t.x - s.width / 2;
             const maxX = t.x + s.width / 2;
             const minY = t.y - s.height / 2;
@@ -104,18 +125,5 @@ export class Engine2DService {
     }
     this.state.selectedEntityId.set(foundId);
     if (foundId) this.state.setActivePanel('inspector');
-  }
-
-  private loadPlayground() {
-    const floorId = EntityGenerator.generate();
-    this.ecs.addEntity(floorId);
-    this.ecs.transforms.set(floorId, { x: 0, y: -5, rotation: 0, scaleX: 1, scaleY: 1 });
-    this.ecs.sprites.set(floorId, { color: '#475569', width: 20, height: 2, layer: 0, opacity: 1 });
-    this.ecs.tags.set(floorId, { name: 'Ground', tags: new Set(['static']) });
-    const floorRb = this.physics.createBody(floorId, 'fixed', 0, -5);
-    this.physics.createCollider(floorId, floorRb!, 20, 2);
-    
-    this.spawnBox(-2, 2, '#fbbf24');
-    this.spawnBox(2, 4, '#ef4444');
   }
 }
