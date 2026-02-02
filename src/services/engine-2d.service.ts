@@ -1,3 +1,4 @@
+
 import { Injectable, inject, signal } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
@@ -6,6 +7,7 @@ import { Renderer2DService } from './renderer-2d.service';
 import { GameLoopService } from '../engine/runtime/game-loop.service';
 import { EntityGenerator, EntityId } from '../engine/ecs/entity';
 import type { ScenePreset2D } from '../engine/scene.types';
+import * as RAPIER from '@dimforge/rapier2d-compat';
 
 @Injectable({ providedIn: 'root' })
 export class Engine2DService {
@@ -48,6 +50,10 @@ export class Engine2DService {
   private tick(dt: number) {
     if (this.state.mode() === 'play' && !this.state.isPaused()) {
         const start = performance.now();
+        // Update gravity if it changed
+        if (this.physics.world) {
+            this.physics.world.gravity = { x: 0, y: this.state.gravityY() };
+        }
         this.physics.step(dt / 1000); 
         this.physics.syncTransformsToECS();
         this.state.setPhysicsTime(performance.now() - start);
@@ -73,7 +79,6 @@ export class Engine2DService {
     this.ecs.tags.set(id, { name: `Box_${id}`, tags: new Set(['physics_object']) });
     
     const rb = this.physics.createBody(id, 'dynamic', x, y);
-    // Ensure the collider matches the visual size
     if (rb) this.physics.createCollider(id, rb, w, h);
     return id;
   }
@@ -94,7 +99,44 @@ export class Engine2DService {
     if (s) s.color = color;
   }
 
-  selectEntityAt(screenX: number, screenY: number) {
+  updateEntityName(id: EntityId, name: string) {
+    const tag = this.ecs.tags.get(id);
+    if (tag) tag.name = name;
+  }
+
+  updateEntitySize(id: EntityId, width: number, height: number) {
+    const s = this.ecs.sprites.get(id);
+    const rb = this.ecs.rigidBodies.get(id);
+    const col = this.ecs.colliders.get(id);
+    
+    if (s) {
+      s.width = width;
+      s.height = height;
+    }
+
+    // Re-create collider if physics exists
+    if (rb && col && this.physics.world) {
+      this.physics.world.removeCollider(col.handle, true);
+      const newCol = this.physics.createCollider(id, rb.handle, width, height);
+      if (newCol) {
+        this.ecs.colliders.set(id, { handle: newCol, shape: 'cuboid' });
+      }
+    }
+  }
+
+  setEntityPosition(id: EntityId, x: number, y: number) {
+    const t = this.ecs.transforms.get(id);
+    const rb = this.ecs.rigidBodies.get(id);
+    if (t) {
+      t.x = x;
+      t.y = y;
+    }
+    if (rb) {
+      rb.handle.setTranslation({ x, y }, true);
+    }
+  }
+
+  selectEntityAt(screenX: number, screenY: number): number | null {
     const zoom = this.state.cameraZoom();
     const camX = this.state.cameraX();
     const camY = this.state.cameraY();
@@ -106,13 +148,11 @@ export class Engine2DService {
 
     let foundId: number | null = null;
     const entities = this.ecs.entitiesList();
-    // Reverse iterate to find top-most
     for (let i = entities.length - 1; i >= 0; i--) {
         const id = entities[i];
         const t = this.ecs.getTransform(id);
         const s = this.ecs.getSprite(id);
         if (t && s) {
-            // Simple AABB check for selection (rotation ignored for selection box for simplicity)
             const minX = t.x - s.width / 2;
             const maxX = t.x + s.width / 2;
             const minY = t.y - s.height / 2;
@@ -125,5 +165,19 @@ export class Engine2DService {
     }
     this.state.selectedEntityId.set(foundId);
     if (foundId) this.state.setActivePanel('inspector');
+    return foundId;
+  }
+
+  screenToWorld(screenX: number, screenY: number) {
+    const zoom = this.state.cameraZoom();
+    const camX = this.state.cameraX();
+    const camY = this.state.cameraY();
+    const halfW = this.renderer.width / 2;
+    const halfH = this.renderer.height / 2;
+
+    return {
+        x: (screenX - halfW) / zoom + camX,
+        y: -((screenY - halfH) / zoom - camY)
+    };
   }
 }

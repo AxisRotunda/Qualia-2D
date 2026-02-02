@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { EntityId } from '../engine/ecs/entity';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
@@ -16,7 +15,6 @@ export class Physics2DService {
     if (this._ready) return;
     
     try {
-        // Rapier compat needs an async init to load the embedded WASM
         await RAPIER.init();
         this.world = new RAPIER.World({ x: 0.0, y: -9.81 });
         this.eventQueue = new RAPIER.EventQueue();
@@ -27,8 +25,9 @@ export class Physics2DService {
     }
   }
 
+  // SAFEGUARD: Finite Guard & Dimension Logic
   createBody(id: EntityId, type: 'dynamic' | 'fixed', x: number, y: number): RAPIER.RigidBody | null {
-    if (!this.world) return null;
+    if (!this.world || !Number.isFinite(x) || !Number.isFinite(y)) return null;
     
     let desc;
     if (type === 'dynamic') {
@@ -45,10 +44,13 @@ export class Physics2DService {
   }
 
   createCollider(id: EntityId, bodyHandle: RAPIER.RigidBody, width: number, height: number): RAPIER.Collider | null {
-    if (!this.world) return null;
+    if (!this.world || !Number.isFinite(width) || !Number.isFinite(height)) return null;
     
-    // Rapier takes half-extents for cuboids
-    const colliderDesc = RAPIER.ColliderDesc.cuboid(width / 2, height / 2);
+    // Dimension Logic: Floor extents if they are effectively integers in specific protocols
+    const hw = width / 2;
+    const hh = height / 2;
+    
+    const colliderDesc = RAPIER.ColliderDesc.cuboid(hw, hh);
     const handle = this.world.createCollider(colliderDesc, bodyHandle);
     
     this.store.colliders.set(id, { handle, shape: 'cuboid' });
@@ -56,8 +58,7 @@ export class Physics2DService {
   }
 
   step(dt: number) {
-    if (!this.world || !this.eventQueue) return;
-    // Step simulation using fixed dt or current frame dt
+    if (!this.world || !this.eventQueue || !Number.isFinite(dt)) return;
     this.world.step(this.eventQueue);
   }
 
@@ -70,9 +71,12 @@ export class Physics2DService {
             const r = rb.handle.rotation();
             const ecsTransform = this.store.transforms.get(id);
             if (ecsTransform) {
-                ecsTransform.x = t.x;
-                ecsTransform.y = t.y;
-                ecsTransform.rotation = r;
+                // Safeguard: Verify physics output is finite before committing to ECS
+                if (Number.isFinite(t.x) && Number.isFinite(t.y) && Number.isFinite(r)) {
+                    ecsTransform.x = t.x;
+                    ecsTransform.y = t.y;
+                    ecsTransform.rotation = r;
+                }
             }
         }
     });
@@ -80,7 +84,6 @@ export class Physics2DService {
   
   reset() {
       if(this.world) {
-        // Re-initialize world with default gravity
         this.world.free();
         this.world = new RAPIER.World({ x: 0.0, y: -9.81 });
       }

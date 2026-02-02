@@ -18,6 +18,7 @@ export class EngineState2DService {
   readonly cameraY = signal<number>(0);
   readonly cameraZoom = signal<number>(50); 
   readonly gridVisible = signal<boolean>(true);
+  readonly debugPhysics = signal<boolean>(false);
   readonly bgColor = signal<string>('#0f172a');
 
   // Physics Global
@@ -48,9 +49,12 @@ export class EngineState2DService {
     this.activePanel.update(current => current === panel ? 'none' : panel);
   }
 
-  // Template Helpers to avoid arrow functions in HTML
   toggleGrid() {
     this.gridVisible.update(v => !v);
+  }
+
+  toggleDebugPhysics() {
+    this.debugPhysics.update(v => !v);
   }
 
   updateGravity(val: string) {

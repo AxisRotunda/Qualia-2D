@@ -42,7 +42,7 @@ export class Renderer2DService {
     const halfW = this.width / 2;
     const halfH = this.height / 2;
 
-    // Clear with dynamic BG Color
+    // Clear background
     ctx.fillStyle = this.state.bgColor();
     ctx.fillRect(0, 0, this.width, this.height);
 
@@ -66,23 +66,31 @@ export class Renderer2DService {
             ctx.translate(t.x, t.y);
             ctx.rotate(t.rotation);
             
+            // Draw Sprite
             ctx.fillStyle = s.color;
             ctx.globalAlpha = s.opacity;
             ctx.fillRect(-s.width / 2, -s.height / 2, s.width, s.height);
             
-            // Highlight
+            // Draw Collider Debug
+            if (this.state.debugPhysics()) {
+                ctx.strokeStyle = '#f0f';
+                ctx.lineWidth = 1 / zoom;
+                ctx.strokeRect(-s.width / 2, -s.height / 2, s.width, s.height);
+            }
+
+            // Selection Highlight
             if (this.state.selectedEntityId() === id) {
-                ctx.strokeStyle = '#3b82f6'; // Bright Blue
+                ctx.strokeStyle = '#3b82f6';
                 ctx.lineWidth = 4 / zoom;
                 ctx.strokeRect(-s.width / 2, -s.height / 2, s.width, s.height);
                 
-                // Add tiny pulse effect indicators in corners?
+                // Corner Indicators
                 ctx.fillStyle = '#3b82f6';
-                const size = 0.1;
-                ctx.fillRect(-s.width/2 - size/2, -s.height/2 - size/2, size, size);
-                ctx.fillRect(s.width/2 - size/2, -s.height/2 - size/2, size, size);
-                ctx.fillRect(-s.width/2 - size/2, s.height/2 - size/2, size, size);
-                ctx.fillRect(s.width/2 - size/2, s.height/2 - size/2, size, size);
+                const dotSize = 0.1;
+                ctx.fillRect(-s.width/2 - dotSize/2, -s.height/2 - dotSize/2, dotSize, dotSize);
+                ctx.fillRect(s.width/2 - dotSize/2, -s.height/2 - dotSize/2, dotSize, dotSize);
+                ctx.fillRect(-s.width/2 - dotSize/2, s.height/2 - dotSize/2, dotSize, dotSize);
+                ctx.fillRect(s.width/2 - dotSize/2, s.height/2 - dotSize/2, dotSize, dotSize);
             }
             
             ctx.restore();

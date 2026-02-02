@@ -14,263 +14,312 @@
       (contextmenu)="$event.preventDefault()">
     </canvas>
 
-    <!-- Overlay HUD: Top Stats -->
-    <div class="absolute top-4 left-4 flex gap-2 pointer-events-none transition-opacity duration-300" [class.opacity-20]="state.mode() === 'play'">
-      <div class="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-[10px] font-mono border border-white/5 flex items-center gap-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-        FPS: {{ state.fps() | number:'1.0-0' }}
-      </div>
-      <div class="px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-[10px] font-mono border border-white/5">
-        ENTITIES: {{ engine.ecs.entityCount() }}
-      </div>
-      @if (engine.currentScene(); as s) {
-        <div class="px-3 py-1.5 bg-amber-500/10 backdrop-blur-md rounded-full text-[10px] font-mono border border-amber-500/20 text-amber-500 uppercase">
-          {{ s.name }}
+    <!-- [T0] SYSTEM HUD: HIGH-DENSITY MATRICES -->
+    <div class="absolute top-6 left-6 flex flex-col gap-4 pointer-events-none transition-opacity duration-300" [class.opacity-40]="state.mode() === 'play'">
+      
+      <!-- ID & Tiering -->
+      <div class="flex flex-col gap-1">
+        <h1 class="text-white font-black text-2xl tracking-tighter">QUALIA_2D<span class="text-amber-500 text-[10px] ml-2 tracking-widest uppercase bg-amber-500/20 px-2 py-0.5 rounded">KERNEL_V1.1</span></h1>
+        <div class="text-[9px] font-mono text-slate-500 flex gap-4">
+          <span>TIER: T0_CORE</span>
+          <span>AUTH: AXIAL_DIRECTIVES</span>
+          <span>STATE: {{ state.statusText() }}</span>
         </div>
-      }
+      </div>
+
+      <!-- Real-time Metrics Matrix -->
+      <div class="grid grid-cols-2 gap-2 w-64">
+        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
+           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">FPS_CALIBRATION</div>
+           <div class="text-lg font-mono text-green-400">{{ state.fps() | number:'1.0-0' }}</div>
+        </div>
+        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
+           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">ECS_ENTITY_COUNT</div>
+           <div class="text-lg font-mono text-blue-400">{{ engine.ecs.entityCount() }}</div>
+        </div>
+        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
+           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">PHYSICS_STEP_MS</div>
+           <div class="text-lg font-mono text-amber-500">{{ state.physicsTimeMs() | number:'1.2-2' }}</div>
+        </div>
+        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
+           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">ZOOM_EXTENT</div>
+           <div class="text-lg font-mono text-slate-300">{{ state.cameraZoom() | number:'1.0-0' }}%</div>
+        </div>
+      </div>
+
+      <!-- Processual Memory Log -->
+      <div class="w-64 bg-slate-900/40 border border-white/5 rounded p-2 overflow-hidden">
+        <div class="text-[7px] text-slate-600 uppercase font-black mb-2 flex justify-between">
+          <span>PROCESS_LOG</span>
+          <span class="animate-pulse">ONLINE</span>
+        </div>
+        <div class="space-y-1">
+          @for (log of commands.commandLog(); track $index) {
+            <div class="text-[9px] font-mono text-slate-400 truncate opacity-80 border-l border-slate-700 pl-2">
+              {{ log }}
+            </div>
+          } @empty {
+             <div class="text-[9px] font-mono text-slate-700 italic">SYSTEM_READY</div>
+          }
+        </div>
+      </div>
     </div>
 
     <!-- Engine Boot Loader -->
     @if (state.loading()) {
-      <div class="absolute inset-0 flex items-center justify-center bg-slate-950/95 z-50">
-        <div class="flex flex-col items-center gap-6">
-          <div class="relative w-20 h-20">
-            <div class="absolute inset-0 border-4 border-amber-500/20 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+      <div class="absolute inset-0 flex items-center justify-center bg-slate-950/98 z-50">
+        <div class="flex flex-col items-center gap-8">
+          <div class="relative w-24 h-24">
+            <div class="absolute inset-0 border-[1px] border-amber-500/10 rounded-full"></div>
+            <div class="absolute inset-0 border-t-2 border-amber-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-4 border-[1px] border-blue-500/10 rounded-full"></div>
+            <div class="absolute inset-4 border-b-2 border-blue-500 rounded-full animate-spin-slow" style="animation-duration: 3s"></div>
           </div>
           <div class="flex flex-col items-center">
-            <h1 class="text-amber-500 font-black tracking-[0.4em] text-xl">QUALIA2D</h1>
-            <p class="text-[10px] text-slate-500 mt-2 font-mono animate-pulse">BOOTING ECS KERNEL...</p>
+            <h1 class="text-white font-black tracking-[0.6em] text-2xl">QUALIA2D</h1>
+            <p class="text-[8px] text-slate-600 mt-4 font-mono tracking-[0.4em] uppercase">Initializing Neural Core T0...</p>
           </div>
         </div>
       </div>
     }
 
-    <!-- Selection Quick Action Menu (Floating) -->
+    <!-- Selection Quick Action Menu -->
     @if (state.selectedEntityId(); as id) {
-       <div class="absolute bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-700/50 shadow-2xl z-40">
+       <div class="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-slate-900/90 backdrop-blur-xl p-1 rounded-2xl border border-white/10 shadow-2xl z-40">
           <button (click)="engine.deleteEntity(id)" class="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all active:scale-90">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
           </button>
           <div class="w-px h-6 bg-slate-700 mx-1"></div>
-          <button (click)="state.setActivePanel('inspector')" class="px-4 py-3 text-xs font-bold text-amber-500 uppercase tracking-widest active:scale-95">
-            Inspect #{{ id }}
+          <button (click)="state.setActivePanel('inspector')" class="px-6 py-3 text-[10px] font-black text-amber-500 uppercase tracking-widest">
+            INSPECT_OBJECT [{{ id }}]
           </button>
        </div>
     }
   </main>
 
-  <!-- Side Panel: Left (Hierarchy) -->
+  <!-- Command Palette / Navigation Bar -->
+  <footer class="h-24 bg-slate-950 border-t border-white/5 flex items-center px-8 justify-between z-40 relative">
+    
+    <!-- Operational Verbs (T0 Command Registry) -->
+    <div class="flex items-center gap-2">
+      <div class="flex flex-col gap-1 mr-4">
+        <span class="text-[7px] text-slate-600 font-black uppercase">Command_Registry</span>
+        <div class="flex gap-1">
+          <button (click)="runCommand('RUN_PHYS')" class="px-3 py-1.5 border border-white/10 rounded hover:bg-white/5 text-[9px] font-mono text-slate-400">RUN_PHYS</button>
+          <button (click)="runCommand('RUN_SCENE_OPT')" class="px-3 py-1.5 border border-white/10 rounded hover:bg-white/5 text-[9px] font-mono text-slate-400">RUN_SCENE_OPT</button>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
+        <button 
+          (click)="state.setActivePanel('hierarchy')"
+          class="p-4 rounded-xl transition-all"
+          [class.bg-blue-600]="state.activePanel() === 'hierarchy'"
+          [class.text-white]="state.activePanel() === 'hierarchy'"
+          [class.text-slate-600]="state.activePanel() !== 'hierarchy'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+        </button>
+        <button 
+          (click)="state.setActivePanel('settings')"
+          class="p-4 rounded-xl transition-all"
+          [class.bg-blue-600]="state.activePanel() === 'settings'"
+          [class.text-white]="state.activePanel() === 'settings'"
+          [class.text-slate-600]="state.activePanel() !== 'settings'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Central Control Hub -->
+    <div class="flex items-center gap-4">
+      <button 
+        (click)="engine.togglePlay()"
+        class="w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-2xl active:scale-90 border-[4px] border-slate-900"
+        [class.bg-green-500]="state.mode() !== 'play'"
+        [class.bg-amber-500]="state.mode() === 'play'">
+        @if (state.mode() === 'edit') {
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        }
+      </button>
+      <button (click)="engine.resetScene()" class="w-10 h-10 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center hover:bg-slate-800 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+    </div>
+
+    <!-- Quick Spawn -->
+    <button 
+      (click)="engine.spawnBox()"
+      class="bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 rounded-2xl flex items-center gap-3 font-black text-xs transition-all active:scale-95 shadow-2xl shadow-blue-500/20">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14m-7-7v14"/></svg>
+      <span>SPAWN_CORE_UNIT</span>
+    </button>
+  </footer>
+
+  <!-- Side Panels (Hierarchy/Inspector/Settings) use high-density aesthetics too -->
   <aside 
-    class="fixed left-0 top-0 bottom-0 w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 z-30 transition-transform duration-500 ease-out flex flex-col shadow-2xl"
+    class="fixed left-0 top-0 bottom-0 w-72 bg-slate-950/95 backdrop-blur-2xl border-r border-white/5 z-30 transition-transform duration-500 ease-out flex flex-col shadow-2xl"
     [class.-translate-x-full]="state.activePanel() !== 'hierarchy'">
-    <div class="p-6 flex-1 flex flex-col overflow-hidden">
+    <div class="p-8 flex-1 flex flex-col overflow-hidden">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Hierarchy</h2>
-        <button (click)="state.setActivePanel('none')" class="text-slate-500 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg></button>
+        <h2 class="text-white font-black text-[10px] uppercase tracking-[0.4em]">Hierarchy_T1</h2>
+        <button (click)="state.setActivePanel('none')" class="text-slate-600 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg></button>
       </div>
       
       <div class="flex-1 overflow-y-auto space-y-1 pr-2 custom-scrollbar">
         @for (id of engine.ecs.entitiesList(); track id) {
           <div 
             (click)="state.selectedEntityId.set(id)"
-            class="group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border border-transparent"
-            [class.bg-blue-600/20]="state.selectedEntityId() === id"
-            [class.border-blue-500/30]="state.selectedEntityId() === id"
-            [class.hover:bg-slate-800]="state.selectedEntityId() !== id">
+            class="group flex items-center justify-between p-3 rounded border border-transparent transition-all cursor-pointer"
+            [class.bg-blue-600/10]="state.selectedEntityId() === id"
+            [class.border-blue-500/20]="state.selectedEntityId() === id"
+            [class.hover:bg-white/5]="state.selectedEntityId() !== id">
             <div class="flex items-center gap-3">
-               <div class="w-2 h-2 rounded-full" [style.background-color]="engine.ecs.getSprite(id)?.color || '#fff'"></div>
-               <span class="text-[11px] font-mono" [class.text-blue-400]="state.selectedEntityId() === id">
+               <div class="w-1.5 h-1.5 rounded-full" [style.background-color]="engine.ecs.getSprite(id)?.color || '#fff'"></div>
+               <span class="text-[10px] font-mono tracking-tighter" [class.text-blue-400]="state.selectedEntityId() === id">
                  {{ engine.ecs.tags.get(id)?.name || 'Entity_' + id }}
                </span>
             </div>
-            <span class="text-[9px] text-slate-600 font-mono opacity-0 group-hover:opacity-100">#{{ id }}</span>
+            <span class="text-[8px] text-slate-700 font-mono">ID:{{ id }}</span>
           </div>
         }
       </div>
     </div>
   </aside>
 
-  <!-- Side Panel: Right (Inspector / Settings) -->
+  <!-- Right Side: Inspector -->
   <aside 
-    class="fixed right-0 top-0 bottom-0 w-80 bg-slate-900/95 backdrop-blur-xl border-l border-slate-800 z-30 transition-transform duration-500 ease-out flex flex-col shadow-2xl"
+    class="fixed right-0 top-0 bottom-0 w-80 bg-slate-950/95 backdrop-blur-2xl border-l border-white/5 z-30 transition-transform duration-500 ease-out flex flex-col shadow-2xl"
     [class.translate-x-full]="state.activePanel() !== 'inspector' && state.activePanel() !== 'settings'">
     
-    <div class="p-6 flex-1 flex flex-col overflow-hidden">
+    <div class="p-8 flex-1 flex flex-col overflow-hidden">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">
-          {{ state.activePanel() === 'settings' ? 'Global Settings' : 'Inspector' }}
+        <h2 class="text-white font-black text-[10px] uppercase tracking-[0.4em]">
+          {{ state.activePanel() === 'settings' ? 'Global_Kernel_T0' : 'Inspector_T1' }}
         </h2>
-        <button (click)="state.setActivePanel('none')" class="text-slate-500 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg></button>
+        <button (click)="state.setActivePanel('none')" class="text-slate-600 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg></button>
       </div>
 
-      <div class="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
+      <div class="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
         @if (state.activePanel() === 'settings') {
-           <div class="space-y-4">
-             <!-- Scene Selection -->
-             <div class="p-4 bg-slate-950/50 rounded-2xl border border-slate-800 space-y-3">
-               <label class="block text-slate-500 text-[9px] uppercase font-bold tracking-widest">Active Scene</label>
+           <div class="space-y-6">
+             <div class="p-4 bg-white/5 border border-white/5 rounded space-y-4">
+               <label class="block text-slate-600 text-[8px] uppercase font-black tracking-widest">Active_Simulation_Preset</label>
                @for (s of scenes; track s.id) {
-                 <button 
-                   (click)="engine.loadScene(s)"
-                   class="w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between group"
-                   [class.bg-slate-800]="engine.currentScene()?.id === s.id"
-                   [class.border-blue-500]="engine.currentScene()?.id === s.id"
-                   [class.border-transparent]="engine.currentScene()?.id !== s.id"
-                   [class.hover:bg-slate-800]="engine.currentScene()?.id !== s.id">
-                   <div>
-                     <div class="text-xs font-bold" [class.text-blue-400]="engine.currentScene()?.id === s.id">{{ s.name }}</div>
-                     <div class="text-[9px] text-slate-500 mt-1">{{ s.description }}</div>
-                   </div>
-                   @if (engine.currentScene()?.id === s.id) {
-                     <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
-                   }
+                 <button (click)="engine.loadScene(s)"
+                   class="w-full text-left p-3 rounded border transition-all"
+                   [class.bg-white/10]="engine.currentScene()?.id === s.id"
+                   [class.border-blue-500/50]="engine.currentScene()?.id === s.id"
+                   [class.border-transparent]="engine.currentScene()?.id !== s.id">
+                   <div class="text-[10px] font-bold tracking-tight" [class.text-blue-400]="engine.currentScene()?.id === s.id">{{ s.name }}</div>
+                   <div class="text-[8px] text-slate-600 mt-1 uppercase">{{ s.description }}</div>
                  </button>
                }
              </div>
 
-             <div class="p-4 bg-slate-950/50 rounded-2xl border border-slate-800">
-               <label class="block text-slate-500 text-[9px] mb-3 uppercase font-bold tracking-widest">Gravity Y</label>
-               <input type="range" min="-20" max="20" step="0.1" [value]="state.gravityY()" (input)="state.updateGravity($any($event.target).value)" class="w-full accent-amber-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
-               <div class="flex justify-between mt-2 font-mono text-[10px] text-slate-400"><span>-20</span><span>{{ state.gravityY() }}</span><span>20</span></div>
+             <div class="p-4 bg-white/5 border border-white/5 rounded">
+               <label class="block text-slate-600 text-[8px] mb-4 uppercase font-black tracking-widest">Gravity_Vector_Y</label>
+               <input type="range" min="-20" max="20" step="0.1" [value]="state.gravityY()" (input)="state.updateGravity($any($event.target).value)" class="w-full accent-amber-500 h-0.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+               <div class="flex justify-between mt-4 font-mono text-[9px] text-slate-500"><span>-20.0</span><span class="text-amber-500">{{ state.gravityY() }}</span><span>20.0</span></div>
              </div>
              
-             <div class="p-4 bg-slate-950/50 rounded-2xl border border-slate-800">
-               <label class="block text-slate-500 text-[9px] mb-3 uppercase font-bold tracking-widest">Environment</label>
+             <div class="p-4 bg-white/5 border border-white/5 rounded space-y-4">
+               <label class="block text-slate-600 text-[8px] uppercase font-black tracking-widest">Visual_Topology</label>
                <div class="flex items-center justify-between">
-                 <span class="text-xs">Show Grid</span>
-                 <button (click)="state.toggleGrid()" class="w-10 h-5 rounded-full transition-colors relative" [class.bg-blue-600]="state.gridVisible()" [class.bg-slate-700]="!state.gridVisible()">
-                   <div class="absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.gridVisible() ? 'translateX(20px)' : 'none'"></div>
+                 <span class="text-[10px] text-slate-400 font-mono">RENDER_GRID</span>
+                 <button (click)="state.toggleGrid()" class="w-8 h-4 rounded-full transition-colors relative" [class.bg-blue-600]="state.gridVisible()" [class.bg-slate-800]="!state.gridVisible()">
+                   <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.gridVisible() ? 'translateX(16px)' : 'none'"></div>
+                 </button>
+               </div>
+               <div class="flex items-center justify-between">
+                 <span class="text-[10px] text-slate-400 font-mono">DEBUG_COLLIDERS</span>
+                 <button (click)="state.toggleDebugPhysics()" class="w-8 h-4 rounded-full transition-colors relative" [class.bg-pink-600]="state.debugPhysics()" [class.bg-slate-800]="!state.debugPhysics()">
+                   <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.debugPhysics() ? 'translateX(16px)' : 'none'"></div>
                  </button>
                </div>
              </div>
            </div>
         } @else if (state.activePanel() === 'inspector' && state.selectedEntityId(); as id) {
-           <div class="space-y-6">
-             <!-- ID Badge -->
-             <div class="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 flex items-center justify-between">
-                <div>
-                  <div class="text-amber-500 font-black text-lg font-mono">#{{ id }}</div>
-                  <div class="text-[9px] text-amber-500/60 uppercase font-bold tracking-tighter">Active Component Host</div>
+           <div class="space-y-8">
+             <div class="bg-amber-500/5 p-4 border border-amber-500/20 rounded space-y-4">
+                <div class="flex items-center justify-between">
+                   <div class="text-amber-500 font-black text-xl font-mono tracking-tighter">ID:{{ id }}</div>
+                   <div class="text-[8px] font-black border border-amber-500 text-amber-500 px-2 py-0.5 rounded uppercase">Entity_Kernel</div>
                 </div>
-                <div class="bg-amber-500 text-black text-[9px] font-black px-2 py-1 rounded">ENTITY</div>
+                <input type="text" [value]="engine.ecs.tags.get(id)?.name || ''" (input)="updateEntityName(id, $any($event.target).value)"
+                  class="w-full bg-black border border-white/5 rounded px-3 py-2 text-[10px] font-mono outline-none focus:border-amber-500/40 text-slate-300">
              </div>
 
-             <!-- Transform -->
+             <!-- Transform Matrix -->
              @if (engine.ecs.getTransform(id); as t) {
-               <div class="space-y-3">
-                 <div class="flex items-center gap-2">
-                   <div class="w-1 h-3 bg-amber-500 rounded-full"></div>
-                   <h3 class="text-xs font-bold uppercase tracking-widest">Transform</h3>
-                 </div>
-                 <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-slate-950 p-3 rounded-xl border border-white/5">
-                       <span class="text-[8px] text-slate-600 uppercase font-black block mb-1">Position X</span>
-                       <span class="text-xs font-mono">{{ t.x | number:'1.2-2' }}</span>
+               <div class="space-y-4">
+                 <h3 class="text-[8px] font-black uppercase tracking-[0.3em] text-slate-500">Transform_Matrix</h3>
+                 <div class="grid grid-cols-2 gap-px bg-white/5 border border-white/5 rounded overflow-hidden">
+                    <div class="bg-black p-4">
+                       <span class="text-[7px] text-slate-700 uppercase font-black block mb-1">POS_X</span>
+                       <span class="text-xs font-mono text-amber-500">{{ t.x | number:'1.2-2' }}</span>
                     </div>
-                    <div class="bg-slate-950 p-3 rounded-xl border border-white/5">
-                       <span class="text-[8px] text-slate-600 uppercase font-black block mb-1">Position Y</span>
-                       <span class="text-xs font-mono">{{ t.y | number:'1.2-2' }}</span>
+                    <div class="bg-black p-4">
+                       <span class="text-[7px] text-slate-700 uppercase font-black block mb-1">POS_Y</span>
+                       <span class="text-xs font-mono text-amber-500">{{ t.y | number:'1.2-2' }}</span>
                     </div>
                  </div>
                </div>
              }
 
-             <!-- Appearance -->
+             <!-- Geometry Shield -->
              @if (engine.ecs.getSprite(id); as s) {
-               <div class="space-y-3">
-                 <div class="flex items-center gap-2">
-                   <div class="w-1 h-3 bg-blue-500 rounded-full"></div>
-                   <h3 class="text-xs font-bold uppercase tracking-widest text-slate-300">Appearance</h3>
+               <div class="space-y-4">
+                 <h3 class="text-[8px] font-black uppercase tracking-[0.3em] text-slate-500">Geometry_Shield</h3>
+                 <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                       <label class="text-[7px] text-slate-700 uppercase font-black">EXTENT_W</label>
+                       <input type="number" step="0.1" [value]="s.width" (input)="updateEntityWidth(id, $any($event.target).value)" class="w-full bg-black border border-white/5 rounded p-3 text-[10px] font-mono text-slate-300">
+                    </div>
+                    <div class="space-y-2">
+                       <label class="text-[7px] text-slate-700 uppercase font-black">EXTENT_H</label>
+                       <input type="number" step="0.1" [value]="s.height" (input)="updateEntityHeight(id, $any($event.target).value)" class="w-full bg-black border border-white/5 rounded p-3 text-[10px] font-mono text-slate-300">
+                    </div>
                  </div>
-                 <div class="bg-slate-950 p-4 rounded-2xl border border-white/5 space-y-4">
-                    <div>
-                      <span class="text-[8px] text-slate-600 uppercase font-black block mb-3">Material Color</span>
-                      <div class="flex flex-wrap gap-2">
-                         @for (c of ['#60a5fa', '#ef4444', '#10b981', '#fbbf24', '#8b5cf6', '#f472b6']; track c) {
-                           <button (click)="engine.updateSpriteColor(id, c)" 
-                             class="w-8 h-8 rounded-lg border-2 transition-transform active:scale-90"
-                             [style.background-color]="c"
-                             [class.border-white]="s.color === c"
-                             [class.border-transparent]="s.color !== c">
-                           </button>
-                         }
-                      </div>
+
+                 <div class="bg-black p-4 border border-white/5 rounded">
+                    <span class="text-[7px] text-slate-700 uppercase font-black block mb-4">Material_Calibration</span>
+                    <div class="flex flex-wrap gap-2">
+                       @for (c of ['#60a5fa', '#ef4444', '#10b981', '#fbbf24', '#8b5cf6', '#f472b6', '#ffffff']; track c) {
+                         <button (click)="engine.updateSpriteColor(id, c)" 
+                           class="w-6 h-6 rounded border transition-transform active:scale-90"
+                           [style.background-color]="c"
+                           [class.border-white]="s.color === c"
+                           [class.border-transparent]="s.color !== c">
+                         </button>
+                       }
                     </div>
                  </div>
                </div>
              }
            </div>
         } @else {
-          <div class="flex-1 flex flex-col items-center justify-center text-slate-600">
-            <div class="w-16 h-16 rounded-3xl bg-slate-800/50 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-30"><circle cx="12" cy="12" r="10"/><path d="M12 8v8m-4-4h8"/></svg>
+          <div class="flex-1 flex flex-col items-center justify-center text-slate-800">
+            <div class="w-16 h-16 border border-white/5 rounded-full flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="opacity-20"><path d="M12 2v20M2 12h20"/></svg>
             </div>
-            <p class="text-[10px] uppercase font-bold tracking-widest italic opacity-40">Awaiting selection</p>
+            <p class="text-[8px] uppercase font-black tracking-[0.4em] italic opacity-40">Scanning_Context...</p>
           </div>
         }
       </div>
     </div>
   </aside>
-
-  <!-- BOTTOM CONTROL HUB (Thumb Zone) -->
-  <footer class="h-24 bg-slate-900/60 backdrop-blur-2xl border-t border-slate-800/50 flex items-center px-4 md:px-8 justify-between z-40 relative">
-    
-    <!-- Navigation Left -->
-    <div class="flex items-center gap-1 bg-slate-950/40 p-1.5 rounded-2xl border border-white/5">
-      <button 
-        (click)="state.setActivePanel('hierarchy')"
-        class="p-4 rounded-xl transition-all"
-        [class.bg-blue-600]="state.activePanel() === 'hierarchy'"
-        [class.text-white]="state.activePanel() === 'hierarchy'"
-        [class.text-slate-500]="state.activePanel() !== 'hierarchy'"
-        [class.hover:bg-slate-800]="state.activePanel() !== 'hierarchy'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-      </button>
-      <button 
-        (click)="state.setActivePanel('settings')"
-        class="p-4 rounded-xl transition-all"
-        [class.bg-blue-600]="state.activePanel() === 'settings'"
-        [class.text-white]="state.activePanel() === 'settings'"
-        [class.text-slate-500]="state.activePanel() !== 'settings'"
-        [class.hover:bg-slate-800]="state.activePanel() !== 'settings'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
-    </div>
-
-    <!-- Central Transport -->
-    <div class="flex items-center gap-3">
-      <button 
-        (click)="engine.togglePlay()"
-        class="w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-xl active:scale-90"
-        [class.bg-emerald-500]="state.mode() !== 'play'"
-        [class.text-black]="state.mode() !== 'play'"
-        [class.bg-amber-500]="state.mode() === 'play'"
-        [class.text-black]="state.mode() === 'play'">
-        @if (state.mode() === 'edit') {
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-        }
-      </button>
-      <button (click)="engine.resetScene()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-slate-700 active:scale-90 border border-white/5 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-      </button>
-    </div>
-
-    <!-- Actions Right (Thumb Access) -->
-    <button 
-      (click)="engine.spawnBox()"
-      class="bg-blue-600 hover:bg-blue-500 text-white px-6 h-14 rounded-2xl flex items-center gap-3 font-black text-sm transition-all active:scale-95 shadow-xl shadow-blue-900/40">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7v14"/></svg>
-      <span class="hidden md:inline">SPAWN BOX</span>
-    </button>
-  </footer>
 </div>
 
 <style>
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar { width: 2px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #334155; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; }
+  
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin-slow { animation: spin-slow linear infinite; }
 </style>
