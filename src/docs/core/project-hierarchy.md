@@ -25,20 +25,21 @@
 - `renderer-2d.service.ts`: Canvas2D rendering system.
 - `command-registry.service.ts`: T0 Verb execution logic.
 
-### /src/data
-- `scene-presets.ts`: Pre-defined physics scenarios.
-- `entity-templates.ts`: Entity prefabs/templates.
-
 ### /src/docs
 - `kernel.md`: High-level manifest & section index.
 - **kernel/**:
   - `axial-directives.md`: Core principles (Applet Priority).
   - `safeguards.md`: Prohibitions (No GenAI) and Safety.
   - `command-registry.md`: Operational verb definitions.
+  - `protocol-constructor.md`: [NEW] Protocol Genesis/Iteration logic.
+  - `refactor-protocol.md`: [NEW] Refactoring heuristics and AI continuity rules.
 - **core/**:
   - `project-hierarchy.md`: This file (The Map).
 - **visual/**:
-  - `aesthetic.md`: Human-centric design guidelines.
+  - `aesthetic.md`: Human-centric design guidelines (Root).
+  - `tokens.md`: Atoms of design (Colors, Blur).
+  - `hud-architecture.md`: Spatial layout rules.
+  - `motion.md`: UI physics and interaction rules.
+  - `blueprints.md`: Skeleton components for expansion.
 - **history/**:
   - `memory.md`: Narrative log of development.
-  - **repair-logs/**: (Directory) Fragmented memory streams for debugging.

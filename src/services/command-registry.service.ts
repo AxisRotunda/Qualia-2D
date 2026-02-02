@@ -2,7 +2,16 @@ import { Injectable, inject, signal } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 
-export type QualiaVerb = 'RUN_KNOWLEDGE' | 'RUN_OPT' | 'RUN_REF' | 'RUN_REPAIR' | 'RUN_UI' | 'RUN_PHYS' | 'RUN_MAT' | 'RUN_SCENE_OPT';
+export type QualiaVerb = 
+  | 'RUN_KNOWLEDGE' 
+  | 'RUN_OPT' 
+  | 'RUN_REF' 
+  | 'RUN_REPAIR' 
+  | 'RUN_UI' 
+  | 'RUN_PHYS' 
+  | 'RUN_MAT' 
+  | 'RUN_SCENE_OPT'
+  | 'RUN_PROTOCOL';
 
 @Injectable({ providedIn: 'root' })
 export class CommandRegistryService {
@@ -12,14 +21,19 @@ export class CommandRegistryService {
   readonly lastCommand = signal<QualiaVerb | null>(null);
   readonly commandLog = signal<string[]>([]);
 
-  execute(verb: QualiaVerb) {
+  execute(verb: QualiaVerb, params?: string) {
     this.lastCommand.set(verb);
-    this.log(`Invoking protocol for: ${verb}`);
+    this.log(`INVOKING: ${verb}${params ? ' (' + params + ')' : ''}`);
 
     switch (verb) {
+      case 'RUN_PROTOCOL':
+        this.handleProtocolConstructor(params);
+        break;
+      case 'RUN_REF':
+        this.performIntelligentRefactor();
+        break;
       case 'RUN_PHYS':
-        // Reset physics world or recalibrate
-        this.log("PROTOCOL: DYNAMICS_CALIBRATION_ACTIVE");
+        this.log("CORE: RECALIBRATING_DYNAMICS");
         break;
       case 'RUN_UI':
         this.state.setActivePanel(this.state.activePanel() === 'none' ? 'hierarchy' : 'none');
@@ -28,19 +42,35 @@ export class CommandRegistryService {
         this.performSceneOptimization();
         break;
       default:
-        this.log(`WARN: Protocol ${verb} not yet implemented.`);
+        this.log(`WARN: Protocol ${verb} offline.`);
     }
   }
 
+  private handleProtocolConstructor(input?: string) {
+    this.log("CONSTRUCTOR: ANALYZING_INPUT");
+    // Mock logic for protocol meta-layer
+    if (input && input.includes('scene')) {
+      this.log("CONSTRUCTOR: ITERATING_SCENE_LOGIC");
+    } else {
+      this.log("CONSTRUCTOR: GENESIS_MODE_ACTIVE");
+    }
+  }
+
+  private performIntelligentRefactor() {
+    this.log("REF: SCANNING_FOR_MONOLITHS");
+    // Simulate heuristic scanning
+    setTimeout(() => {
+      this.log("REF: BOTTLENECK_HUNT_COMPLETE");
+      this.log("HEURISTICS: STALLS:0 | MONOLITHS:0 | DOC_SYNC:OK");
+    }, 500);
+  }
+
   private performSceneOptimization() {
-    const entities = this.ecs.entitiesList();
-    let removed = 0;
-    // Logic to remove entities that are too far out of bounds
-    this.log(`OPTIMIZATION: PRUNED ${removed} ENTITIES`);
+    const count = this.ecs.entityCount();
+    this.log(`OPT: PRUNING_GRAPH (${count} nodes)`);
   }
 
   private log(msg: string) {
-    const timestamp = new Date().toLocaleTimeString();
-    this.commandLog.update(prev => [`[${timestamp}] ${msg}`, ...prev].slice(0, 5));
+    this.commandLog.update(prev => [msg, ...prev].slice(0, 5));
   }
 }

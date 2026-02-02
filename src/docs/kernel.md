@@ -12,7 +12,10 @@ This document serves as the root entry point for the Qualia2D constitutional log
 - **[Project Hierarchy](../core/project-hierarchy.md)**: Hard file-system mapping for agent navigation.
 
 ### 3. Human Experience
-- **[Aesthetic Guidelines](../visual/aesthetic.md)**: Visual identity, mobile-first interaction patterns, and human-centric design philosophy.
+- **[Aesthetic Index](../visual/aesthetic.md)**: Visual identity root.
+- **[Design Tokens](../visual/tokens.md)**: Colors, Typography, and Blur primitives.
+- **[Layout Architecture](../visual/hud-architecture.md)**: Spatial positioning and HUD rules.
+- **[Interaction Patterns](../visual/motion.md)**: Feedback, Motion, and Gesture logic.
 
 ## Invariants
 - **Determinism**: The simulation core is deterministic.

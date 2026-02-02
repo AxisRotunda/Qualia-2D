@@ -1,28 +1,18 @@
-# [T1] Aesthetic & Design Guidelines
-ID: VISUAL_CORE_V1.0 Role: Human Interface Excellence.
+# [T1] Visual Identity: Obsidian Glass
+ID: VISUAL_ROOT_V2.0 | Role: Experience Index.
 
-## 1. DESIGN PHILOSOPHY
-Qualia2D is transitioning from a "Machine-Heavy" HUD to an "Immersive Toolset". The interface should feel like a premium creative instrument—inviting, responsive, and oriented toward human sensory consumption.
+## 1. CORE CONCEPT
+Qualia2D utilizes the **Obsidian Glass** interface system. It is designed to feel like a high-performance aerospace HUD—transparent, data-dense, and ergonomically optimized for high-speed creative workflows.
 
-## 2. CORE PILLARS
+## 2. SYSTEM ARCHITECTURE
+The visual system is decomposed into specialized domains to ensure consistency across the engine lifecycle:
 
-### 2.1 TOUCH-FIRST ERGONOMICS
-- **Target Size**: Minimum touch target of 44x44px.
-- **Thumb Zone**: Critical controls (Play/Pause, Spawn) positioned in the lower-central region for easy mobile access.
-- **Gestures**: Support for pinch-to-zoom and two-finger pan as primary navigation.
+- **[Design Tokens](./tokens.md)**: The irreducible atoms (Colors, Blur, Space).
+- **[HUD Architecture](./hud-architecture.md)**: The spatial layout and Z-indexing of instruments.
+- **[Motion & Interaction](./motion.md)**: The physics of the UI (Transitions, Feedback).
+- **[Component Blueprints](./blueprints.md)**: Skeleton structures for new UI modules.
 
-### 2.2 IMMERSIVE DEPTH
-- **Glassmorphism**: Use `backdrop-blur` and low-opacity fills to allow the simulation to "bleed" through the UI.
-- **Feedback**: Soft shadows (`shadow-xl`) and subtle scale transforms (`active:scale-95`) for tactile feedback.
-- **Color Palette**: 
-  - Neutral Base: Slate-950 (Background), Slate-900 (Panels).
-  - High Performance: Amber-500 (Warnings/Active State).
-  - Action Primary: Blue-600 (Creation/UI Selection).
-
-### 2.3 TYPOGRAPHIC HIERARCHY
-- **Human Readability**: Move away from all-caps "MATRIX" logs for primary interactions. Use clear, sans-serif weights for readability.
-- **Engine Data**: Maintain Mono fonts (e.g., `font-mono`) exclusively for raw telemetry (FPS, ECS IDs) to preserve "Pro" feel.
-
-## 3. UI EVOLUTION
-- **The Dashboard**: Replace cluttered left-aligned stats with a clean, semi-transparent Top Bar or floating bubbles.
-- **The Palette**: Use icon-driven buttons with descriptive tooltips rather than raw protocol names where possible.
+## 3. INVARIANTS
+1. **Simulation First**: The canvas must never be fully obscured by static UI.
+2. **Blur is Depth**: Transparency must always be accompanied by background-blur to maintain readability.
+3. **Contrast for Action**: Interactive elements must maintain 4.5:1 contrast against their glass backgrounds.

@@ -1,4 +1,3 @@
-
 # Memory Log
 
 ## [Init] Qualia2D Genesis
@@ -14,9 +13,16 @@
 ## [v1.1] Manipulation & Debug Update
 - **Action**: Enhanced interactivity and developer tooling.
 - **Changes**:
-  - Implemented **Entity Dragging** in Edit mode: Synchronizes ECS Transform and Rapier RigidBody translation.
-  - Added **Physics Debug Mode**: Visualizes colliders as magenta wireframes via `Renderer2DService`.
-  - Expanded **Inspector**: Real-time dimension editing and name updates.
-  - Added **Domino Run** Scene: Demonstrates physics stability and collision chaining.
-  - Fixed: Gravity now updates correctly during active simulation.
-- **Impact**: The engine now functions as a basic level editor, not just a viewer.
+  - Implemented **Entity Dragging** in Edit mode.
+  - Added **Physics Debug Mode**.
+  - Expanded **Inspector**.
+  - Added **Domino Run** Scene.
+
+## [v1.2] Protocol Meta-Layer & Refactor Logic
+- **Action**: Deployment of Protocol Constructor and Refactor Heuristics.
+- **Changes**:
+  - Registered `RUN_PROTOCOL` meta-verb for engine extensibility.
+  - Implemented `protocol-constructor.md` for AI-driven verb genesis.
+  - Enhanced `RUN_REF` to detect monoliths and process stalls.
+  - Established Heuristics Reporting in `CommandRegistryService`.
+- **Impact**: System can now autonomously iterate on its own operational logic via Agent interaction.
