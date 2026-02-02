@@ -2,27 +2,20 @@
 
 ## [Init] Qualia2D Genesis
 - **Action**: Initial system synthesis.
-- **Context**: Porting Qualia3D concepts to 2D plane.
-- **Outcome**: 
-  - Zoneless Angular shell established.
-  - Rapier2D WASM integration verified.
-  - ECS Store operational (Map-based).
-  - Canvas 2D Renderer with double-buffering logic.
-  - Basic editor controls (Pan/Zoom/Inspect).
+- **Outcome**: Established Zoneless shell, Rapier2D integration, and Signal-driven HUD.
 
 ## [v1.1] Manipulation & Debug Update
 - **Action**: Enhanced interactivity and developer tooling.
-- **Changes**:
-  - Implemented **Entity Dragging** in Edit mode.
-  - Added **Physics Debug Mode**.
-  - Expanded **Inspector**.
-  - Added **Domino Run** Scene.
+- **Outcome**: Added Entity Dragging, Physics Debug Mode, and expanded Inspector.
 
 ## [v1.2] Protocol Meta-Layer & Refactor Logic
 - **Action**: Deployment of Protocol Constructor and Refactor Heuristics.
-- **Changes**:
-  - Registered `RUN_PROTOCOL` meta-verb for engine extensibility.
-  - Implemented `protocol-constructor.md` for AI-driven verb genesis.
-  - Enhanced `RUN_REF` to detect monoliths and process stalls.
-  - Established Heuristics Reporting in `CommandRegistryService`.
-- **Impact**: System can now autonomously iterate on its own operational logic via Agent interaction.
+- **Outcome**: Established meta-verbs for autonomous logic iteration.
+
+## [v1.3] Protocol-Centric Restructure
+- **Action**: Migrated refactor and constructor logic to `/protocols/` and generated missing domain protocols.
+- **Context**: Centralizing operational logic for better Agent-Process mapping.
+- **Outcome**: 
+  - Created 9 dedicated protocol MD files.
+  - Updated `command-registry.md` and `project-hierarchy.md`.
+  - Established clear intent-to-file mapping for all engine verbs.

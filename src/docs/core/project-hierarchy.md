@@ -31,10 +31,16 @@
   - `axial-directives.md`: Core principles (Applet Priority).
   - `safeguards.md`: Prohibitions (No GenAI) and Safety.
   - `command-registry.md`: Operational verb definitions.
-  - `protocol-constructor.md`: [NEW] Protocol Genesis/Iteration logic.
-  - `refactor-protocol.md`: [NEW] Refactoring heuristics and AI continuity rules.
-- **core/**:
-  - `project-hierarchy.md`: This file (The Map).
+- **protocols/**: [NEW]
+  - `protocol-constructor.md`: Protocol Genesis/Iteration logic.
+  - `refactor-protocol.md`: Refactoring heuristics and AI continuity rules.
+  - `protocol-knowledge.md`: Knowledge & Context sync logic.
+  - `protocol-optimize.md`: Performance and WASM tuning.
+  - `protocol-repair.md`: Stability and error recovery.
+  - `protocol-ui.md`: UX/Design language enforcement.
+  - `protocol-dynamics.md`: Physics simulation calibration.
+  - `protocol-material.md`: Visual and rendering rules.
+  - `protocol-scene-optimizer.md`: ECS pruning logic.
 - **visual/**:
   - `aesthetic.md`: Human-centric design guidelines (Root).
   - `tokens.md`: Atoms of design (Colors, Blur).
