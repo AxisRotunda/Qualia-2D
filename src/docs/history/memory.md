@@ -19,3 +19,8 @@
   - Created 9 dedicated protocol MD files.
   - Updated `command-registry.md` and `project-hierarchy.md`.
   - Established clear intent-to-file mapping for all engine verbs.
+
+## [v1.4] Hard Deletion of Duplicates
+- **Action**: Removed residual stub files in `src/docs/kernel/`.
+- **Context**: Ensuring zero-redundancy in the protocol graph and absolute structural integrity.
+- **Outcome**: Deleted `protocol-constructor.md` and `refactor-protocol.md` from the kernel directory. All internal engine references successfully redirected to the versioned protocols in `/src/docs/protocols/`.
