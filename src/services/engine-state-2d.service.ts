@@ -2,6 +2,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 
 export type EngineMode = 'edit' | 'play';
+export type ActivePanel = 'none' | 'hierarchy' | 'inspector' | 'settings';
 
 @Injectable({ providedIn: 'root' })
 export class EngineState2DService {
@@ -15,12 +16,16 @@ export class EngineState2DService {
   // Viewport
   readonly cameraX = signal<number>(0);
   readonly cameraY = signal<number>(0);
-  readonly cameraZoom = signal<number>(50); // Pixels per meter approximation
+  readonly cameraZoom = signal<number>(50); 
   readonly gridVisible = signal<boolean>(true);
+  readonly bgColor = signal<string>('#0f172a');
 
-  // Interaction
+  // Physics Global
+  readonly gravityY = signal<number>(-9.81);
+
+  // UI Panels
+  readonly activePanel = signal<ActivePanel>('none');
   readonly selectedEntityId = signal<number | null>(null);
-  readonly showInspector = signal<boolean>(false);
 
   // Computed
   readonly statusText = computed(() => {
@@ -30,11 +35,31 @@ export class EngineState2DService {
 
   setFps(val: number) { this.fps.set(val); }
   setPhysicsTime(val: number) { this.physicsTimeMs.set(val); }
-  toggleMode() { this.mode.update(m => m === 'edit' ? 'play' : 'edit'); }
+  
+  toggleMode() { 
+    this.mode.update(m => m === 'edit' ? 'play' : 'edit'); 
+    if (this.mode() === 'play') this.activePanel.set('none');
+  }
+  
   togglePause() { this.isPaused.update(p => !p); }
   setLoading(l: boolean) { this.loading.set(l); }
-  toggleInspector() { this.showInspector.update(v => !v); }
   
+  setActivePanel(panel: ActivePanel) {
+    this.activePanel.update(current => current === panel ? 'none' : panel);
+  }
+
+  // Template Helpers to avoid arrow functions in HTML
+  toggleGrid() {
+    this.gridVisible.update(v => !v);
+  }
+
+  updateGravity(val: string) {
+    const num = parseFloat(val);
+    if (!isNaN(num)) {
+      this.gravityY.set(num);
+    }
+  }
+
   // Camera Ops
   panCamera(dx: number, dy: number) {
     this.cameraX.update(x => x + dx);
@@ -42,6 +67,6 @@ export class EngineState2DService {
   }
   
   zoomCamera(delta: number) {
-    this.cameraZoom.update(z => Math.max(10, Math.min(200, z + delta)));
+    this.cameraZoom.update(z => Math.max(5, Math.min(500, z + delta)));
   }
 }

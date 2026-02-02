@@ -7,8 +7,8 @@ import { EngineState2DService } from './engine-state-2d.service';
 export class Renderer2DService {
   private ctx: CanvasRenderingContext2D | null = null;
   private canvas: HTMLCanvasElement | null = null;
-  private width = 0;
-  private height = 0;
+  public width = 0;
+  public height = 0;
 
   constructor(
     private store: ComponentStoreService,
@@ -17,7 +17,7 @@ export class Renderer2DService {
 
   attach(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on backbuffer
+    this.ctx = canvas.getContext('2d', { alpha: false });
     this.resize();
   }
 
@@ -38,12 +38,12 @@ export class Renderer2DService {
     const ctx = this.ctx;
     const camX = this.state.cameraX();
     const camY = this.state.cameraY();
-    const zoom = this.state.cameraZoom(); // pixels per meter
+    const zoom = this.state.cameraZoom();
     const halfW = this.width / 2;
     const halfH = this.height / 2;
 
-    // Clear
-    ctx.fillStyle = '#0f172a'; // Slate-900
+    // Clear with dynamic BG Color
+    ctx.fillStyle = this.state.bgColor();
     ctx.fillRect(0, 0, this.width, this.height);
 
     // Grid
@@ -51,19 +51,13 @@ export class Renderer2DService {
         this.drawGrid(ctx, camX, camY, zoom, halfW, halfH);
     }
 
-    // Save context for camera transform
     ctx.save();
-    
-    // Apply Camera: 
-    // Screen = (World - Camera) * Zoom + CenterOffset
-    // We translate to center, scale by zoom, then translate by negative camera pos
     ctx.translate(halfW, halfH);
-    ctx.scale(zoom, -zoom); // Flip Y so +Y is up
+    ctx.scale(zoom, -zoom);
     ctx.translate(-camX, -camY);
 
-    // Draw Entities
-    // Simple painter's algorithm via layer sorting could go here
-    this.store.entities.forEach(id => {
+    // Render Entities
+    this.store.entitiesList().forEach(id => {
         const t = this.store.getTransform(id);
         const s = this.store.getSprite(id);
         
@@ -74,15 +68,21 @@ export class Renderer2DService {
             
             ctx.fillStyle = s.color;
             ctx.globalAlpha = s.opacity;
-            
-            // Draw centered rect
             ctx.fillRect(-s.width / 2, -s.height / 2, s.width, s.height);
             
-            // Selection highlight
+            // Highlight
             if (this.state.selectedEntityId() === id) {
-                ctx.strokeStyle = '#ffff00';
-                ctx.lineWidth = 2 / zoom; // Constant screen width
+                ctx.strokeStyle = '#3b82f6'; // Bright Blue
+                ctx.lineWidth = 4 / zoom;
                 ctx.strokeRect(-s.width / 2, -s.height / 2, s.width, s.height);
+                
+                // Add tiny pulse effect indicators in corners?
+                ctx.fillStyle = '#3b82f6';
+                const size = 0.1;
+                ctx.fillRect(-s.width/2 - size/2, -s.height/2 - size/2, size, size);
+                ctx.fillRect(s.width/2 - size/2, -s.height/2 - size/2, size, size);
+                ctx.fillRect(-s.width/2 - size/2, s.height/2 - size/2, size, size);
+                ctx.fillRect(s.width/2 - size/2, s.height/2 - size/2, size, size);
             }
             
             ctx.restore();
@@ -94,44 +94,36 @@ export class Renderer2DService {
 
   private drawGrid(ctx: CanvasRenderingContext2D, camX: number, camY: number, zoom: number, halfW: number, halfH: number) {
     ctx.save();
-    ctx.strokeStyle = '#1e293b'; // Slate-800
+    ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 1;
 
-    const gridSize = 1; // 1 meter
+    const gridSize = 1;
     const step = gridSize * zoom;
-    
-    // Calculate offset to keep grid anchored to world 0,0
-    // The screen position of World(0,0) is:
-    // ScreenX = (0 - camX) * zoom + halfW
-    // ScreenY = (0 - camY) * -zoom + halfH
     
     const offsetX = (-camX * zoom + halfW) % step;
     const offsetY = (camY * zoom + halfH) % step;
 
     ctx.beginPath();
     for (let x = offsetX; x < this.width; x += step) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, this.height);
+        ctx.moveTo(x, 0); ctx.lineTo(x, this.height);
     }
     for (let y = offsetY; y < this.height; y += step) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(this.width, y);
+        ctx.moveTo(0, y); ctx.lineTo(this.width, y);
     }
     ctx.stroke();
     
-    // Axis lines
+    // Axes
     const originScreenX = (-camX * zoom + halfW);
-    const originScreenY = (camY * zoom + halfH); // Flipped Y
+    const originScreenY = (camY * zoom + halfH);
     
     if (originScreenX >= 0 && originScreenX <= this.width) {
-        ctx.strokeStyle = '#ef4444'; // Red X Axis
+        ctx.strokeStyle = '#ef444466';
         ctx.beginPath(); ctx.moveTo(originScreenX, 0); ctx.lineTo(originScreenX, this.height); ctx.stroke();
     }
     if (originScreenY >= 0 && originScreenY <= this.height) {
-        ctx.strokeStyle = '#22c55e'; // Green Y Axis
+        ctx.strokeStyle = '#22c55e66';
         ctx.beginPath(); ctx.moveTo(0, originScreenY); ctx.lineTo(this.width, originScreenY); ctx.stroke();
     }
-
     ctx.restore();
   }
 }
