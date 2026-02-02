@@ -1,0 +1,5 @@
+{
+  "name": "Qualia2D Engine",
+  "description": "A 2D game engine built with Angular, Signals, and Rapier2D, featuring ECS architecture and a Zoneless runtime.",
+  "requestFramePermissions": []
+}
