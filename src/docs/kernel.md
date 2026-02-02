@@ -1,14 +1,20 @@
+# Qualia2D Kernel Index [T0]
 
-# Qualia2D Kernel (Tier 0)
+## [T0] Structural Map
+This document serves as the root entry point for the Qualia2D constitutional logic. All sub-processes must align with the definitions linked below.
 
-## Axial Laws
-1. **Determinism**: The simulation core is deterministic. Given the same initial state and inputs, the physics outcome is identical.
-2. **Fixed-Step Simulation**: Physics runs on a fixed accumulator (e.g., 60hz). Visuals are interpolated or extrapolated only if needed, but the ground truth is the physics step.
-3. **ECS Authority**: The Entity Component System (ECS) is the single source of truth for game state.
-4. **Physics Authority**: In `PLAY` mode, Rapier2D dictates transform mutations. In `EDIT` mode, the Editor/User inputs dictate transform mutations.
-5. **Stateless Rendering**: The `Renderer2DService` retains no state between frames. It purely projects the current ECS state onto the Canvas.
+### 1. Core Directives
+- **[Axial Directives](./kernel/axial-directives.md)**: Irreducible principles of the engine (Applet Priority, Automation Bias, Processual Identity).
+- **[Safeguards](./kernel/safeguards.md)**: Hard boundaries, WASM safety, and the absolute prohibition of GenAI integration.
+
+### 2. Operational Logic
+- **[Command Registry](./kernel/command-registry.md)**: Mapping of operational verbs (RUN_PHYS, RUN_UI, etc.) to protocol behaviors.
+- **[Project Hierarchy](../core/project-hierarchy.md)**: Hard file-system mapping for agent navigation.
+
+### 3. Human Experience
+- **[Aesthetic Guidelines](../visual/aesthetic.md)**: Visual identity, mobile-first interaction patterns, and human-centric design philosophy.
 
 ## Invariants
-- **Transform Flow (Play)**: Physics World -> RigidBody -> ECS Transform Component -> Renderer.
-- **Transform Flow (Edit)**: Gizmo/Input -> ECS Transform Component -> RigidBody (teleport).
-- **Mutations**: Direct ECS store mutation is forbidden for external consumers. All state changes must proceed through `Engine2DService` or specific Feature Services.
+- **Determinism**: The simulation core is deterministic.
+- **ECS Authority**: Entity Component System is the single source of truth.
+- **Stateless Rendering**: Renderer projects state; it does not hold it.

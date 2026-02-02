@@ -14,52 +14,44 @@
       (contextmenu)="$event.preventDefault()">
     </canvas>
 
-    <!-- [T0] SYSTEM HUD: HIGH-DENSITY MATRICES -->
-    <div class="absolute top-6 left-6 flex flex-col gap-4 pointer-events-none transition-opacity duration-300" [class.opacity-40]="state.mode() === 'play'">
+    <!-- [T1] HUMAN-CENTRIC HUD -->
+    <div class="absolute top-6 left-6 flex flex-col gap-6 pointer-events-none transition-all duration-500" [class.opacity-30]="state.mode() === 'play'">
       
-      <!-- ID & Tiering -->
-      <div class="flex flex-col gap-1">
-        <h1 class="text-white font-black text-2xl tracking-tighter">QUALIA_2D<span class="text-amber-500 text-[10px] ml-2 tracking-widest uppercase bg-amber-500/20 px-2 py-0.5 rounded">KERNEL_V1.1</span></h1>
-        <div class="text-[9px] font-mono text-slate-500 flex gap-4">
-          <span>TIER: T0_CORE</span>
-          <span>AUTH: AXIAL_DIRECTIVES</span>
-          <span>STATE: {{ state.statusText() }}</span>
+      <!-- Branding & Mode Status -->
+      <div class="flex flex-col">
+        <h1 class="text-white font-extrabold text-3xl tracking-tight flex items-center gap-3">
+          Qualia<span class="text-blue-500">2D</span>
+          <span class="text-[10px] tracking-widest uppercase bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-white/5 font-mono">
+            {{ state.mode() }}
+          </span>
+        </h1>
+      </div>
+
+      <!-- Live Telemetry (Softened Matrix) -->
+      <div class="flex gap-3">
+        <div class="bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex flex-col">
+           <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Performance</span>
+           <span class="text-lg font-mono text-white leading-none">{{ state.fps() | number:'1.0-0' }}<span class="text-[10px] text-slate-600 ml-1">FPS</span></span>
+        </div>
+        <div class="bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex flex-col">
+           <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Entities</span>
+           <span class="text-lg font-mono text-white leading-none">{{ engine.ecs.entityCount() }}</span>
         </div>
       </div>
 
-      <!-- Real-time Metrics Matrix -->
-      <div class="grid grid-cols-2 gap-2 w-64">
-        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
-           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">FPS_CALIBRATION</div>
-           <div class="text-lg font-mono text-green-400">{{ state.fps() | number:'1.0-0' }}</div>
+      <!-- Simplified Process Log -->
+      <div class="w-56 bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">System Log</span>
+          <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
         </div>
-        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
-           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">ECS_ENTITY_COUNT</div>
-           <div class="text-lg font-mono text-blue-400">{{ engine.ecs.entityCount() }}</div>
-        </div>
-        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
-           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">PHYSICS_STEP_MS</div>
-           <div class="text-lg font-mono text-amber-500">{{ state.physicsTimeMs() | number:'1.2-2' }}</div>
-        </div>
-        <div class="bg-black/60 border border-white/5 backdrop-blur px-3 py-2 rounded">
-           <div class="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">ZOOM_EXTENT</div>
-           <div class="text-lg font-mono text-slate-300">{{ state.cameraZoom() | number:'1.0-0' }}%</div>
-        </div>
-      </div>
-
-      <!-- Processual Memory Log -->
-      <div class="w-64 bg-slate-900/40 border border-white/5 rounded p-2 overflow-hidden">
-        <div class="text-[7px] text-slate-600 uppercase font-black mb-2 flex justify-between">
-          <span>PROCESS_LOG</span>
-          <span class="animate-pulse">ONLINE</span>
-        </div>
-        <div class="space-y-1">
+        <div class="space-y-2">
           @for (log of commands.commandLog(); track $index) {
-            <div class="text-[9px] font-mono text-slate-400 truncate opacity-80 border-l border-slate-700 pl-2">
+            <div class="text-[10px] font-mono text-slate-300 truncate opacity-80">
               {{ log }}
             </div>
           } @empty {
-             <div class="text-[9px] font-mono text-slate-700 italic">SYSTEM_READY</div>
+             <div class="text-[10px] font-mono text-slate-600 italic">Core Initialized...</div>
           }
         </div>
       </div>
@@ -67,228 +59,217 @@
 
     <!-- Engine Boot Loader -->
     @if (state.loading()) {
-      <div class="absolute inset-0 flex items-center justify-center bg-slate-950/98 z-50">
-        <div class="flex flex-col items-center gap-8">
-          <div class="relative w-24 h-24">
-            <div class="absolute inset-0 border-[1px] border-amber-500/10 rounded-full"></div>
-            <div class="absolute inset-0 border-t-2 border-amber-500 rounded-full animate-spin"></div>
-            <div class="absolute inset-4 border-[1px] border-blue-500/10 rounded-full"></div>
-            <div class="absolute inset-4 border-b-2 border-blue-500 rounded-full animate-spin-slow" style="animation-duration: 3s"></div>
+      <div class="absolute inset-0 flex items-center justify-center bg-slate-950 z-50">
+        <div class="flex flex-col items-center gap-6">
+          <div class="relative w-20 h-20">
+            <div class="absolute inset-0 border-2 border-blue-500/10 rounded-full"></div>
+            <div class="absolute inset-0 border-t-2 border-blue-500 rounded-full animate-spin"></div>
           </div>
           <div class="flex flex-col items-center">
-            <h1 class="text-white font-black tracking-[0.6em] text-2xl">QUALIA2D</h1>
-            <p class="text-[8px] text-slate-600 mt-4 font-mono tracking-[0.4em] uppercase">Initializing Neural Core T0...</p>
+            <h1 class="text-white font-black tracking-widest text-xl">QUALIA_2D</h1>
+            <p class="text-[10px] text-slate-500 mt-2 font-mono uppercase tracking-widest">Syncing Kernel T0...</p>
           </div>
         </div>
       </div>
     }
 
-    <!-- Selection Quick Action Menu -->
+    <!-- Selection Quick Action Menu (Mobile Friendly) -->
     @if (state.selectedEntityId(); as id) {
-       <div class="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-slate-900/90 backdrop-blur-xl p-1 rounded-2xl border border-white/10 shadow-2xl z-40">
-          <button (click)="engine.deleteEntity(id)" class="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all active:scale-90">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+       <div class="absolute bottom-28 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-slate-900/90 backdrop-blur-2xl p-2 rounded-3xl border border-white/10 shadow-2xl z-40">
+          <button (click)="engine.deleteEntity(id)" class="w-12 h-12 flex items-center justify-center bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all active:scale-90">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
           </button>
-          <div class="w-px h-6 bg-slate-700 mx-1"></div>
-          <button (click)="state.setActivePanel('inspector')" class="px-6 py-3 text-[10px] font-black text-amber-500 uppercase tracking-widest">
-            INSPECT_OBJECT [{{ id }}]
+          <div class="w-px h-8 bg-white/10 mx-1"></div>
+          <button (click)="state.setActivePanel('inspector')" class="px-6 h-12 flex items-center text-[11px] font-bold text-white uppercase tracking-wider">
+            Inspect #{{ id }}
           </button>
        </div>
     }
   </main>
 
-  <!-- Command Palette / Navigation Bar -->
-  <footer class="h-24 bg-slate-950 border-t border-white/5 flex items-center px-8 justify-between z-40 relative">
+  <!-- Mobile-First Control Bar -->
+  <footer class="h-24 bg-slate-950 border-t border-white/5 flex items-center px-6 justify-between z-40 relative">
     
-    <!-- Operational Verbs (T0 Command Registry) -->
+    <!-- Left: Secondary Tools -->
     <div class="flex items-center gap-2">
-      <div class="flex flex-col gap-1 mr-4">
-        <span class="text-[7px] text-slate-600 font-black uppercase">Command_Registry</span>
-        <div class="flex gap-1">
-          <button (click)="runCommand('RUN_PHYS')" class="px-3 py-1.5 border border-white/10 rounded hover:bg-white/5 text-[9px] font-mono text-slate-400">RUN_PHYS</button>
-          <button (click)="runCommand('RUN_SCENE_OPT')" class="px-3 py-1.5 border border-white/10 rounded hover:bg-white/5 text-[9px] font-mono text-slate-400">RUN_SCENE_OPT</button>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
-        <button 
-          (click)="state.setActivePanel('hierarchy')"
-          class="p-4 rounded-xl transition-all"
-          [class.bg-blue-600]="state.activePanel() === 'hierarchy'"
-          [class.text-white]="state.activePanel() === 'hierarchy'"
-          [class.text-slate-600]="state.activePanel() !== 'hierarchy'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-        </button>
-        <button 
-          (click)="state.setActivePanel('settings')"
-          class="p-4 rounded-xl transition-all"
-          [class.bg-blue-600]="state.activePanel() === 'settings'"
-          [class.text-white]="state.activePanel() === 'settings'"
-          [class.text-slate-600]="state.activePanel() !== 'settings'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </div>
+      <button 
+        (click)="state.setActivePanel('hierarchy')"
+        class="w-14 h-14 rounded-2xl flex items-center justify-center transition-all border border-white/5"
+        [class.bg-blue-600]="state.activePanel() === 'hierarchy'"
+        [class.text-white]="state.activePanel() === 'hierarchy'"
+        [class.text-slate-500]="state.activePanel() !== 'hierarchy'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+      </button>
+      <button 
+        (click)="state.setActivePanel('settings')"
+        class="w-14 h-14 rounded-2xl flex items-center justify-center transition-all border border-white/5"
+        [class.bg-blue-600]="state.activePanel() === 'settings'"
+        [class.text-white]="state.activePanel() === 'settings'"
+        [class.text-slate-500]="state.activePanel() !== 'settings'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
     </div>
 
-    <!-- Central Control Hub -->
-    <div class="flex items-center gap-4">
+    <!-- Center: Play/Reset -->
+    <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-4">
       <button 
         (click)="engine.togglePlay()"
-        class="w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-2xl active:scale-90 border-[4px] border-slate-900"
+        class="w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-xl active:scale-90 border-[4px] border-slate-900"
         [class.bg-green-500]="state.mode() !== 'play'"
         [class.bg-amber-500]="state.mode() === 'play'">
         @if (state.mode() === 'edit') {
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         }
       </button>
-      <button (click)="engine.resetScene()" class="w-10 h-10 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center hover:bg-slate-800 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      <button (click)="engine.resetScene()" class="w-12 h-12 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center hover:bg-slate-800 transition-colors border border-white/5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       </button>
     </div>
 
-    <!-- Quick Spawn -->
+    <!-- Right: Primary Action -->
     <button 
       (click)="engine.spawnBox()"
-      class="bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 rounded-2xl flex items-center gap-3 font-black text-xs transition-all active:scale-95 shadow-2xl shadow-blue-500/20">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14m-7-7v14"/></svg>
-      <span>SPAWN_CORE_UNIT</span>
+      class="bg-blue-600 hover:bg-blue-500 text-white w-14 h-14 sm:w-auto sm:px-6 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs transition-all active:scale-95 shadow-xl shadow-blue-500/20 border border-blue-400/20">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14m-7-7v14"/></svg>
+      <span class="hidden sm:inline">SPAWN</span>
     </button>
   </footer>
 
-  <!-- Side Panels (Hierarchy/Inspector/Settings) use high-density aesthetics too -->
+  <!-- Side Panels (Enhanced for Mobile) -->
   <aside 
-    class="fixed left-0 top-0 bottom-0 w-72 bg-slate-950/95 backdrop-blur-2xl border-r border-white/5 z-30 transition-transform duration-500 ease-out flex flex-col shadow-2xl"
+    class="fixed left-0 top-0 bottom-0 w-80 bg-slate-900/95 backdrop-blur-3xl border-r border-white/10 z-50 transition-transform duration-500 ease-in-out flex flex-col shadow-2xl"
     [class.-translate-x-full]="state.activePanel() !== 'hierarchy'">
     <div class="p-8 flex-1 flex flex-col overflow-hidden">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-white font-black text-[10px] uppercase tracking-[0.4em]">Hierarchy_T1</h2>
-        <button (click)="state.setActivePanel('none')" class="text-slate-600 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg></button>
+        <h2 class="text-white font-bold text-sm uppercase tracking-widest">Hierarchy</h2>
+        <button (click)="state.setActivePanel('none')" class="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg>
+        </button>
       </div>
       
-      <div class="flex-1 overflow-y-auto space-y-1 pr-2 custom-scrollbar">
+      <div class="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
         @for (id of engine.ecs.entitiesList(); track id) {
           <div 
             (click)="state.selectedEntityId.set(id)"
-            class="group flex items-center justify-between p-3 rounded border border-transparent transition-all cursor-pointer"
-            [class.bg-blue-600/10]="state.selectedEntityId() === id"
-            [class.border-blue-500/20]="state.selectedEntityId() === id"
+            class="group flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer"
+            [class.bg-blue-600]="state.selectedEntityId() === id"
+            [class.border-blue-400/30]="state.selectedEntityId() === id"
+            [class.border-white/5]="state.selectedEntityId() !== id"
             [class.hover:bg-white/5]="state.selectedEntityId() !== id">
-            <div class="flex items-center gap-3">
-               <div class="w-1.5 h-1.5 rounded-full" [style.background-color]="engine.ecs.getSprite(id)?.color || '#fff'"></div>
-               <span class="text-[10px] font-mono tracking-tighter" [class.text-blue-400]="state.selectedEntityId() === id">
+            <div class="flex items-center gap-4">
+               <div class="w-3 h-3 rounded-full border border-white/20" [style.background-color]="engine.ecs.getSprite(id)?.color || '#fff'"></div>
+               <span class="text-xs font-medium" [class.text-white]="state.selectedEntityId() === id" [class.text-slate-300]="state.selectedEntityId() !== id">
                  {{ engine.ecs.tags.get(id)?.name || 'Entity_' + id }}
                </span>
             </div>
-            <span class="text-[8px] text-slate-700 font-mono">ID:{{ id }}</span>
+            <span class="text-[9px] font-mono" [class.text-blue-200]="state.selectedEntityId() === id" [class.text-slate-600]="state.selectedEntityId() !== id">ID:{{ id }}</span>
           </div>
         }
       </div>
     </div>
   </aside>
 
-  <!-- Right Side: Inspector -->
+  <!-- Right Side: Inspector & Settings -->
   <aside 
-    class="fixed right-0 top-0 bottom-0 w-80 bg-slate-950/95 backdrop-blur-2xl border-l border-white/5 z-30 transition-transform duration-500 ease-out flex flex-col shadow-2xl"
+    class="fixed right-0 top-0 bottom-0 w-80 bg-slate-900/95 backdrop-blur-3xl border-l border-white/10 z-50 transition-transform duration-500 ease-in-out flex flex-col shadow-2xl"
     [class.translate-x-full]="state.activePanel() !== 'inspector' && state.activePanel() !== 'settings'">
     
     <div class="p-8 flex-1 flex flex-col overflow-hidden">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-white font-black text-[10px] uppercase tracking-[0.4em]">
-          {{ state.activePanel() === 'settings' ? 'Global_Kernel_T0' : 'Inspector_T1' }}
+        <h2 class="text-white font-bold text-sm uppercase tracking-widest">
+          {{ state.activePanel() === 'settings' ? 'Engine Settings' : 'Properties' }}
         </h2>
-        <button (click)="state.setActivePanel('none')" class="text-slate-600 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg></button>
+        <button (click)="state.setActivePanel('none')" class="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12m0-12 12 12"/></svg>
+        </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
+      <div class="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
         @if (state.activePanel() === 'settings') {
            <div class="space-y-6">
-             <div class="p-4 bg-white/5 border border-white/5 rounded space-y-4">
-               <label class="block text-slate-600 text-[8px] uppercase font-black tracking-widest">Active_Simulation_Preset</label>
-               @for (s of scenes; track s.id) {
-                 <button (click)="engine.loadScene(s)"
-                   class="w-full text-left p-3 rounded border transition-all"
-                   [class.bg-white/10]="engine.currentScene()?.id === s.id"
-                   [class.border-blue-500/50]="engine.currentScene()?.id === s.id"
-                   [class.border-transparent]="engine.currentScene()?.id !== s.id">
-                   <div class="text-[10px] font-bold tracking-tight" [class.text-blue-400]="engine.currentScene()?.id === s.id">{{ s.name }}</div>
-                   <div class="text-[8px] text-slate-600 mt-1 uppercase">{{ s.description }}</div>
-                 </button>
-               }
+             <!-- Scene Selection -->
+             <div class="space-y-3">
+               <label class="block text-slate-500 text-[10px] uppercase font-bold tracking-widest">Active Scenario</label>
+               <div class="space-y-2">
+                 @for (s of scenes; track s.id) {
+                   <button (click)="engine.loadScene(s)"
+                     class="w-full text-left p-4 rounded-2xl border transition-all"
+                     [class.bg-blue-600]="engine.currentScene()?.id === s.id"
+                     [class.border-blue-400/30]="engine.currentScene()?.id === s.id"
+                     [class.border-white/5]="engine.currentScene()?.id !== s.id">
+                     <div class="text-xs font-bold" [class.text-white]="engine.currentScene()?.id === s.id">{{ s.name }}</div>
+                     <div class="text-[10px] mt-1 line-clamp-1" [class.text-blue-100]="engine.currentScene()?.id === s.id" [class.text-slate-500]="engine.currentScene()?.id !== s.id">
+                       {{ s.description }}
+                     </div>
+                   </button>
+                 }
+               </div>
              </div>
 
-             <div class="p-4 bg-white/5 border border-white/5 rounded">
-               <label class="block text-slate-600 text-[8px] mb-4 uppercase font-black tracking-widest">Gravity_Vector_Y</label>
-               <input type="range" min="-20" max="20" step="0.1" [value]="state.gravityY()" (input)="state.updateGravity($any($event.target).value)" class="w-full accent-amber-500 h-0.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
-               <div class="flex justify-between mt-4 font-mono text-[9px] text-slate-500"><span>-20.0</span><span class="text-amber-500">{{ state.gravityY() }}</span><span>20.0</span></div>
+             <!-- Physics Config -->
+             <div class="p-5 bg-white/5 rounded-3xl border border-white/5">
+               <label class="block text-slate-500 text-[10px] mb-4 uppercase font-bold tracking-widest">Gravity Strength</label>
+               <input type="range" min="-20" max="20" step="0.1" [value]="state.gravityY()" (input)="state.updateGravity($any($event.target).value)" 
+                 class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+               <div class="flex justify-between mt-4 font-mono text-[10px]">
+                 <span class="text-slate-600">-20.0</span>
+                 <span class="text-blue-400 font-bold">{{ state.gravityY() }}</span>
+                 <span class="text-slate-600">20.0</span>
+               </div>
              </div>
              
-             <div class="p-4 bg-white/5 border border-white/5 rounded space-y-4">
-               <label class="block text-slate-600 text-[8px] uppercase font-black tracking-widest">Visual_Topology</label>
+             <!-- Toggles -->
+             <div class="p-5 bg-white/5 rounded-3xl border border-white/5 space-y-4">
                <div class="flex items-center justify-between">
-                 <span class="text-[10px] text-slate-400 font-mono">RENDER_GRID</span>
-                 <button (click)="state.toggleGrid()" class="w-8 h-4 rounded-full transition-colors relative" [class.bg-blue-600]="state.gridVisible()" [class.bg-slate-800]="!state.gridVisible()">
-                   <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.gridVisible() ? 'translateX(16px)' : 'none'"></div>
+                 <span class="text-xs text-slate-300">Show Grid</span>
+                 <button (click)="state.toggleGrid()" class="w-10 h-5 rounded-full transition-all relative" [class.bg-blue-600]="state.gridVisible()" [class.bg-slate-700]="!state.gridVisible()">
+                   <div class="absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.gridVisible() ? 'translateX(20px)' : 'none'"></div>
                  </button>
                </div>
                <div class="flex items-center justify-between">
-                 <span class="text-[10px] text-slate-400 font-mono">DEBUG_COLLIDERS</span>
-                 <button (click)="state.toggleDebugPhysics()" class="w-8 h-4 rounded-full transition-colors relative" [class.bg-pink-600]="state.debugPhysics()" [class.bg-slate-800]="!state.debugPhysics()">
-                   <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.debugPhysics() ? 'translateX(16px)' : 'none'"></div>
+                 <span class="text-xs text-slate-300">Debug Physics</span>
+                 <button (click)="state.toggleDebugPhysics()" class="w-10 h-5 rounded-full transition-all relative" [class.bg-pink-600]="state.debugPhysics()" [class.bg-slate-700]="!state.debugPhysics()">
+                   <div class="absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform" [style.transform]="state.debugPhysics() ? 'translateX(20px)' : 'none'"></div>
                  </button>
                </div>
              </div>
            </div>
         } @else if (state.activePanel() === 'inspector' && state.selectedEntityId(); as id) {
-           <div class="space-y-8">
-             <div class="bg-amber-500/5 p-4 border border-amber-500/20 rounded space-y-4">
+           <div class="space-y-6">
+             <div class="bg-blue-500/5 p-6 rounded-3xl border border-blue-500/20 space-y-4">
                 <div class="flex items-center justify-between">
-                   <div class="text-amber-500 font-black text-xl font-mono tracking-tighter">ID:{{ id }}</div>
-                   <div class="text-[8px] font-black border border-amber-500 text-amber-500 px-2 py-0.5 rounded uppercase">Entity_Kernel</div>
+                   <div class="text-white font-bold text-lg">Entity #{{ id }}</div>
+                   <span class="text-[9px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded-lg uppercase font-bold tracking-wider">Dynamic</span>
                 </div>
                 <input type="text" [value]="engine.ecs.tags.get(id)?.name || ''" (input)="updateEntityName(id, $any($event.target).value)"
-                  class="w-full bg-black border border-white/5 rounded px-3 py-2 text-[10px] font-mono outline-none focus:border-amber-500/40 text-slate-300">
+                  class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500/40 text-slate-200 transition-colors">
              </div>
 
-             <!-- Transform Matrix -->
-             @if (engine.ecs.getTransform(id); as t) {
-               <div class="space-y-4">
-                 <h3 class="text-[8px] font-black uppercase tracking-[0.3em] text-slate-500">Transform_Matrix</h3>
-                 <div class="grid grid-cols-2 gap-px bg-white/5 border border-white/5 rounded overflow-hidden">
-                    <div class="bg-black p-4">
-                       <span class="text-[7px] text-slate-700 uppercase font-black block mb-1">POS_X</span>
-                       <span class="text-xs font-mono text-amber-500">{{ t.x | number:'1.2-2' }}</span>
-                    </div>
-                    <div class="bg-black p-4">
-                       <span class="text-[7px] text-slate-700 uppercase font-black block mb-1">POS_Y</span>
-                       <span class="text-xs font-mono text-amber-500">{{ t.y | number:'1.2-2' }}</span>
-                    </div>
-                 </div>
-               </div>
-             }
-
-             <!-- Geometry Shield -->
+             <!-- Dimensions -->
              @if (engine.ecs.getSprite(id); as s) {
                <div class="space-y-4">
-                 <h3 class="text-[8px] font-black uppercase tracking-[0.3em] text-slate-500">Geometry_Shield</h3>
-                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                       <label class="text-[7px] text-slate-700 uppercase font-black">EXTENT_W</label>
-                       <input type="number" step="0.1" [value]="s.width" (input)="updateEntityWidth(id, $any($event.target).value)" class="w-full bg-black border border-white/5 rounded p-3 text-[10px] font-mono text-slate-300">
+                 <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 px-1">Geometry</label>
+                 <div class="grid grid-cols-2 gap-3">
+                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
+                       <span class="text-[9px] text-slate-600 uppercase font-bold">Width</span>
+                       <input type="number" step="0.1" [value]="s.width" (input)="updateEntityWidth(id, $any($event.target).value)" 
+                         class="w-full bg-transparent border-none p-0 text-base font-mono text-white outline-none">
                     </div>
-                    <div class="space-y-2">
-                       <label class="text-[7px] text-slate-700 uppercase font-black">EXTENT_H</label>
-                       <input type="number" step="0.1" [value]="s.height" (input)="updateEntityHeight(id, $any($event.target).value)" class="w-full bg-black border border-white/5 rounded p-3 text-[10px] font-mono text-slate-300">
+                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
+                       <span class="text-[9px] text-slate-600 uppercase font-bold">Height</span>
+                       <input type="number" step="0.1" [value]="s.height" (input)="updateEntityHeight(id, $any($event.target).value)" 
+                         class="w-full bg-transparent border-none p-0 text-base font-mono text-white outline-none">
                     </div>
                  </div>
 
-                 <div class="bg-black p-4 border border-white/5 rounded">
-                    <span class="text-[7px] text-slate-700 uppercase font-black block mb-4">Material_Calibration</span>
-                    <div class="flex flex-wrap gap-2">
-                       @for (c of ['#60a5fa', '#ef4444', '#10b981', '#fbbf24', '#8b5cf6', '#f472b6', '#ffffff']; track c) {
+                 <div class="p-5 bg-white/5 rounded-3xl border border-white/5">
+                    <span class="text-[9px] text-slate-600 uppercase font-bold block mb-4">Color Palette</span>
+                    <div class="flex flex-wrap gap-3">
+                       @for (c of ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff']; track c) {
                          <button (click)="engine.updateSpriteColor(id, c)" 
-                           class="w-6 h-6 rounded border transition-transform active:scale-90"
+                           class="w-8 h-8 rounded-xl border-2 transition-all active:scale-90"
                            [style.background-color]="c"
                            [class.border-white]="s.color === c"
                            [class.border-transparent]="s.color !== c">
@@ -300,11 +281,9 @@
              }
            </div>
         } @else {
-          <div class="flex-1 flex flex-col items-center justify-center text-slate-800">
-            <div class="w-16 h-16 border border-white/5 rounded-full flex items-center justify-center mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="opacity-20"><path d="M12 2v20M2 12h20"/></svg>
-            </div>
-            <p class="text-[8px] uppercase font-black tracking-[0.4em] italic opacity-40">Scanning_Context...</p>
+          <div class="flex-1 flex flex-col items-center justify-center text-slate-700 opacity-50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mb-4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            <p class="text-xs font-medium uppercase tracking-[0.2em]">Select an object</p>
           </div>
         }
       </div>
@@ -313,13 +292,7 @@
 </div>
 
 <style>
-  .custom-scrollbar::-webkit-scrollbar { width: 2px; }
+  .custom-scrollbar::-webkit-scrollbar { width: 3px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; }
-  
-  @keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  .animate-spin-slow { animation: spin-slow linear infinite; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 </style>
