@@ -3,6 +3,9 @@
 ## [T0] Structural Map
 This document serves as the root entry point for the Qualia2D constitutional logic. All sub-processes must align with the definitions linked below.
 
+### 0. The Vision
+- **[Qualia2D Manifesto](./qualia2d-manifesto.md)**: The philosophical and technical vision for the engine.
+
 ### 1. Core Directives
 - **[Axial Directives](./kernel/axial-directives.md)**: Irreducible principles of the engine (Applet Priority, Automation Bias, Processual Identity).
 - **[Safeguards](./kernel/safeguards.md)**: Hard boundaries, WASM safety, and the absolute prohibition of GenAI integration.
