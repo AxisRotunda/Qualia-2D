@@ -1,4 +1,3 @@
-
 export interface Transform2D {
   x: number;
   y: number;
@@ -28,4 +27,10 @@ export interface Collider2D {
 export interface TagComponent {
   name: string;
   tags: Set<string>;
+}
+
+export interface ForceField2D {
+  strength: number; // Positive = Attract, Negative = Repel
+  radius: number;
+  active: boolean;
 }

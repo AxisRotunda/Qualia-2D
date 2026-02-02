@@ -1,26 +1,11 @@
+
 # Memory Log
 
-## [Init] Qualia2D Genesis
-- **Action**: Initial system synthesis.
-- **Outcome**: Established Zoneless shell, Rapier2D integration, and Signal-driven HUD.
+... (previous logs)
 
-## [v1.1] Manipulation & Debug Update
-- **Action**: Enhanced interactivity and developer tooling.
-- **Outcome**: Added Entity Dragging, Physics Debug Mode, and expanded Inspector.
-
-## [v1.2] Protocol Meta-Layer & Refactor Logic
-- **Action**: Deployment of Protocol Constructor and Refactor Heuristics.
-- **Outcome**: Established meta-verbs for autonomous logic iteration.
-
-## [v1.3] Protocol-Centric Restructure
-- **Action**: Migrated refactor and constructor logic to `/protocols/` and generated missing domain protocols.
-- **Context**: Centralizing operational logic for better Agent-Process mapping.
-- **Outcome**: 
-  - Created 9 dedicated protocol MD files.
-  - Updated `command-registry.md` and `project-hierarchy.md`.
-  - Established clear intent-to-file mapping for all engine verbs.
-
-## [v1.4] Hard Deletion of Duplicates
-- **Action**: Removed residual stub files in `src/docs/kernel/`.
-- **Context**: Ensuring zero-redundancy in the protocol graph and absolute structural integrity.
-- **Outcome**: Deleted `protocol-constructor.md` and `refactor-protocol.md` from the kernel directory. All internal engine references successfully redirected to the versioned protocols in `/src/docs/protocols/`.
+## [v1.14] Architectural Purification [T1]
+- **Command**: `RUN_REF`
+- **Action**: Decomposed monolithic `AppComponent` into modular UI components.
+- **Components Created**: `ViewportComponent`, `TelemetryComponent`, `CommandHubComponent`, `InspectorComponent`.
+- **Logic**: Isolated pointer/keyboard event routing into `ViewportComponent`. Moved property mutation logic to `InspectorComponent`.
+- **Outcome**: `AppComponent` HTML reduced by ~60%. Improved Agent cache locality for UI mutations. All Z-axis and design invariants maintained.

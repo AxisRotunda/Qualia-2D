@@ -5,6 +5,7 @@
 | Command | Protocol | Intent | Documentation |
 | :--- | :--- | :--- | :--- |
 | `RUN_PROTOCOL` | protocol-constructor | Construct or iterate on engine protocols. | [Constructor](../protocols/protocol-constructor.md) |
+| `RUN_INDUSTRY` | protocol-industry | Research and integrate industry standards. | [Industry](../protocols/protocol-industry.md) |
 | `RUN_KNOWLEDGE` | protocol-knowledge | Sync documentation hierarchy. | [Knowledge](../protocols/protocol-knowledge.md) |
 | `RUN_OPT` | protocol-optimize | Performance and GC tuning. | [Optimize](../protocols/protocol-optimize.md) |
 | `RUN_REF` | protocol-refactor | Architectural cleanup & bottleneck hunt. | [Refactor](../protocols/refactor-protocol.md) |

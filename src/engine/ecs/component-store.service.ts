@@ -1,7 +1,6 @@
-
 import { Injectable, signal } from '@angular/core';
 import { EntityId } from './entity';
-import { Transform2D, Sprite2D, RigidBody2D, Collider2D, TagComponent } from './components';
+import { Transform2D, Sprite2D, RigidBody2D, Collider2D, TagComponent, ForceField2D } from './components';
 
 @Injectable({ providedIn: 'root' })
 export class ComponentStoreService {
@@ -10,6 +9,7 @@ export class ComponentStoreService {
   readonly rigidBodies = new Map<EntityId, RigidBody2D>();
   readonly colliders = new Map<EntityId, Collider2D>();
   readonly tags = new Map<EntityId, TagComponent>();
+  readonly forceFields = new Map<EntityId, ForceField2D>();
 
   // Use signal for the entity list to drive Hierarchy UI
   private _entities = signal<EntityId[]>([]);
@@ -26,13 +26,10 @@ export class ComponentStoreService {
     this._entities.update(list => list.filter(e => e !== id));
     this.transforms.delete(id);
     this.sprites.delete(id);
-    const rb = this.rigidBodies.get(id);
-    if (rb?.handle) {
-      // Logic for cleanup handled in Physics Service usually
-    }
     this.rigidBodies.delete(id);
     this.colliders.delete(id);
     this.tags.delete(id);
+    this.forceFields.delete(id);
     this.entityCount.set(this._entities().length);
   }
 
@@ -43,9 +40,11 @@ export class ComponentStoreService {
     this.rigidBodies.clear();
     this.colliders.clear();
     this.tags.clear();
+    this.forceFields.clear();
     this.entityCount.set(0);
   }
 
   getTransform(id: EntityId): Transform2D | undefined { return this.transforms.get(id); }
   getSprite(id: EntityId): Sprite2D | undefined { return this.sprites.get(id); }
+  getForceField(id: EntityId): ForceField2D | undefined { return this.forceFields.get(id); }
 }

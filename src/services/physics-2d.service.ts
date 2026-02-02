@@ -25,7 +25,40 @@ export class Physics2DService {
     }
   }
 
-  // SAFEGUARD: Finite Guard & Dimension Logic
+  // INDUSTRY_STANDARD: Spatial Query for Point Selection with optional tolerance radius
+  pickEntityAt(x: number, y: number, radius = 0): EntityId | null {
+    if (!this.world) return null;
+
+    let selectedId: EntityId | null = null;
+    const point = { x, y };
+
+    if (radius <= 0) {
+      this.world.intersectionsWithPoint(point, (collider) => {
+          for (const [id, col] of this.store.colliders) {
+              if (col.handle === collider) {
+                  selectedId = id;
+                  return false;
+              }
+          }
+          return true;
+      });
+    } else {
+      // For mobile/tolerance, we use a small shape intersection
+      const shape = new RAPIER.Ball(radius);
+      this.world.intersectionsWithShape(point, 0, shape, (collider) => {
+        for (const [id, col] of this.store.colliders) {
+          if (col.handle === collider) {
+            selectedId = id;
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    return selectedId;
+  }
+
   createBody(id: EntityId, type: 'dynamic' | 'fixed', x: number, y: number): RAPIER.RigidBody | null {
     if (!this.world || !Number.isFinite(x) || !Number.isFinite(y)) return null;
     
@@ -46,7 +79,6 @@ export class Physics2DService {
   createCollider(id: EntityId, bodyHandle: RAPIER.RigidBody, width: number, height: number): RAPIER.Collider | null {
     if (!this.world || !Number.isFinite(width) || !Number.isFinite(height)) return null;
     
-    // Dimension Logic: Floor extents if they are effectively integers in specific protocols
     const hw = width / 2;
     const hh = height / 2;
     
@@ -71,7 +103,6 @@ export class Physics2DService {
             const r = rb.handle.rotation();
             const ecsTransform = this.store.transforms.get(id);
             if (ecsTransform) {
-                // Safeguard: Verify physics output is finite before committing to ECS
                 if (Number.isFinite(t.x) && Number.isFinite(t.y) && Number.isFinite(r)) {
                     ecsTransform.x = t.x;
                     ecsTransform.y = t.y;

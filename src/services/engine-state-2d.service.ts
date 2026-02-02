@@ -1,17 +1,23 @@
-
 import { Injectable, signal, computed } from '@angular/core';
 
 export type EngineMode = 'edit' | 'play';
 export type ActivePanel = 'none' | 'hierarchy' | 'inspector' | 'settings';
+export type ControllerTopology = 'platformer' | 'top-down-rpg' | 'top-down-action';
 
 @Injectable({ providedIn: 'root' })
 export class EngineState2DService {
   // Simulation
   readonly mode = signal<EngineMode>('edit');
+  readonly topology = signal<ControllerTopology>('platformer');
   readonly isPaused = signal<boolean>(false);
   readonly loading = signal<boolean>(true);
   readonly fps = signal<number>(0);
   readonly physicsTimeMs = signal<number>(0);
+
+  // Input State (Keyboard & Mouse)
+  readonly keys = signal<Set<string>>(new Set());
+  readonly cursorWorldX = signal<number>(0);
+  readonly cursorWorldY = signal<number>(0);
 
   // Viewport
   readonly cameraX = signal<number>(0);
@@ -20,6 +26,10 @@ export class EngineState2DService {
   readonly gridVisible = signal<boolean>(true);
   readonly debugPhysics = signal<boolean>(false);
   readonly bgColor = signal<string>('#0f172a');
+
+  // Interaction
+  readonly isDragging = signal<boolean>(false);
+  readonly dragTargetPos = signal<{x: number, y: number} | null>(null);
 
   // Physics Global
   readonly gravityY = signal<number>(-9.81);
@@ -31,7 +41,8 @@ export class EngineState2DService {
   // Computed
   readonly statusText = computed(() => {
     if (this.loading()) return 'LOADING';
-    return `${this.mode().toUpperCase()} | ${this.isPaused() ? 'PAUSED' : 'RUNNING'}`;
+    const top = this.topology().replace(/-/g, ' ').toUpperCase();
+    return `${this.mode().toUpperCase()} [${top}]`;
   });
 
   setFps(val: number) { this.fps.set(val); }
@@ -40,6 +51,10 @@ export class EngineState2DService {
   toggleMode() { 
     this.mode.update(m => m === 'edit' ? 'play' : 'edit'); 
     if (this.mode() === 'play') this.activePanel.set('none');
+  }
+
+  setTopology(top: ControllerTopology) {
+    this.topology.set(top);
   }
   
   togglePause() { this.isPaused.update(p => !p); }
@@ -62,6 +77,11 @@ export class EngineState2DService {
     if (!isNaN(num)) {
       this.gravityY.set(num);
     }
+  }
+
+  updateCursor(x: number, y: number) {
+    this.cursorWorldX.set(x);
+    this.cursorWorldY.set(y);
   }
 
   // Camera Ops

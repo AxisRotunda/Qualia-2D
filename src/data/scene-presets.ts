@@ -1,14 +1,55 @@
-
 import { EntityGenerator } from '../engine/ecs/entity';
 import type { Engine2DService } from '../services/engine-2d.service';
 import type { ScenePreset2D } from '../engine/scene.types';
 
 export const SCENES: ScenePreset2D[] = [
   {
-    id: 'playground',
-    name: 'Physics Playground',
-    description: 'Basic floor with dynamic boxes.',
+    id: 'arena',
+    name: 'Neon Hotline',
+    description: 'Top-down action with twin-stick aiming.',
     load: (engine: Engine2DService) => {
+        engine.state.setTopology('top-down-action');
+        
+        // Boundaries
+        const boundSize = 15;
+        const thickness = 1;
+        
+        const walls = [
+          { x: 0, y: boundSize, w: boundSize * 2, h: thickness },
+          { x: 0, y: -boundSize, w: boundSize * 2, h: thickness },
+          { x: boundSize, y: 0, w: thickness, h: boundSize * 2 },
+          { x: -boundSize, y: 0, w: thickness, h: boundSize * 2 }
+        ];
+
+        walls.forEach((w, i) => {
+          const id = EntityGenerator.generate();
+          engine.ecs.addEntity(id);
+          engine.ecs.transforms.set(id, { x: w.x, y: w.y, rotation: 0, scaleX: 1, scaleY: 1 });
+          engine.ecs.sprites.set(id, { color: '#1e293b', width: w.w, height: w.h, layer: 0, opacity: 1 });
+          engine.ecs.tags.set(id, { name: `Wall_${i}`, tags: new Set(['static']) });
+          const rb = engine.physics.createBody(id, 'fixed', w.x, w.y);
+          if (rb) engine.physics.createCollider(id, rb, w.w, w.h);
+        });
+
+        // Player
+        engine.spawnBox(0, 0, '#6366f1', 1, 1, 'dynamic');
+
+        // Debris / Targets
+        for (let i = 0; i < 8; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 5 + Math.random() * 5;
+          const x = Math.cos(angle) * dist;
+          const y = Math.sin(angle) * dist;
+          engine.spawnBox(x, y, '#ec4899', 0.8, 0.8, 'dynamic');
+        }
+    }
+  },
+  {
+    id: 'playground',
+    name: 'Physics Platformer',
+    description: 'Standard gravity & jump mechanics.',
+    load: (engine: Engine2DService) => {
+        engine.state.setTopology('platformer');
         const floorId = EntityGenerator.generate();
         engine.ecs.addEntity(floorId);
         engine.ecs.transforms.set(floorId, { x: 0, y: -6, rotation: 0, scaleX: 1, scaleY: 1 });
@@ -17,16 +58,41 @@ export const SCENES: ScenePreset2D[] = [
         const floorRb = engine.physics.createBody(floorId, 'fixed', 0, -6);
         if(floorRb) engine.physics.createCollider(floorId, floorRb, 24, 2);
         
-        engine.spawnBox(-2, 2, '#fbbf24');
-        engine.spawnBox(2, 4, '#ef4444');
-        engine.spawnBox(0, 8, '#60a5fa');
+        // Player
+        engine.spawnBox(0, 0, '#60a5fa', 1, 1, 'dynamic');
+
+        // Obstacles
+        engine.spawnBox(-2, 2, '#fbbf24', 1, 1, 'dynamic');
+        engine.spawnBox(2, 4, '#ef4444', 1, 1, 'dynamic');
+    }
+  },
+  {
+    id: 'rpg_lab',
+    name: 'RPG Grid',
+    description: 'Snappy movement with no inertia.',
+    load: (engine: Engine2DService) => {
+      engine.state.setTopology('top-down-rpg');
+      
+      // Floor Pattern
+      for(let x = -5; x <= 5; x+=5) {
+        for(let y = -5; y <= 5; y+=5) {
+           // Decor only
+        }
+      }
+
+      const playerId = engine.spawnBox(0, 0, '#10b981', 1, 1); 
+      engine.updateEntityName(playerId, 'Hero');
+
+      engine.spawnBox(3, 2, '#6366f1', 1, 1);
+      engine.spawnBox(-3, -2, '#f43f5e', 1, 1);
     }
   },
   {
     id: 'dominoes',
     name: 'Domino Run',
-    description: 'A chain reaction of falling rectangles.',
+    description: 'Chain reaction demo.',
     load: (engine: Engine2DService) => {
+        engine.state.setTopology('platformer');
         // Ground
         const floorId = EntityGenerator.generate();
         engine.ecs.addEntity(floorId);
@@ -55,54 +121,5 @@ export const SCENES: ScenePreset2D[] = [
             }
         }
     }
-  },
-  {
-    id: 'tower',
-    name: 'Entropy Tower',
-    description: 'A delicate stack of boxes.',
-    load: (engine: Engine2DService) => {
-        const floorId = EntityGenerator.generate();
-        engine.ecs.addEntity(floorId);
-        engine.ecs.transforms.set(floorId, { x: 0, y: -8, rotation: 0, scaleX: 1, scaleY: 1 });
-        engine.ecs.sprites.set(floorId, { color: '#334155', width: 30, height: 2, layer: 0, opacity: 1 });
-        const floorRb = engine.physics.createBody(floorId, 'fixed', 0, -8);
-        if(floorRb) engine.physics.createCollider(floorId, floorRb, 30, 2);
-
-        const rows = 8;
-        const boxSize = 1.0;
-        const spacing = 0.05;
-        
-        for(let r = 0; r < rows; r++) {
-            const cols = 8 - r;
-            if (cols <= 0) break;
-            
-            for(let c = 0; c < cols; c++) {
-                const rowWidth = cols * (boxSize + spacing);
-                const startX = -rowWidth / 2 + boxSize / 2;
-                const x = startX + c * (boxSize + spacing);
-                const y = -6 + r * (boxSize + spacing);
-                engine.spawnBox(x, y, '#8b5cf6', boxSize, boxSize);
-            }
-        }
-    }
-  },
-  {
-      id: 'rain',
-      name: 'Chaos Rain',
-      description: 'Particles stress test.',
-      load: (engine: Engine2DService) => {
-           const floorId = EntityGenerator.generate();
-           engine.ecs.addEntity(floorId);
-           engine.ecs.transforms.set(floorId, { x: 0, y: -10, rotation: 0, scaleX: 1, scaleY: 1 });
-           engine.ecs.sprites.set(floorId, { color: '#1e293b', width: 40, height: 1, layer: 0, opacity: 1 });
-           const floorRb = engine.physics.createBody(floorId, 'fixed', 0, -10);
-           if(floorRb) engine.physics.createCollider(floorId, floorRb, 40, 1);
-           
-           for(let i=0; i<60; i++) {
-               const x = (Math.random() - 0.5) * 15;
-               const y = 5 + Math.random() * 25;
-               engine.spawnBox(x, y, '#22d3ee', 0.4, 0.4);
-           }
-      }
   }
 ];
