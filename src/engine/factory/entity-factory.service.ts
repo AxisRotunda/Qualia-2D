@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { ComponentStoreService } from '../ecs/component-store.service';
-import { Physics2DService } from '../../services/physics-2d.service';
+import { PhysicsEngine } from '../core/physics-engine.service';
 import { EntityGenerator, EntityId } from '../ecs/entity';
 
 @Injectable({ providedIn: 'root' })
 export class EntityFactoryService {
   private ecs = inject(ComponentStoreService);
-  private physics = inject(Physics2DService);
+  private physics = inject(PhysicsEngine);
 
   spawnFromTemplate(templateId: string, x = 0, y = 0): EntityId {
     switch(templateId) {
@@ -26,7 +26,6 @@ export class EntityFactoryService {
     this.ecs.sprites.set(id, { color: '#6366f1', width: 1.2, height: 1.2, layer: 2, opacity: 1 });
     this.ecs.tags.set(id, { name: 'Player_Hero', tags: new Set(['player']) });
     this.ecs.players.set(id, { speed: 15, turnSpeed: 10, lastFireTime: 0, fireRate: 200 });
-    
     const rb = this.physics.createBody(id, 'dynamic', x, y);
     if (rb) {
         rb.setLinearDamping(0.5);
@@ -50,7 +49,6 @@ export class EntityFactoryService {
     this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
     this.ecs.sprites.set(id, { color, width: w, height: h, layer: 1, opacity: 1 });
     this.ecs.tags.set(id, { name: `${type === 'dynamic' ? 'Box' : 'Platform'}_${id}`, tags: new Set(['physics_object']) });
-    
     const rb = this.physics.createBody(id, type, x, y);
     if (rb) this.physics.createCollider(id, rb, w, h);
     return id;

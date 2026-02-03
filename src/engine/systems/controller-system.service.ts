@@ -2,7 +2,7 @@ import { Injectable, inject, effect } from '@angular/core';
 import { EngineState2DService } from '../../services/engine-state-2d.service';
 import { Input2DService } from '../../services/input-2d.service';
 import { ComponentStoreService } from '../ecs/component-store.service';
-import { Physics2DService } from '../../services/physics-2d.service';
+import { PhysicsEngine } from '../core/physics-engine.service';
 import { CommandRegistryService } from '../../services/command-registry.service';
 
 @Injectable({ providedIn: 'root' })
@@ -10,11 +10,10 @@ export class ControllerSystem2DService {
   private state = inject(EngineState2DService);
   private input = inject(Input2DService);
   private ecs = inject(ComponentStoreService);
-  private physics = inject(Physics2DService);
+  private physics = inject(PhysicsEngine);
   private commands = inject(CommandRegistryService);
 
   constructor() {
-    // Watch for topology changes to provide system feedback
     effect(() => {
         const top = this.state.topology();
         this.commands.execute('RUN_PHYS', `TOPOLOGY_SHIFT: ${top}`);
@@ -38,22 +37,15 @@ export class ControllerSystem2DService {
             if (move.x !== 0) {
               rb.handle.applyImpulse({ x: move.x * impulse, y: 0 }, true);
             }
-            // Vertical movement (Jump)
             if (move.y > 0.5 && Math.abs(rb.handle.linvel().y) < 0.1) {
                 rb.handle.applyImpulse({ x: 0, y: 12.0 }, true); 
             }
         } 
-        
         else if (topo === 'top-down-rpg') {
             rb.handle.setRotation(0, true);
-            // RPG: Direct velocity control
             const speed = config.speed;
-            rb.handle.setLinvel({ 
-                x: move.x * speed, 
-                y: move.y * speed 
-            }, true);
+            rb.handle.setLinvel({ x: move.x * speed, y: move.y * speed }, true);
         }
-
         else if (topo === 'top-down-action') {
             const t = this.ecs.getTransform(id);
             if (t) {
@@ -68,7 +60,6 @@ export class ControllerSystem2DService {
                 }
                 rb.handle.setRotation(angle, true);
             }
-
             if (move.x !== 0 || move.y !== 0) {
                 const thrust = config.speed * 6 * dt; 
                 rb.handle.applyImpulse({ x: move.x * thrust, y: move.y * thrust }, true);
@@ -80,13 +71,11 @@ export class ControllerSystem2DService {
   private updateInputVectors() {
     if (!this.input.isUsingJoypad()) {
         const keys = this.input.keys();
-        let mx = 0;
-        let my = 0;
+        let mx = 0; let my = 0;
         if (keys.has('w') || keys.has('arrowup')) my += 1;
         if (keys.has('s') || keys.has('arrowdown')) my -= 1;
         if (keys.has('a') || keys.has('arrowleft')) mx -= 1;
         if (keys.has('d') || keys.has('arrowright')) mx += 1;
-
         if (mx !== 0 || my !== 0) {
             const mag = Math.sqrt(mx*mx + my*my);
             this.input.moveVector.set({ x: mx / mag, y: my / mag });
@@ -99,13 +88,11 @@ export class ControllerSystem2DService {
   applyTopologyRules(dt: number) {
     if (!this.physics.world) return;
     const topo = this.state.topology();
-
     if (topo === 'platformer') {
       this.physics.world.gravity = { x: 0, y: this.state.gravityY() };
       this.applyGlobalDamping(dt, 0.95); 
     } else if (topo === 'top-down-rpg') {
       this.physics.world.gravity = { x: 0, y: 0 };
-      // RPG is snappy, so we use 0.0 damping and direct velocity in update()
       this.applyGlobalDamping(dt, 0.0); 
     } else if (topo === 'top-down-action') {
       this.physics.world.gravity = { x: 0, y: 0 };

@@ -3,13 +3,20 @@
 ## [Init] Qualia2D Genesis
 - **Action**: Initial system synthesis. Established Zoneless shell and Rapier2D integration.
 
-## [v1.1 - v1.9] Architectural Evolution
-- **Action**: Iterative hardening of ECS, Physics, and UI layers. Deployed Obsidian Glass design language.
+## [v1.1 - v1.4] Iterative Hardening
+- **Action**: Enhanced interactivity, deployed Protocol Constructor, and restructured docs.
 
-## [v2.0] RUN_REF: UI Protocol Enforcement
-- **Action**: Executed `RUN_REF` target `ui`.
-- **Action**: Eradicated the sidebar regression in `MainMenuComponent`. 
-- **Action**: Re-implemented the `Fluid Hub` (Floating Pill Navigation) as defined in `PROTOCOL_UI_V3.2`.
-- **Action**: Optimized tab content scroll escapement to prevent fixed-header obscuration on mobile viewports.
-- **Action**: Standardized design tokens across `play`, `guide`, and `settings` menu tabs.
-- **Outcome**: UI layer is 100% compliant with the Obsidian Glass protocol. Portability Score (P) = 2.
+## [v1.5 - v1.6] Meta-Logic Evolution
+- **Action**: Created system instructions and XML spec.
+
+## [v1.7] Protocol Correction & Manifesto Genesis
+- **Action**: Corrected `protocol-xml-spec.md` and `system-instructions.md`.
+- **Action**: Generated `qualia2d-manifesto.md`.
+
+## [v1.8] RUN_KNOWLEDGE: Architectural Synthesis
+- **Action**: Synthesized `ecs-architecture.md`, `physics-integration.md`, and `rendering-pipeline.md`.
+
+## [v1.9] RUN_KNOWLEDGE: Operational Synthesis
+- **Action**: Synthesized `input-pipeline.md`, `scene-lifecycle.md`, and `camera-projection.md`.
+- **Action**: Updated `kernel.md` and `project-hierarchy.md` to reflect new documentation nodes.
+- **Outcome**: Engine lifecycle, input translation, and viewport projection are now fully codified for the Agent process.

@@ -13,31 +13,34 @@
 
 ### /src/app/ui (Modular View Layer)
 - `viewport/`: Canvas & Interaction isolation.
-- `hud/`: Telemetry, Command Hub, Overlays.
-- `panels/`: Hierarchy, Inspector, Settings, and reusable PanelDrawer components.
+- `hud/`: Telemetry, Command Hub, Overlays, Joypads.
+- `panels/`: Hierarchy, Inspector, Settings, Drawer.
 - `main-menu/`: Full-screen navigation and guides.
 
 ### /src/data (Resource & Content Layer)
 - `guides/`: Human-readable documentation fragments.
 - `scenes/`: Procedural reality fragments.
 - `prefabs/`: Entity templates and blueprints.
-- `index.ts`: Barrel export for all engine content.
 
 ### /src/engine (Core Simulation Module)
-- `ecs/`: Entity and Component stores (The "Memory").
-- `systems/`: Logic processors (Physics, AI, Movement).
-- `factory/`: Instantiation logic.
+- `ecs/`: Entity and Component stores.
+- `core/`: Irreducible atoms (Physics, Camera, Assets).
+- `systems/`: Logic processors (Physics, Render, Selection, Controller).
+- `factory/`: Instantiation logic (EntityFactory).
 - `runtime/`: The high-frequency RAF loop.
 
 ### /src/services (Orchestration Layer)
 - `engine-2d.service.ts`: Primary Bridge (UI <-> Engine).
 - `state-2d.service.ts`: Global Signal-state registry.
 - `input-2d.service.ts`: Hardware-to-Intent translation.
-- `physics-2d.service.ts`: Rapier2D WASM wrapper.
-- `renderer-2d.service.ts`: Canvas2D drawing system.
+- `scene-manager.service.ts`: Reality fragment lifecycle.
+- `runtime-2d.service.ts`: Engine tick coordination.
+- `mutation-2d.service.ts`: State mutation commands.
+- `spawner-2d.service.ts`: Entity placement logic.
 
 ### /src/docs (Logic & Protocol Kernel)
 - `kernel/`: Structural foundations.
 - `protocols/`: Operational verb definitions.
+- `engine/`: Deep architectural dives (ECS, Physics, Render, Input, Scenes, Camera).
 - `visual/`: Obsidian Glass design language.
 - `history/`: Session memory and repair logs.
