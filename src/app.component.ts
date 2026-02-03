@@ -7,7 +7,7 @@ import { PwaService } from './services/pwa.service';
 import { DecimalPipe } from '@angular/common';
 import { SCENES } from './data/scene-presets';
 
-// UI Imports - Absolute Relative Path Enforcement
+// UI Imports - Relocated to domain sub-directories
 import { ViewportComponent } from './app/ui/viewport/viewport.component';
 import { TelemetryComponent } from './app/ui/hud/telemetry.component';
 import { CommandHubComponent } from './app/ui/hud/command-hub.component';

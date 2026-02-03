@@ -2,12 +2,20 @@ import { Injectable, inject } from '@angular/core';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 import { CameraService } from '../engine/core/camera.service';
+import { CommandRegistryService } from './command-registry.service';
+
+export interface StreamConfig {
+  count: number;
+  batchSize?: number; // Check time every N items
+  factory: (index: number) => void;
+}
 
 @Injectable({ providedIn: 'root' })
 export class Spawner2DService {
   private factory = inject(EntityFactoryService);
   private ecs = inject(ComponentStoreService);
   private camera = inject(CameraService);
+  private commands = inject(CommandRegistryService);
 
   spawnFromTemplate(templateId: string, x = 0, y = 0) {
     return this.factory.spawnFromTemplate(templateId, x, y);
@@ -23,5 +31,33 @@ export class Spawner2DService {
 
   spawnBox(x = 0, y = 5, color = '#60a5fa', w = 1, h = 1, type: 'dynamic' | 'fixed' = 'dynamic') {
     return this.factory.spawnBox(x, y, color, w, h, type);
+  }
+
+  /**
+   * [RUN_ARCHETYPE] Time-Sliced Entity Streaming.
+   * Spawns entities in batches to respect a 12ms frame budget.
+   * Yields to the browser via requestAnimationFrame to prevent blocking.
+   */
+  async spawnStream(config: StreamConfig) {
+    const startTotal = performance.now();
+    const batchSize = config.batchSize || 16;
+    const frameBudgetMs = 12; // Leave ~4ms for browser overhead (60fps)
+    
+    let frameStart = performance.now();
+    
+    for (let i = 0; i < config.count; i++) {
+      config.factory(i);
+
+      // Check budget every batchSize iterations to reduce perf.now() overhead
+      if (i % batchSize === 0) {
+        if ((performance.now() - frameStart) > frameBudgetMs) {
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          frameStart = performance.now();
+        }
+      }
+    }
+
+    const duration = performance.now() - startTotal;
+    this.commands.execute('RUN_ARCHETYPE', `Streamed ${config.count} ents in ${duration.toFixed(1)}ms`);
   }
 }

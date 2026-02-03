@@ -30,6 +30,7 @@ export class SceneManagerService {
     if (this.isTransitioning()) return;
     this.isTransitioning.set(true);
     this.state.setLoading(true);
+    // Yield to browser for UI update
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
@@ -39,10 +40,17 @@ export class SceneManagerService {
       EntityGenerator.reset();
       this.state.selectedEntityId.set(null);
       if (scene.preferredTopology) this.state.setTopology(scene.preferredTopology);
+      
+      // Yield to ensure cleanup is rendered/processed
       await new Promise(resolve => requestAnimationFrame(resolve));
-      scene.load(engine);
+      
+      // Load Scene (Supports Async/Streaming)
+      await scene.load(engine);
+      
       if (scene.onEnter) scene.onEnter(engine);
       this.currentScene.set(scene);
+      
+      // Short delay for aesthetic stabilization
       await new Promise(resolve => setTimeout(resolve, 300));
     } finally {
       this.state.setLoading(false);

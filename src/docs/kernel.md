@@ -13,6 +13,7 @@ This document serves as the root entry point for the Qualia2D constitutional log
 ### 2. Operational Logic
 - **[Command Registry](./kernel/command-registry.md)**: Mapping of operational verbs.
 - **[Project Hierarchy](../core/project-hierarchy.md)**: Hard file-system mapping.
+- **[Knowledge Sync Protocol](./protocols/protocol-knowledge.md)**: Documentation governance.
 
 ### 3. Engine Architecture (The Dives)
 - **[ECS Architecture](./engine/ecs-architecture.md)**: Data-first state management.
@@ -20,6 +21,8 @@ This document serves as the root entry point for the Qualia2D constitutional log
 - **[Rendering Pipeline](./engine/rendering-pipeline.md)**: Planar projection rules.
 - **[Engine Lifecycle](./engine/lifecycle.md)**: The high-frequency pulse.
 - **[Input Pipeline](./engine/input-pipeline.md)**: Device normalization logic.
+- **[Hyper-Core & Prediction](./engine/hyper-core.md)**: Kalman Filter & Gesture Oracle.
+- **[Memory Tiering](./engine/memory-tiering.md)**: Cognitive stratification.
 - **[Scene Lifecycle](./engine/scene-lifecycle.md)**: Reality fragment management.
 - **[Camera & Projection](./engine/camera-projection.md)**: Coordinate translation laws.
 
@@ -33,3 +36,4 @@ This document serves as the root entry point for the Qualia2D constitutional log
 - **Determinism**: Physics core is WASM-backed and deterministic.
 - **Zoneless**: No Angular zones allowed.
 - **SSOT**: Component Store is the only valid source of entity state.
+- **Predictive**: Input and Camera utilize Kalman Fusion to eliminate perceived latency.

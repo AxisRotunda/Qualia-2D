@@ -11,7 +11,7 @@ export interface ScenePreset2D {
   complexity: SceneComplexity;
   preferredTopology?: ControllerTopology;
   // Lifecycle Hooks
-  load: (engine: Engine2DService) => void;
+  load: (engine: Engine2DService) => void | Promise<void>;
   onEnter?: (engine: Engine2DService) => void;
   onExit?: (engine: Engine2DService) => void;
 }

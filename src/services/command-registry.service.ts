@@ -22,6 +22,7 @@ export type QualiaVerb =
   | 'RUN_GUIDE_GEN'
   | 'RUN_INDUSTRY'
   | 'RUN_MEM_ARCH'
+  | 'RUN_ARCHETYPE'
   | 'RUN_ORACLE_SYNTH'
   | 'RUN_KALMAN_CALIB';
 
@@ -47,7 +48,7 @@ export class CommandRegistryService {
     
     // Tagging logic for automated Narrative Sync (memory.md)
     const tags = ['command'];
-    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB'].includes(verb)) {
+    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB', 'RUN_ARCHETYPE'].includes(verb)) {
       tags.push('notable'); 
     }
 
@@ -86,6 +87,9 @@ export class CommandRegistryService {
         break;
       case 'RUN_MEM_ARCH':
         this.performMemoryAudit();
+        break;
+      case 'RUN_ARCHETYPE':
+        this.log('ARCHETYPE: STREAMING_CHUNKED_ENTITIES', ['optimization', 'ecs']);
         break;
       case 'RUN_ORACLE_SYNTH':
         this.oracle.synthesizeTable();
