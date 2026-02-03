@@ -1,5 +1,5 @@
 # [T1] UI Protocol
-ID: PROTOCOL_UI_V3.2 | Role: Aesthetic & Interface Synthesis.
+ID: PROTOCOL_UI_V3.3 | Role: Aesthetic & Interface Synthesis.
 
 ## 1. INTENT
 This protocol governs the synthesis, audit, and iteration of the Qualia2D view layer. It enforces the **Obsidian Glass** design language, emphasizing fluid hub layouts over rigid administrative sidebars.
@@ -21,6 +21,13 @@ Used for the primary navigation and landing states.
 - **Rule**: Detailed content (Guides, Inspector) must overlay the screen using `fixed inset-0 z-[100]` on mobile, while maintaining high-density alignment on desktop.
 - **Redundancy Guard**: Action buttons must only appear at final decision points (e.g., Scene Selection), never inside informational detail panels.
 
+### 3.3 HUMAN TRANSLATION SCHEMAS
+When rendering `VisualArticle` cards (Guides), the UI must explicitly handle the following `schemaId` types with distinct iconography:
+- `movement`: Kinetic/Axis iconography.
+- `physics`: Atomic/Simulation iconography.
+- `input`: Tactile/Gamepad iconography.
+- **Fallback**: Generic Document/File icon.
+
 ## 4. LOGIC MATRIX: RUN_UI [TARGET]
 
 ### TARGET: `main_menu`
@@ -34,6 +41,7 @@ Used for the primary navigation and landing states.
   1. Grid of modules for selection.
   2. No "Initialize" buttons in guide steps.
   3. Detail view uses immersive escapement.
+  4. Verify all `schemaId` types map to unique visuals (No generic fallbacks for core domains).
 
 ## 5. SAFEGUARDS
 - **Obscuration Limit**: Viewport must remain >40% visible during HUD operations.

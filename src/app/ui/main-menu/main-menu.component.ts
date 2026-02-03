@@ -8,13 +8,20 @@ import { DecimalPipe } from '@angular/common';
 import { MenuPlayTabComponent } from './play-tab.component';
 import { MenuGuideTabComponent } from './guide-tab.component';
 import { MenuSettingsTabComponent } from './settings-tab.component';
+import { MenuLaunchModalComponent } from './launch-modal.component';
 
 type MenuTab = 'play' | 'guide' | 'settings';
 
 @Component({
   selector: 'app-main-menu',
   standalone: true,
-  imports: [DecimalPipe, MenuPlayTabComponent, MenuGuideTabComponent, MenuSettingsTabComponent],
+  imports: [
+    DecimalPipe, 
+    MenuPlayTabComponent, 
+    MenuGuideTabComponent, 
+    MenuSettingsTabComponent,
+    MenuLaunchModalComponent
+  ],
   template: `
     <div class="fixed inset-0 z-[90] bg-[#020617] text-slate-200 font-sans select-none overflow-hidden">
       
@@ -24,12 +31,11 @@ type MenuTab = 'play' | 'guide' | 'settings';
         <div class="absolute top-[20%] -right-[10%] w-[600px] h-[600px] bg-rose-500/10 blur-[120px] rounded-full mix-blend-screen animate-pulse duration-[8s]"></div>
       </div>
 
-      <!-- MAIN CONTENT LAYER (Z-0) -->
-      <!-- All tab content uses internal scroll containers to slide BEHIND the header -->
+      <!-- MAIN CONTENT LAYER -->
       <main class="absolute inset-0 z-0">
          @switch (activeTab()) {
            @case ('play') {
-             <app-menu-play-tab (select)="selectScene($event)" />
+             <app-menu-play-tab (select)="selectedScene.set($event)" />
            }
            @case ('guide') {
              <app-menu-guide-tab (launch)="launchModuleSim($event)" />
@@ -40,10 +46,8 @@ type MenuTab = 'play' | 'guide' | 'settings';
          }
       </main>
 
-      <!-- FLOATING NAVIGATION HEADER (Z-50): THE FLUID HUB -->
+      <!-- FLOATING NAVIGATION HEADER -->
       <header class="absolute top-0 inset-x-0 z-50 flex flex-col items-center pt-8 pb-12 pointer-events-none bg-gradient-to-b from-[#020617] via-[#020617]/80 to-transparent">
-        
-        <!-- Branding Pill -->
         <div class="flex flex-col items-center gap-1 mb-6 animate-in slide-in-from-top-4 duration-700">
           <div class="flex items-center gap-3">
              <div class="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-[10px] font-black shadow-[0_0_20px_rgba(99,102,241,0.5)]">Q</div>
@@ -52,7 +56,6 @@ type MenuTab = 'play' | 'guide' | 'settings';
           <div class="text-[7px] text-indigo-500/50 uppercase font-black tracking-[0.5em]">System_Core_v1.4</div>
         </div>
 
-        <!-- Glass Pill Nav -->
         <nav class="pointer-events-auto flex items-center gap-1 p-1.5 bg-slate-950/40 backdrop-blur-3xl rounded-full border border-white/5 shadow-[0_16px_48px_rgba(0,0,0,0.6)] animate-in zoom-in-95 duration-500 delay-100">
           @for (tab of tabs; track tab.id) {
             <button (click)="activeTab.set(tab.id)" 
@@ -67,7 +70,6 @@ type MenuTab = 'play' | 'guide' | 'settings';
               </svg>
               <span class="relative z-10 text-[9px] font-black uppercase tracking-[0.2em] hidden sm:inline">{{ tab.label }}</span>
               
-              <!-- Active Highlight -->
               @if (activeTab() === tab.id) {
                 <div class="absolute inset-x-4 bottom-0 h-px bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,1)]"></div>
               }
@@ -76,51 +78,15 @@ type MenuTab = 'play' | 'guide' | 'settings';
         </nav>
       </header>
 
-      <!-- LAUNCH MODAL (Z-100) -->
+      <!-- LAUNCH MODAL -->
       @if (selectedScene(); as scene) {
-        <div (click)="selectedScene.set(null)" class="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-300">
-            <div (click)="$event.stopPropagation()" class="w-full max-w-2xl bg-[#020617] border border-white/10 rounded-[3.5rem] p-10 md:p-16 animate-in zoom-in-95 duration-300 shadow-[0_64px_128px_-32px_rgba(0,0,0,0.8)] relative overflow-hidden">
-              
-              <!-- Modal Decor -->
-              <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-              <header class="relative z-10 flex items-start justify-between mb-12">
-                  <div class="space-y-3">
-                    <div class="text-indigo-500 text-[10px] font-black uppercase tracking-[0.4em]">Initialize_Reality_Fragment</div>
-                    <h2 class="text-5xl md:text-6xl font-black text-white leading-none tracking-tighter">{{ scene.name }}</h2>
-                  </div>
-                  <button (click)="selectedScene.set(null)" class="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-all active:scale-90 shadow-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 6-12 12m0-12 12 12"/></svg>
-                  </button>
-              </header>
-
-              <div class="relative z-10 space-y-12">
-                  <div class="space-y-6">
-                    <label class="text-[10px] uppercase font-black text-slate-500 tracking-[0.4em] px-2 block">Control_Topology</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        @for (t of topologies; track t) {
-                          <button (click)="selectedTopology.set(t)" 
-                              class="p-5 rounded-3xl border text-center transition-all relative overflow-hidden active:scale-95"
-                              [class.bg-indigo-600]="selectedTopology() === t"
-                              [class.border-indigo-400/50]="selectedTopology() === t"
-                              [class.bg-white/5]="selectedTopology() !== t"
-                              [class.border-white/5]="selectedTopology() !== t"
-                              [class.hover:bg-white/10]="selectedTopology() !== t">
-                              <div class="text-[10px] font-black uppercase tracking-widest text-white">{{ t.replace('-', ' ') }}</div>
-                          </button>
-                        }
-                    </div>
-                  </div>
-
-                  <button (click)="launch()" class="w-full py-8 bg-white text-black rounded-3xl font-black uppercase tracking-[0.4em] text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_60px_-10px_rgba(255,255,255,0.3)]">
-                    Activate Reality Stream
-                  </button>
-              </div>
-            </div>
-        </div>
+        <app-menu-launch-modal 
+          [scene]="scene" 
+          (launch)="launch(scene, $event)" 
+          (cancel)="selectedScene.set(null)" />
       }
 
-      <!-- FOOTER TELEMETRY (Z-10) -->
+      <!-- FOOTER TELEMETRY -->
       <footer class="absolute bottom-8 inset-x-0 flex justify-center pointer-events-none z-10 animate-in slide-in-from-bottom-4 duration-1000">
          <div class="flex items-center gap-8 px-8 py-3 bg-slate-950/40 backdrop-blur-md rounded-full border border-white/5">
             <div class="flex items-center gap-3">
@@ -150,40 +116,26 @@ export class MainMenuComponent {
   ];
 
   readonly scenes = SCENES;
-  readonly topologies: ControllerTopology[] = ['platformer', 'top-down-action', 'top-down-rpg'];
-
   readonly activeTab = signal<MenuTab>('play');
   readonly selectedScene = signal<any>(null);
-  readonly selectedTopology = signal<ControllerTopology>('platformer');
 
   constructor() {
     if (this.storage.load('grid_hidden', false)) this.state.gridVisible.set(false);
     if (this.storage.load('debug_active', false)) this.state.debugPhysics.set(true);
   }
 
-  selectScene(scene: any) {
-    this.selectedScene.set(scene);
-    if (scene.preferredTopology) {
-      this.selectedTopology.set(scene.preferredTopology);
-    }
-  }
-
-  launch() {
-    const s = this.selectedScene();
-    if (s) {
-      this.engine.loadScene(s);
-      this.state.setTopology(this.selectedTopology());
-      this.state.isMainMenuOpen.set(false);
-      this.state.mode.set('play');
-    }
+  launch(scene: any, topology: ControllerTopology) {
+    this.engine.loadScene(scene);
+    this.state.setTopology(topology);
+    this.state.isMainMenuOpen.set(false);
+    this.state.mode.set('play');
+    this.selectedScene.set(null);
   }
 
   launchModuleSim(module: VisualArticle) {
     if (module.simulationSceneId) {
       const scene = this.scenes.find(s => s.id === module.simulationSceneId);
-      if (scene) {
-        this.selectScene(scene);
-      }
+      if (scene) this.selectedScene.set(scene);
     }
   }
 

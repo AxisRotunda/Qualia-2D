@@ -13,6 +13,7 @@ export type QualiaVerb =
   | 'RUN_MAT' 
   | 'RUN_SCENE_OPT'
   | 'RUN_PROTOCOL'
+  | 'RUN_GUIDE_GEN'
   | 'RUN_INDUSTRY';
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +30,9 @@ export class CommandRegistryService {
     this.log(`INVOKING: ${verb}${params ? ' (' + params + ')' : ''}`);
 
     switch (verb) {
+      case 'RUN_GUIDE_GEN':
+        this.log(`GENESIS: TRANSLATING_DOMAIN: ${params || 'ALL'}`);
+        break;
       case 'RUN_REPAIR':
         this.performIntelligentRepair(params || 'GENERAL_STABILITY');
         break;
@@ -59,7 +63,6 @@ export class CommandRegistryService {
     const slug = errorMsg.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     this.log(`REPAIR: SCANNING_FOR_LOG: issue-${slug}.md`);
     
-    // Simulation of the v2.0 Protocol Steps
     setTimeout(() => {
       this.log(`REPAIR: GENESIS_COMPLETE: issue-${slug}.md`);
       this.log(`DIAGNOSTIC: BRANCH_A_COLLAPSE_CHECK: PASS`);
