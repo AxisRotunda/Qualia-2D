@@ -7,15 +7,18 @@ export interface Transform2D {
 }
 
 export interface Sprite2D {
-  color: string; // Placeholder for actual sprite ID/Atlas
+  color: string;
+  textureId?: string;
   width: number;
   height: number;
   layer: number;
   opacity: number;
+  flipX?: boolean;
+  flipY?: boolean;
 }
 
 export interface RigidBody2D {
-  handle: any; // RAPIER.RigidBody (using any to avoid strict type dependency issues in this setup)
+  handle: any; // RAPIER.RigidBody
   bodyType: 'dynamic' | 'fixed' | 'kinematic';
 }
 
@@ -33,4 +36,11 @@ export interface ForceField2D {
   strength: number; // Positive = Attract, Negative = Repel
   radius: number;
   active: boolean;
+}
+
+export interface PlayerController2D {
+  speed: number;
+  turnSpeed: number;
+  lastFireTime: number;
+  fireRate: number; // ms between shots
 }

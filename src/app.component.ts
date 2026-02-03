@@ -1,8 +1,10 @@
 
-import { Component, AfterViewInit, inject, signal, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, inject, ViewChild } from '@angular/core';
 import { Engine2DService } from './services/engine-2d.service';
 import { EngineState2DService } from './services/engine-state-2d.service';
 import { CommandRegistryService, QualiaVerb } from './services/command-registry.service';
+import { Input2DService } from './services/input-2d.service';
+import { PwaService } from './services/pwa.service';
 import { DecimalPipe } from '@angular/common';
 import { SCENES } from './data/scene-presets';
 
@@ -11,17 +13,19 @@ import { ViewportComponent } from './app/ui/viewport.component';
 import { TelemetryComponent } from './app/ui/telemetry.component';
 import { CommandHubComponent } from './app/ui/command-hub.component';
 import { InspectorComponent } from './app/ui/inspector.component';
+import { VirtualJoypadComponent } from './app/ui/virtual-joypad.component';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
   imports: [
     DecimalPipe,
     ViewportComponent,
     TelemetryComponent,
     CommandHubComponent,
-    InspectorComponent
+    InspectorComponent,
+    VirtualJoypadComponent
   ],
+  templateUrl: './app.component.html',
   host: {
     'class': 'block h-full w-full select-none overflow-hidden touch-none',
   }
@@ -32,9 +36,10 @@ export class AppComponent implements AfterViewInit {
   engine = inject(Engine2DService);
   state = inject(EngineState2DService);
   commands = inject(CommandRegistryService);
+  input = inject(Input2DService);
+  pwa = inject(PwaService);
   
   scenes = SCENES;
-  isCreateMenuOpen = signal(false);
 
   async ngAfterViewInit() {
     if (this.viewport) {
@@ -47,11 +52,30 @@ export class AppComponent implements AfterViewInit {
   }
 
   toggleCreateMenu() {
-    this.isCreateMenuOpen.update(v => !v);
+    this.input.reset(); // INDUSTRY_STANDARD: Flush inputs to prevent stuck thumbsticks
+    this.state.isCreateMenuOpen.update(v => !v);
+  }
+
+  toggleSceneBrowser() {
+    this.input.reset(); // INDUSTRY_STANDARD: Flush inputs to prevent stuck thumbsticks
+    this.state.isSceneBrowserOpen.update(v => !v);
+  }
+
+  loadScene(id: string) {
+    const scene = this.scenes.find(s => s.id === id);
+    if (scene) {
+      this.input.reset();
+      this.engine.loadScene(scene);
+      this.state.isSceneBrowserOpen.set(false);
+    }
   }
 
   spawnEntity(templateId: string) {
-    this.engine.spawnFromTemplate(templateId, this.state.cameraX(), this.state.cameraY() + 5);
-    this.isCreateMenuOpen.set(false);
+    const t = this.engine.ecs.getTransform(this.engine.camera.followedEntityId() || 0);
+    const x = t ? t.x : this.engine.camera.x();
+    const y = t ? t.y + 2 : this.engine.camera.y() + 5;
+    this.engine.spawnFromTemplate(templateId, x, y);
+    this.state.isCreateMenuOpen.set(false);
+    this.input.reset();
   }
 }

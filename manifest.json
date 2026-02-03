@@ -1,0 +1,22 @@
+{
+  "name": "Qualia2D Engine",
+  "short_name": "Qualia2D",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "orientation": "landscape",
+  "description": "High-performance 2D Game Engine (Zoneless Angular + Rapier2D).",
+  "icons": [
+    {
+      "src": "https://picsum.photos/192/192",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://picsum.photos/512/512",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

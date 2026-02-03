@@ -1,3 +1,4 @@
+
 import { Injectable, signal, computed } from '@angular/core';
 
 export type EngineMode = 'edit' | 'play';
@@ -6,39 +7,35 @@ export type ControllerTopology = 'platformer' | 'top-down-rpg' | 'top-down-actio
 
 @Injectable({ providedIn: 'root' })
 export class EngineState2DService {
-  // Simulation
+  // Simulation Context
   readonly mode = signal<EngineMode>('edit');
   readonly topology = signal<ControllerTopology>('platformer');
   readonly isPaused = signal<boolean>(false);
   readonly loading = signal<boolean>(true);
+  
+  // Telemetry
   readonly fps = signal<number>(0);
   readonly physicsTimeMs = signal<number>(0);
 
-  // Input State (Keyboard & Mouse)
-  readonly keys = signal<Set<string>>(new Set());
-  readonly cursorWorldX = signal<number>(0);
-  readonly cursorWorldY = signal<number>(0);
-
-  // Viewport
-  readonly cameraX = signal<number>(0);
-  readonly cameraY = signal<number>(0);
-  readonly cameraZoom = signal<number>(50); 
+  // Simulation Globals
+  readonly gravityY = signal<number>(-9.81);
+  readonly bgColor = signal<string>('#0f172a');
   readonly gridVisible = signal<boolean>(true);
   readonly debugPhysics = signal<boolean>(false);
-  readonly bgColor = signal<string>('#0f172a');
 
-  // Interaction
-  readonly isDragging = signal<boolean>(false);
-  readonly dragTargetPos = signal<{x: number, y: number} | null>(null);
-
-  // Physics Global
-  readonly gravityY = signal<number>(-9.81);
-
-  // UI Panels
+  // UI / Interaction Session
   readonly activePanel = signal<ActivePanel>('none');
   readonly selectedEntityId = signal<number | null>(null);
+  
+  // Overlay States
+  readonly isSceneBrowserOpen = signal<boolean>(false);
+  readonly isCreateMenuOpen = signal<boolean>(false);
 
-  // Computed
+  // Derived: Global block for input / joystick
+  readonly isOverlayOpen = computed(() => {
+    return this.isSceneBrowserOpen() || this.isCreateMenuOpen() || this.loading();
+  });
+
   readonly statusText = computed(() => {
     if (this.loading()) return 'LOADING';
     const top = this.topology().replace(/-/g, ' ').toUpperCase();
@@ -64,33 +61,11 @@ export class EngineState2DService {
     this.activePanel.update(current => current === panel ? 'none' : panel);
   }
 
-  toggleGrid() {
-    this.gridVisible.update(v => !v);
-  }
-
-  toggleDebugPhysics() {
-    this.debugPhysics.update(v => !v);
-  }
+  toggleGrid() { this.gridVisible.update(v => !v); }
+  toggleDebugPhysics() { this.debugPhysics.update(v => !v); }
 
   updateGravity(val: string) {
     const num = parseFloat(val);
-    if (!isNaN(num)) {
-      this.gravityY.set(num);
-    }
-  }
-
-  updateCursor(x: number, y: number) {
-    this.cursorWorldX.set(x);
-    this.cursorWorldY.set(y);
-  }
-
-  // Camera Ops
-  panCamera(dx: number, dy: number) {
-    this.cameraX.update(x => x + dx);
-    this.cameraY.update(y => y + dy);
-  }
-  
-  zoomCamera(delta: number) {
-    this.cameraZoom.update(z => Math.max(5, Math.min(500, z + delta)));
+    if (!isNaN(num)) this.gravityY.set(num);
   }
 }

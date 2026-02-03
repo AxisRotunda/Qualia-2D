@@ -1,10 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Qualia2D Engine</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    
+    <!-- PWA / Mobile Industry Standards -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="importmap">
     {
@@ -24,7 +31,23 @@
     }
     </script>
   </head>
-  <body class="bg-slate-900 text-slate-100 overflow-hidden">
+  <body class="bg-slate-900 text-slate-100 overflow-hidden select-none touch-none">
     <app-root></app-root>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          // REPAIR: Construct absolute URL based on window.location to avoid 
+          // origin mismatch in preview environments (e.g. ai.studio vs usercontent).
+          try {
+            const swUrl = new URL('service-worker.js', window.location.href);
+            navigator.serviceWorker.register(swUrl)
+              .then(reg => console.log('Qualia2D: Service Worker registered.', reg.scope))
+              .catch(err => console.log('Qualia2D: Service Worker registration skipped (Environment restriction).'));
+          } catch (e) {
+            console.log('Qualia2D: Service Worker not supported in this context.');
+          }
+        });
+      }
+    </script>
   </body>
 </html>

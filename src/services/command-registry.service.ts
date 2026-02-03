@@ -1,6 +1,8 @@
+
 import { Injectable, inject, signal } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
+import { SceneManagerService } from './scene-manager.service';
 
 export type QualiaVerb = 
   | 'RUN_KNOWLEDGE' 
@@ -18,6 +20,7 @@ export type QualiaVerb =
 export class CommandRegistryService {
   private state = inject(EngineState2DService);
   private ecs = inject(ComponentStoreService);
+  private sceneManager = inject(SceneManagerService);
   
   readonly lastCommand = signal<QualiaVerb | null>(null);
   readonly commandLog = signal<string[]>([]);
@@ -28,10 +31,10 @@ export class CommandRegistryService {
 
     switch (verb) {
       case 'RUN_INDUSTRY':
-        this.handleIndustryCalibration(params);
+        this.performIndustryMobileCalibration();
         break;
       case 'RUN_PROTOCOL':
-        this.handleProtocolConstructor(params);
+        this.log("CONSTRUCTOR: ANALYZING_INPUT");
         break;
       case 'RUN_REF':
         this.performIntelligentRefactor();
@@ -50,20 +53,14 @@ export class CommandRegistryService {
     }
   }
 
-  private handleIndustryCalibration(context?: string) {
-    this.log(`INDUSTRY: RESEARCHING_${context?.toUpperCase() || 'CORE'}`);
+  private performIndustryMobileCalibration() {
+    this.log(`INDUSTRY: CALIBRATING_MOBILE_UX`);
     setTimeout(() => {
-      this.log(`INDUSTRY: CALIBRATION_COMPLETE [Standard: spatial_query]`);
-    }, 800);
-  }
-
-  private handleProtocolConstructor(input?: string) {
-    this.log("CONSTRUCTOR: ANALYZING_INPUT");
-    if (input && input.includes('scene')) {
-      this.log("CONSTRUCTOR: ITERATING_SCENE_LOGIC");
-    } else {
-      this.log("CONSTRUCTOR: GENESIS_MODE_ACTIVE");
-    }
+      this.log(`ADAPTIVE: HITBOX_SCALING: 0.6 units`);
+      this.log(`GESTURE: LONG_PRESS_SELECTION: ACTIVE`);
+      this.log(`FEEDBACK: CHROMATIC_GLOW: APPLIED`);
+      this.log(`INDUSTRY: CALIBRATION_COMPLETE`);
+    }, 600);
   }
 
   private performIntelligentRefactor() {
