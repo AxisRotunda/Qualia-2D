@@ -1,4 +1,3 @@
-
 import { Injectable, inject } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { Camera2DService } from './camera-2d.service';
@@ -18,11 +17,11 @@ import type { ScenePreset2D } from '../engine/scene.types';
 
 /**
  * High-Level Engine Orchestrator.
- * [RUN_REF]: Now acts as a lightweight Bridge following Modular Isolation (P <= 3).
+ * [RUN_REF]: Acts as a Bridge following Modular Isolation (P <= 3).
  */
 @Injectable({ providedIn: 'root' })
 export class Engine2DService {
-  // logic Orchestrators
+  // Logic Orchestrators
   readonly state = inject(EngineState2DService);
   readonly camera = inject(Camera2DService);
   readonly input = inject(Input2DService);
@@ -60,6 +59,14 @@ export class Engine2DService {
 
   spawnFromTemplate(templateId: string, x = 0, y = 0) {
     return this.factory.spawnFromTemplate(templateId, x, y);
+  }
+
+  spawnAtCamera(templateId: string) {
+    const followId = this.camera.followedEntityId();
+    const t = followId !== null ? this.ecs.getTransform(followId) : null;
+    const x = t ? t.x : this.camera.x();
+    const y = t ? t.y + 2 : this.camera.y() + 5;
+    return this.spawnFromTemplate(templateId, x, y);
   }
 
   spawnBox(x = 0, y = 5, color = '#60a5fa', w = 1, h = 1, type: 'dynamic' | 'fixed' = 'dynamic') {

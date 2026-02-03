@@ -1,4 +1,3 @@
-
 import { Component, AfterViewInit, inject, ViewChild } from '@angular/core';
 import { Engine2DService } from './services/engine-2d.service';
 import { EngineState2DService } from './services/engine-state-2d.service';
@@ -8,18 +7,18 @@ import { PwaService } from './services/pwa.service';
 import { DecimalPipe } from '@angular/common';
 import { SCENES } from './data/scene-presets';
 
-// Modular UI Imports
-import { ViewportComponent } from './app/ui/viewport.component';
-import { TelemetryComponent } from './app/ui/telemetry.component';
-import { CommandHubComponent } from './app/ui/command-hub.component';
-import { InspectorComponent } from './app/ui/inspector.component';
-import { VirtualJoypadComponent } from './app/ui/virtual-joypad.component';
-import { MainMenuComponent } from './app/ui/main-menu.component';
+// UI Imports - Absolute Relative Path Enforcement
+import { ViewportComponent } from './app/ui/viewport/viewport.component';
+import { TelemetryComponent } from './app/ui/hud/telemetry.component';
+import { CommandHubComponent } from './app/ui/hud/command-hub.component';
+import { InspectorComponent } from './app/ui/panels/inspector.component';
+import { VirtualJoypadComponent } from './app/ui/hud/virtual-joypad.component';
+import { MainMenuComponent } from './app/ui/main-menu/main-menu.component';
 import { SceneBrowserOverlayComponent } from './app/ui/overlays/scene-browser.component';
 import { CreateMenuOverlayComponent } from './app/ui/overlays/create-menu.component';
-import { HierarchyComponent } from './app/ui/hierarchy.component';
-import { EngineSettingsComponent } from './app/ui/engine-settings.component';
-import { SelectionToolbarComponent } from './app/ui/selection-toolbar.component';
+import { HierarchyComponent } from './app/ui/panels/hierarchy.component';
+import { EngineSettingsComponent } from './app/ui/panels/engine-settings.component';
+import { SelectionToolbarComponent } from './app/ui/hud/selection-toolbar.component';
 import { PanelDrawerComponent } from './app/ui/panels/panel-drawer.component';
 
 @Component({
@@ -85,10 +84,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   spawnEntity(templateId: string) {
-    const t = this.engine.ecs.getTransform(this.engine.camera.followedEntityId() || 0);
-    const x = t ? t.x : this.engine.camera.x();
-    const y = t ? t.y + 2 : this.engine.camera.y() + 5;
-    this.engine.spawnFromTemplate(templateId, x, y);
+    this.engine.spawnAtCamera(templateId);
     this.state.isCreateMenuOpen.set(false);
     this.input.reset();
   }

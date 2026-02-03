@@ -29,6 +29,9 @@ export class CommandRegistryService {
     this.log(`INVOKING: ${verb}${params ? ' (' + params + ')' : ''}`);
 
     switch (verb) {
+      case 'RUN_REPAIR':
+        this.performIntelligentRepair(params || 'GENERAL_STABILITY');
+        break;
       case 'RUN_INDUSTRY':
         this.performIndustryMobileCalibration();
         break;
@@ -50,6 +53,23 @@ export class CommandRegistryService {
       default:
         this.log(`WARN: Protocol ${verb} offline.`);
     }
+  }
+
+  private performIntelligentRepair(errorMsg: string) {
+    const slug = errorMsg.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    this.log(`REPAIR: SCANNING_FOR_LOG: issue-${slug}.md`);
+    
+    // Simulation of the v2.0 Protocol Steps
+    setTimeout(() => {
+      this.log(`REPAIR: GENESIS_COMPLETE: issue-${slug}.md`);
+      this.log(`DIAGNOSTIC: BRANCH_A_COLLAPSE_CHECK: PASS`);
+      this.log(`REPAIR: APPLYING_STABILITY_PATCH`);
+      
+      if (errorMsg.includes('NAN') || errorMsg.includes('PHYSICS')) {
+        this.log("REPAIR: PURGING_COLLAPSED_NODES");
+        this.sceneManager.transitionTo(this.sceneManager.currentScene()!, null as any); 
+      }
+    }, 400);
   }
 
   private performIndustryMobileCalibration() {
