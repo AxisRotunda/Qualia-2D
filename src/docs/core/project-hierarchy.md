@@ -1,6 +1,7 @@
 # Project Hierarchy: Qualia2D Hard Mapping
 
 ## / (Root)
+- `README.md`: GitHub Entry Point.
 - `index.tsx`: Application Bootstrapper (Zoneless).
 - `index.html`: Main entry point (Tailwind + Import Maps).
 - `metadata.json`: Engine metadata.
@@ -41,6 +42,7 @@
 ### /src/docs (Logic & Protocol Kernel)
 - `kernel/`: Structural foundations.
 - `protocols/`: Operational verb definitions.
+- `agent-ops/`: **[NEW]** Context Packs for External AI Agents.
 - `engine/`: Deep architectural dives (ECS, Physics, Render, Input, Scenes, Camera).
 - `visual/`: Obsidian Glass design language.
 - `history/`: Session memory and repair logs.

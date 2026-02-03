@@ -24,21 +24,18 @@
 
 ## [v1.11] RUN_GUIDE_GEN: Human Translation Protocol
 - **Action**: Deployed `PROTOCOL_GUIDE_GEN_V1.0` to manage interactive guide synthesis.
-- **Action**: Refined 'Movement DNA', 'Physical Laws', and 'Tactile Link' guides to prioritize visual inference and layman clarity.
-- **Action**: Decoupled human content from semantic technical documentation syncs.
-- **Outcome**: Engine UX now provides clear, aesthetic onboarding with minimal text density.
+- **Action**: Refined 'Movement DNA', 'Physical Laws', and 'Tactile Link' guides.
 
 ## [v1.12] RUN_REPAIR: Touch Unresponsiveness
-- **Action**: Implemented `REPAIR_TOUCH_V1.0`. Hardened input pipeline against event bubbling and passive listeners on mobile.
-- **Outcome**: Joypads and Overlays no longer conflict with Viewport camera control.
+- **Action**: Implemented `REPAIR_TOUCH_V1.0` to fix event bubbling on mobile.
 
 ## [v1.13] REPAIR_GUIDES: Visual Schema Mismatch
-- **Action**: Diagnosed missing UI handling for `input` schema in `MenuGuideTabComponent`.
-- **Mutation**: Added dedicated D-Pad icon rendering for `input` schemaId.
-- **Protocol**: Updated `protocol-ui.md` to mandate visual coverage for all defined schemas.
-- **Outcome**: "Tactile Link" guide now correctly reflects its category in the Main Menu.
+- **Action**: Added icon rendering for `input` schema in `MenuGuideTabComponent`.
 
 ## [v1.14] RUN_REPAIR: Guide Registry Desync
-- **Action**: Diagnosed missing "Forces" guide in Main Menu despite protocol existence.
-- **Mutation**: Synthesized `forces-dynamics.ts` and registered it in `GUIDE_REGISTRY`.
-- **Outcome**: Main Menu now properly reflects the full set of 4 core engine protocols.
+- **Action**: Synthesized `forces-dynamics.ts` and registered it in `GUIDE_REGISTRY`.
+
+## [v1.15] RUN_KNOWLEDGE: External Context Synthesis
+- **Action**: Generated `README.md` for GitHub presentation.
+- **Action**: Created `src/docs/agent-ops/` containing 4 "Context Packs" for external AI agents (New Scene, New Entity, New Guide, Mod UI).
+- **Outcome**: The codebase is now self-documenting for both humans (README) and AI Agents (Context Packs).
