@@ -13,6 +13,7 @@ import { SelectionSystem } from '../engine/systems/selection-system';
 import { Mutation2DService } from './mutation-2d.service';
 import { Spawner2DService } from './spawner-2d.service';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
+import { MemorySystem2DService } from './memory-2d.service';
 import { ENTITY_TEMPLATES, EntityTemplate } from '../data/prefabs/entity-blueprints';
 import type { ScenePreset2D } from '../engine/scene.types';
 import { EntityId } from '../engine/ecs/entity';
@@ -34,6 +35,7 @@ export class Engine2DService {
   readonly selection = inject(SelectionSystem);
   readonly assets = inject(AssetRegistryService);
   readonly physics = inject(PhysicsEngine);
+  readonly memory = inject(MemorySystem2DService);
 
   readonly templates: EntityTemplate[] = ENTITY_TEMPLATES;
 

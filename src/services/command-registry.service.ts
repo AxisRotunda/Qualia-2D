@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 import { SceneManagerService } from './scene-manager.service';
+import { MemorySystem2DService } from './memory-2d.service';
 
 export type QualiaVerb = 
   | 'RUN_KNOWLEDGE' 
@@ -14,13 +15,15 @@ export type QualiaVerb =
   | 'RUN_SCENE_OPT'
   | 'RUN_PROTOCOL'
   | 'RUN_GUIDE_GEN'
-  | 'RUN_INDUSTRY';
+  | 'RUN_INDUSTRY'
+  | 'RUN_MEM_ARCH';
 
 @Injectable({ providedIn: 'root' })
 export class CommandRegistryService {
   private state = inject(EngineState2DService);
   private ecs = inject(ComponentStoreService);
   private sceneManager = inject(SceneManagerService);
+  private memory = inject(MemorySystem2DService);
   
   readonly lastCommand = signal<QualiaVerb | null>(null);
   readonly commandLog = signal<string[]>([]);
@@ -54,9 +57,25 @@ export class CommandRegistryService {
       case 'RUN_SCENE_OPT':
         this.performSceneOptimization();
         break;
+      case 'RUN_MEM_ARCH':
+        this.performMemoryAudit();
+        break;
       default:
         this.log(`WARN: Protocol ${verb} offline.`);
     }
+  }
+
+  private performMemoryAudit() {
+    this.log("MEMORY: INITIATING_TIERED_ARCH_AUDIT");
+    this.memory.audit();
+    
+    // Simulate async audit return
+    setTimeout(() => {
+      const s = this.memory.stats();
+      this.log(`MEM_REPORT: T0:${s.t0} | T1:${s.t1} | T2:${s.t2}`);
+      this.memory.compact();
+      this.log("MEMORY: COMPACTION_COMPLETE");
+    }, 600);
   }
 
   private performIntelligentRepair(errorMsg: string) {
@@ -100,5 +119,7 @@ export class CommandRegistryService {
 
   private log(msg: string) {
     this.commandLog.update(prev => [msg, ...prev].slice(0, 5));
+    // [PROTOCOL_MEMORY_ARCH]: Ingest log into tiered system
+    this.memory.ingest(msg, ['command_log']);
   }
 }

@@ -12,6 +12,7 @@
 | `RUN_REF` | protocol-refactor | Architectural cleanup & bottleneck hunt. | [Refactor](../protocols/refactor-protocol.md) |
 | `RUN_REPAIR` | protocol-repair | Error recovery and stability. | [Repair](../protocols/protocol-repair.md) |
 | `RUN_UI` | protocol-ui | View layer audit. | [UI](../protocols/protocol-ui.md) |
+| `RUN_MEM_ARCH` | protocol-memory-arch | Optimize memory tiering and retrieval. | [Memory Arch](../protocols/protocol-memory-arch.md) |
 
 ## 2. DOMAIN SPECIFIC VERBS
 

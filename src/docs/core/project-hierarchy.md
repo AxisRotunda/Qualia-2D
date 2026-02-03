@@ -42,6 +42,8 @@
 ### /src/docs (Logic & Protocol Kernel)
 - `kernel/`: Structural foundations.
 - `protocols/`: Operational verb definitions.
+  - `protocol-constructor.md`: Genesis logic.
+  - `protocol-memory-arch.md`: Memory tiering logic.
 - `agent-ops/`: **[NEW]** Context Packs for External AI Agents.
 - `engine/`: Deep architectural dives (ECS, Physics, Render, Input, Scenes, Camera).
 - `visual/`: Obsidian Glass design language.

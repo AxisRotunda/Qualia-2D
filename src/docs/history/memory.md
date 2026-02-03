@@ -42,3 +42,16 @@
 - **Action**: Moved required input access to `ngOnInit`.
 - **Action**: Hardened `SelectionToolbarComponent` guard in `app.component.html` with explicit null checks.
 - **Outcome**: Runtime stability restored. Engine initialization is now correctly sequenced.
+
+## [v1.17] RUN_PROTOCOL: Memory Architecture Genesis
+- **Action**: Deployed `PROTOCOL_MEMORY_ARCH_V1.0`.
+- **Context**: Established hard structural definitions for a 3-tier memory hierarchy (Ephemeral/Semantic/Vector) with sub-quadratic growth invariants.
+- **Outcome**: `RUN_MEM_ARCH` verb registered in command core.
+
+## [v1.18] IMPLEMENTATION: Memory System 2D
+- **Action**: Implemented `MemorySystem2DService` matching `PROTOCOL_MEMORY_ARCH_V1.0` specs.
+- **Architecture**:
+  - **Tier 0**: `Map<string, LogEntry>` (LRU 128).
+  - **Tier 1**: `LogEntry[]` buffer.
+  - **Tier 2**: `IndexedDB` wrapper (`Qualia2D_Mem_v1`).
+- **Integration**: `CommandRegistryService` now auto-ingests logs into the memory system. `RUN_MEM_ARCH` triggers audit and compaction.
