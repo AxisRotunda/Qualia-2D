@@ -12,6 +12,9 @@ export type QualiaVerb =
   | 'RUN_UI' 
   | 'RUN_PHYS' 
   | 'RUN_MAT' 
+  | 'RUN_SPRITE'
+  | 'RUN_POST'
+  | 'RUN_ASSET'
   | 'RUN_SCENE_OPT'
   | 'RUN_PROTOCOL'
   | 'RUN_GUIDE_GEN'
@@ -38,8 +41,8 @@ export class CommandRegistryService {
     
     // Tagging logic for automated Narrative Sync (memory.md)
     const tags = ['command'];
-    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH'].includes(verb)) {
-      tags.push('notable'); // High-importance for memory.md chronicle
+    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE'].includes(verb)) {
+      tags.push('notable'); 
     }
 
     this.log(logMsg, tags);
@@ -59,6 +62,18 @@ export class CommandRegistryService {
         break;
       case 'RUN_PHYS':
         this.log("CORE: RECALIBRATING_DYNAMICS", ['physics']);
+        break;
+      case 'RUN_MAT':
+        this.log("VISUAL: CALIBRATING_SURFACE_PHYSICS", ['notable', 'material']);
+        break;
+      case 'RUN_SPRITE':
+        this.log("VISUAL: TUNING_PLANAR_PROJECTION", ['notable', 'sprite']);
+        break;
+      case 'RUN_POST':
+        this.log("VISUAL: APPLYING_OPTICAL_FILTERS", ['post_processing']);
+        break;
+      case 'RUN_ASSET':
+        this.log("ASSET: AUDITING_RESOURCE_CACHE", ['asset_pipeline']);
         break;
       case 'RUN_UI':
         this.state.setActivePanel(this.state.activePanel() === 'none' ? 'hierarchy' : 'none');
@@ -96,7 +111,6 @@ export class CommandRegistryService {
 
   private log(msg: string, tags: string[] = []) {
     this.commandLog.update(prev => [msg, ...prev].slice(0, 5));
-    // [PROTOCOL_MEMORY_ARCH]: Automated ingestion
     this.memory.ingest(msg, tags);
   }
 }

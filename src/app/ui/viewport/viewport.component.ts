@@ -1,9 +1,9 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { Engine2DService } from '../../../services/engine-2d.service';
 import { EngineState2DService } from '../../../services/engine-state-2d.service';
-import { Camera2DService } from '../../../services/camera-2d.service';
+import { CameraService } from '../../../engine/core/camera.service';
 import { Input2DService } from '../../../services/input-2d.service';
-import { Selection2DService } from '../../../services/selection-2d.service';
+import { SelectionSystem } from '../../../engine/systems/selection-system';
 
 @Component({
   selector: 'app-viewport',
@@ -31,9 +31,9 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
   
   engine = inject(Engine2DService);
   state = inject(EngineState2DService);
-  camera = inject(Camera2DService);
+  camera = inject(CameraService);
   input = inject(Input2DService);
-  selection = inject(Selection2DService);
+  selection = inject(SelectionSystem);
 
   private isDraggingCamera = false;
   private lastX = 0;
@@ -77,8 +77,19 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
   onWheel(e: WheelEvent) {
     if (this.state.isOverlayOpen()) return;
     e.preventDefault();
+    
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
-    this.camera.setZoom(this.camera.zoom() * factor);
+    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+    
+    // Pivot zoom at mouse cursor
+    const worldPos = this.camera.screenToWorld(
+      e.clientX - rect.left, 
+      e.clientY - rect.top, 
+      this.engine.renderer.width, 
+      this.engine.renderer.height
+    );
+    
+    this.camera.zoomAt(factor, worldPos.x, worldPos.y);
   }
 
   onMouseDown(e: MouseEvent) {
@@ -177,11 +188,23 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
     } else if (e.touches.length === 2) {
       const dist = this.getDistance(e.touches[0], e.touches[1]);
       const factor = dist / this.initialPinchDist;
-      this.camera.setZoom(this.initialZoom * factor);
       
       const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
       const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      this.updateCameraDrag(centerX, centerY);
+      
+      const worldPos = this.camera.screenToWorld(
+        centerX - rect.left, 
+        centerY - rect.top, 
+        this.engine.renderer.width, 
+        this.engine.renderer.height
+      );
+
+      // Pivot zoom at pinch center
+      this.camera.zoomAt(factor / (this.camera.zoom() / this.initialZoom), worldPos.x, worldPos.y);
+      
+      // Update drag origin to allow simultaneous pan+zoom
+      this.lastX = centerX;
+      this.lastY = centerY;
     }
   }
 

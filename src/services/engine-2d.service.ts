@@ -18,6 +18,10 @@ import { ENTITY_TEMPLATES, EntityTemplate } from '../data/prefabs/entity-bluepri
 import type { ScenePreset2D } from '../engine/scene.types';
 import { EntityId } from '../engine/ecs/entity';
 
+/**
+ * Qualia2D Primary Orchestrator.
+ * [RUN_REF]: Enforces modular isolation and unidirectional flow.
+ */
 @Injectable({ providedIn: 'root' })
 export class Engine2DService {
   readonly state = inject(EngineState2DService);

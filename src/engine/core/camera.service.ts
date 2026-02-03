@@ -19,6 +19,29 @@ export class CameraService {
     this.zoom.set(Math.max(5, Math.min(500, val)));
   }
 
+  /**
+   * INDUSTRY_STANDARD: Pivot Zoom.
+   * Adjusts zoom while counter-panning to keep a specific world point stationary relative to the viewport.
+   */
+  zoomAt(factor: number, worldX: number, worldY: number) {
+    const oldZoom = this.zoom();
+    const newZoom = Math.max(5, Math.min(500, oldZoom * factor));
+    
+    if (oldZoom === newZoom) return;
+    this.followedEntityId.set(null);
+
+    const ratio = oldZoom / newZoom;
+    
+    // Standard X-Axis adjustment
+    this.x.set(worldX - (worldX - this.x()) * ratio);
+    
+    // Adjusted Y-Axis for inverted planar projection (+Y is Up)
+    // Formula: CamY_new = WorldY + (CamY_old - WorldY) * (Zoom_old / Zoom_new)
+    this.y.set(worldY + (this.y() - worldY) * ratio);
+    
+    this.zoom.set(newZoom);
+  }
+
   zoomDelta(delta: number) {
     this.setZoom(this.zoom() + delta);
   }

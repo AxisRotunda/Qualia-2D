@@ -11,7 +11,7 @@ export class EntityFactoryService {
   spawnFromTemplate(templateId: string, x = 0, y = 0): EntityId {
     switch(templateId) {
       case 'player': return this.spawnPlayer(x, y);
-      case 'box_static': return this.spawnBox(x, y, '#475569', 2, 0.5, 'fixed');
+      case 'box_static': return this.spawnBox(x, y, '#1e293b', 2, 0.5, 'fixed');
       case 'box_dynamic': return this.spawnBox(x, y, '#6366f1', 1, 1, 'dynamic');
       case 'gravity_well': return this.spawnGravityWell(x, y, 20, 5);
       case 'sensor_area': return this.spawnBox(x, y, 'rgba(16, 185, 129, 0.2)', 2, 2, 'fixed');
@@ -23,12 +23,13 @@ export class EntityFactoryService {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
     this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
-    this.ecs.sprites.set(id, { color: '#6366f1', width: 1.2, height: 1.2, layer: 2, opacity: 1 });
-    this.ecs.tags.set(id, { name: 'Player_Hero', tags: new Set(['player']) });
-    this.ecs.players.set(id, { speed: 15, turnSpeed: 10, lastFireTime: 0, fireRate: 200 });
+    this.ecs.sprites.set(id, { color: '#ffffff', textureId: 'tex_hero', width: 1.5, height: 1.5, layer: 3, opacity: 1 });
+    this.ecs.tags.set(id, { name: 'Hero_Unit', tags: new Set(['player']) });
+    this.ecs.players.set(id, { speed: 18, turnSpeed: 12, lastFireTime: 0, fireRate: 200 });
+    
     const rb = this.physics.createBody(id, 'dynamic', x, y);
     if (rb) {
-        rb.setLinearDamping(0.5);
+        rb.setLinearDamping(0.6);
         this.physics.createCollider(id, rb, 1.2, 1.2);
     }
     return id;
@@ -39,7 +40,7 @@ export class EntityFactoryService {
     this.ecs.addEntity(id);
     this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
     this.ecs.forceFields.set(id, { strength, radius, active: true });
-    this.ecs.tags.set(id, { name: `GravityWell_${id}`, tags: new Set(['force_field']) });
+    this.ecs.tags.set(id, { name: `ForceField_${id}`, tags: new Set(['force_field']) });
     return id;
   }
 
@@ -47,8 +48,13 @@ export class EntityFactoryService {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
     this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
-    this.ecs.sprites.set(id, { color, width: w, height: h, layer: 1, opacity: 1 });
-    this.ecs.tags.set(id, { name: `${type === 'dynamic' ? 'Box' : 'Platform'}_${id}`, tags: new Set(['physics_object']) });
+    
+    const textureId = type === 'dynamic' ? 'tex_crate' : 'tex_wall';
+    const layer = type === 'dynamic' ? 2 : 1;
+
+    this.ecs.sprites.set(id, { color, textureId, width: w, height: h, layer, opacity: 1 });
+    this.ecs.tags.set(id, { name: `${type === 'dynamic' ? 'Dynamic' : 'Static'}_${id}`, tags: new Set(['physics_object']) });
+    
     const rb = this.physics.createBody(id, type, x, y);
     if (rb) this.physics.createCollider(id, rb, w, h);
     return id;

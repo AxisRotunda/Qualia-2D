@@ -19,7 +19,10 @@
 | Command | Protocol | Intent | Documentation |
 | :--- | :--- | :--- | :--- |
 | `RUN_PHYS` | protocol-dynamics | Physics tuning and step adjustment. | [Dynamics](../protocols/protocol-dynamics.md) |
-| `RUN_MAT` | protocol-material | Sprite and render calibration. | [Material](../protocols/protocol-material.md) |
+| `RUN_MAT` | protocol-material | Surface physics and blending. | [Material](../protocols/protocol-material.md) |
+| `RUN_SPRITE` | protocol-sprite | Sprite rendering and atlas management. | [Sprite](../protocols/protocol-sprite.md) |
+| `RUN_POST` | protocol-post-processing | Optical fidelity and screen-space filters. | [Post-Processing](../protocols/protocol-post-processing.md) |
+| `RUN_ASSET` | protocol-asset-pipeline | Resource loading and cache management. | [Asset Pipeline](../protocols/protocol-asset-pipeline.md) |
 | `RUN_SCENE_OPT` | protocol-scene-optimizer | Level-logic deletion of out-of-bounds entities. | [Scene Opt](../protocols/protocol-scene-optimizer.md) |
 
 ## 3. PROTOCOL EVOLUTION

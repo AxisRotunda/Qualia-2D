@@ -1,34 +1,26 @@
-# [T0] Memory Chronicle
-ID: CHRONICLE_ROOT_V2.1 | Role: Session SSOT.
+# Memory Log
 
-## 1. COGNITIVE STATE
-The Qualia2D Memory System has reached **Tier 3 (Narrative Sync)**. 
+## [Init] Qualia2D Genesis
+- **Action**: Initial system synthesis. Established Zoneless shell and Rapier2D integration.
 
-### Implementation Status:
-- **T0-T2 (Runtime)**: `MemorySystem2DService` provides LRU Map (T0), Sliding Window (T1), and IndexedDB (T2).
-- **T3 (Evolutionary)**: This document (`memory.md`) is now the "Narrative Tier."
-- **Automation**: `CommandRegistryService` automatically tags notable events (`RUN_REPAIR`, `RUN_REF`, etc.) for Tier 3 synthesis.
+## [v1.1 - v1.4] Iterative Hardening
+- **Action**: Enhanced interactivity, deployed Protocol Constructor, and restructured docs.
 
----
+## [v1.5 - v1.6] Meta-Logic Evolution
+- **Action**: Created system instructions and XML spec.
 
-## 2. EVOLUTION LOG
+## [v1.7] Protocol Correction & Manifesto Genesis
+- **Action**: Corrected `protocol-xml-spec.md` and `system-instructions.md`. Codified the 2D/3D sibling relationship.
 
-### [v1.1 - v1.19] The Genesis & Stratification
-- Established core Zoneless engine.
-- Deployed 3-tier runtime memory system.
-- Synchronized Documentation guides with ECS logic.
+## [v1.8] Visual Protocol Expansion & Asset Overhaul
+- **Action**: Deployed `protocol-sprite.md` and `protocol-material.md`.
+- **Action**: Implemented Procedural Asset Generation in `AssetRegistryService`.
 
-### [v1.20] Narrative Sync Deployment
-- **Action**: Implemented `PROTOCOL_MEMORY_ARCH_V2.0`.
-- **Outcome**: Established the "Agent Bridge" where runtime logs are synthesized into this chronicle.
-- **Automation**: Enhanced `CommandRegistryService` to identify "notable" events for Tier 3 sync.
-- **UI Interaction**: Telemetry now reflects the specific stratification levels (T0/T1/T2).
+## [v1.9] RUN_REF: Architectural Purification
+- **Action**: Consolidated core services into `src/engine` modules. Enforced unidirectional data flow.
 
----
-
-## 3. ACTIVE SUB-LOGS (MCP)
-*For deep-dives into specific repair cycles, consult:*
-- `history/repair-logs/touch-unresponsiveness.md`
-- `history/repair-logs/issue-module-resolution-failure.md`
-- `history/repair-logs/issue-input-required-failure.md`
-- `history/repair-logs/issue-guide-registry-desync.md`
+## [v1.10] RUN_INDUSTRY: Pivot-Zoom Calibration
+- **Action**: Researched and implemented "Pivot-Zoom" across mouse and touch devices.
+- **Context**: `CameraService.zoomAt` and `ViewportComponent` interaction logic.
+- **Outcome**: UX parity with high-end tools (Figma/Godot). Zooming is now relative to the pointer/pinch-center.
+- **Performance**: Remains O(1) in the tick cycle.
