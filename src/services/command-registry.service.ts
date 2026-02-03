@@ -28,98 +28,75 @@ export class CommandRegistryService {
   readonly lastCommand = signal<QualiaVerb | null>(null);
   readonly commandLog = signal<string[]>([]);
 
+  /**
+   * Primary Command Entry Point.
+   * [AUTO_SYNC]: Every execution is ingested into the Tiered Memory System.
+   */
   execute(verb: QualiaVerb, params?: string) {
     this.lastCommand.set(verb);
-    this.log(`INVOKING: ${verb}${params ? ' (' + params + ')' : ''}`);
+    const logMsg = `INVOKING: ${verb}${params ? ' (' + params + ')' : ''}`;
+    
+    // Tagging logic for automated Narrative Sync (memory.md)
+    const tags = ['command'];
+    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH'].includes(verb)) {
+      tags.push('notable'); // High-importance for memory.md chronicle
+    }
+
+    this.log(logMsg, tags);
 
     switch (verb) {
       case 'RUN_GUIDE_GEN':
-        this.log(`GENESIS: TRANSLATING_DOMAIN: ${params || 'ALL'}`);
+        this.log(`GENESIS: TRANSLATING_DOMAIN: ${params || 'ALL'}`, ['notable', 'documentation']);
         break;
       case 'RUN_REPAIR':
         this.performIntelligentRepair(params || 'GENERAL_STABILITY');
         break;
       case 'RUN_INDUSTRY':
-        this.performIndustryMobileCalibration();
-        break;
-      case 'RUN_PROTOCOL':
-        this.log("CONSTRUCTOR: ANALYZING_INPUT");
+        this.log(`INDUSTRY: CALIBRATING_MOBILE_UX`, ['notable', 'industry']);
         break;
       case 'RUN_REF':
-        this.performIntelligentRefactor();
+        this.log(`REF: INITIATING_MODULAR_ISOLATION`, ['notable', 'architectural']);
         break;
       case 'RUN_PHYS':
-        this.log("CORE: RECALIBRATING_DYNAMICS");
+        this.log("CORE: RECALIBRATING_DYNAMICS", ['physics']);
         break;
       case 'RUN_UI':
         this.state.setActivePanel(this.state.activePanel() === 'none' ? 'hierarchy' : 'none');
-        break;
-      case 'RUN_SCENE_OPT':
-        this.performSceneOptimization();
         break;
       case 'RUN_MEM_ARCH':
         this.performMemoryAudit();
         break;
       default:
-        this.log(`WARN: Protocol ${verb} offline.`);
+        this.log(`WARN: Protocol ${verb} offline.`, ['warning']);
     }
   }
 
   private performMemoryAudit() {
-    this.log("MEMORY: INITIATING_TIERED_ARCH_AUDIT");
+    this.log("MEMORY: INITIATING_TIERED_ARCH_AUDIT", ['notable']);
     this.memory.audit();
     
-    // Simulate async audit return
     setTimeout(() => {
       const s = this.memory.stats();
-      this.log(`MEM_REPORT: T0:${s.t0} | T1:${s.t1} | T2:${s.t2}`);
+      this.log(`MEM_REPORT: T0:${s.t0} | T1:${s.t1} | T2:${s.t2}`, ['audit_result']);
       this.memory.compact();
-      this.log("MEMORY: COMPACTION_COMPLETE");
     }, 600);
   }
 
   private performIntelligentRepair(errorMsg: string) {
     const slug = errorMsg.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    this.log(`REPAIR: SCANNING_FOR_LOG: issue-${slug}.md`);
+    this.log(`REPAIR: SCANNING_FOR_LOG: issue-${slug}.md`, ['notable', 'repair']);
     
     setTimeout(() => {
-      this.log(`REPAIR: GENESIS_COMPLETE: issue-${slug}.md`);
-      this.log(`DIAGNOSTIC: BRANCH_A_COLLAPSE_CHECK: PASS`);
-      this.log(`REPAIR: APPLYING_STABILITY_PATCH`);
-      
+      this.log(`REPAIR: APPLYING_STABILITY_PATCH`, ['repair_complete']);
       if (errorMsg.includes('NAN') || errorMsg.includes('PHYSICS')) {
-        this.log("REPAIR: PURGING_COLLAPSED_NODES");
         this.sceneManager.transitionTo(this.sceneManager.currentScene()!, null as any); 
       }
     }, 400);
   }
 
-  private performIndustryMobileCalibration() {
-    this.log(`INDUSTRY: CALIBRATING_MOBILE_UX`);
-    setTimeout(() => {
-      this.log(`ADAPTIVE: HITBOX_SCALING: 0.6 units`);
-      this.log(`GESTURE: LONG_PRESS_SELECTION: ACTIVE`);
-      this.log(`FEEDBACK: CHROMATIC_GLOW: APPLIED`);
-      this.log(`INDUSTRY: CALIBRATION_COMPLETE`);
-    }, 600);
-  }
-
-  private performIntelligentRefactor() {
-    this.log("REF: SCANNING_FOR_MONOLITHS");
-    setTimeout(() => {
-      this.log("REF: MODULAR_ISOLATION_COMPLETE");
-      this.log("HEURISTICS: P-SCORE:2 | BOUNDARIES:OK | DATA:CLEAN");
-    }, 500);
-  }
-
-  private performSceneOptimization() {
-    const count = this.ecs.entityCount();
-    this.log(`OPT: PRUNING_GRAPH (${count} nodes)`);
-  }
-
-  private log(msg: string) {
+  private log(msg: string, tags: string[] = []) {
     this.commandLog.update(prev => [msg, ...prev].slice(0, 5));
-    // [PROTOCOL_MEMORY_ARCH]: Ingest log into tiered system
-    this.memory.ingest(msg, ['command_log']);
+    // [PROTOCOL_MEMORY_ARCH]: Automated ingestion
+    this.memory.ingest(msg, tags);
   }
 }

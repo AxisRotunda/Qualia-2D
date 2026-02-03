@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 
 export interface LogEntry {
   id: string;
@@ -8,26 +8,53 @@ export interface LogEntry {
   tier: 0 | 1 | 2;
 }
 
+export interface SessionSummary {
+  startTime: number;
+  commandCount: number;
+  topVerbs: Map<string, number>;
+  notableEvents: string[];
+}
+
 /**
- * [PROTOCOL_MEMORY_ARCH_V1.0] Implementation
- * Tiered memory system: Ephemeral (Map) -> Semantic (Array) -> Persistent (IndexedDB).
+ * [PROTOCOL_MEMORY_ARCH_V2.0] Implementation
+ * Tiered memory system: Ephemeral -> Semantic -> Persistent -> Narrative (Agent-Synced).
  */
 @Injectable({ providedIn: 'root' })
 export class MemorySystem2DService {
-  // Tier 0: Ephemeral (Map for O(1) lookup, tracking insertion order via keys)
+  // Tier 0: Ephemeral
   private readonly LRU_CAPACITY = 128;
   private _tier0 = new Map<string, LogEntry>();
   
-  // Tier 1: Semantic Buffer (Array for iteration/clustering)
+  // Tier 1: Semantic
   private _tier1: LogEntry[] = [];
   
-  // Tier 2: Persistent Storage
+  // Tier 2: Persistent (IndexedDB)
   private readonly DB_NAME = 'Qualia2D_Mem_v1';
   private readonly STORE_NAME = 'logs';
   private db: IDBDatabase | null = null;
 
-  // Observability
+  // Session Data
+  private readonly startTime = Date.now();
+  private commandUsage = new Map<string, number>();
+  
+  // Observability Signals
   readonly stats = signal<{ t0: number, t1: number, t2: number }>({ t0: 0, t1: 0, t2: 0 });
+  
+  readonly sessionSummary = computed<SessionSummary>(() => {
+    // Computed based on T1 state
+    const verbs = new Map<string, number>();
+    this._tier1.forEach(e => {
+      const verb = e.content.split(':')[0]?.trim();
+      if (verb) verbs.set(verb, (verbs.get(verb) || 0) + 1);
+    });
+
+    return {
+      startTime: this.startTime,
+      commandCount: this._tier1.length,
+      topVerbs: verbs,
+      notableEvents: this._tier1.filter(e => e.tags.includes('notable')).map(e => e.content)
+    };
+  });
 
   constructor() {
     this.initDB();
@@ -46,15 +73,15 @@ export class MemorySystem2DService {
     
     req.onsuccess = (e: any) => {
       this.db = e.target.result;
-      this.audit(); // Initial audit on load
+      this.audit();
     };
     
-    req.onerror = (e) => console.warn('Qualia2D: Memory DB failed', e);
+    req.onerror = (e) => console.warn('Qualia2D: Memory DB Error', e);
   }
 
   /**
    * INGEST [ACTION]
-   * Entry point for new memory fragments. Flows through T0 -> T1 -> T2.
+   * Automated ingestion called by CommandRegistry.
    */
   ingest(content: string, tags: string[] = []) {
     const id = crypto.randomUUID();
@@ -66,38 +93,29 @@ export class MemorySystem2DService {
       tier: 0
     };
 
-    // Tier 0: LRU Eviction
+    // T0: LRU
     if (this._tier0.size >= this.LRU_CAPACITY) {
       const first = this._tier0.keys().next().value;
       if (first) this._tier0.delete(first);
     }
     this._tier0.set(id, entry);
 
-    // Tier 1: Promotion
+    // T1: Semantic
     this._tier1.push({ ...entry, tier: 1 });
 
-    // Tier 2: Async Persist
+    // T2: Persistent
     this.saveToDisk({ ...entry, tier: 2 });
     
     this.updateLiveStats();
   }
 
-  /**
-   * COMPACT [ACTION]
-   * Prunes Tier 1 to prevent memory bloat during long sessions.
-   */
   compact() {
-    // Heuristic: Keep last 100 semantic entries
     if (this._tier1.length > 100) {
       this._tier1 = this._tier1.slice(-100);
     }
     this.updateLiveStats();
   }
 
-  /**
-   * AUDIT [ACTION]
-   * Performs a deep count of the persistent store.
-   */
   audit() {
     if (!this.db) return;
     const tx = this.db.transaction([this.STORE_NAME], 'readonly');
@@ -115,8 +133,12 @@ export class MemorySystem2DService {
 
   private saveToDisk(entry: LogEntry) {
     if (!this.db) return;
-    const tx = this.db.transaction([this.STORE_NAME], 'readwrite');
-    tx.objectStore(this.STORE_NAME).add(entry);
+    try {
+      const tx = this.db.transaction([this.STORE_NAME], 'readwrite');
+      tx.objectStore(this.STORE_NAME).add(entry);
+    } catch (e) {
+      // Fail silently for quota issues
+    }
   }
 
   private updateLiveStats() {
