@@ -1,7 +1,7 @@
 
 import { Injectable, signal } from '@angular/core';
 import { EntityId } from './entity';
-import { Transform2D, Sprite2D, RigidBody2D, Collider2D, TagComponent, ForceField2D, PlayerController2D, SpriteAnimation, Interaction } from './components';
+import { Transform2D, Sprite2D, RigidBody2D, Collider2D, TagComponent, ForceField2D, PlayerController2D, SpriteAnimation, Interaction, DialogComponent, PortalComponent } from './components';
 
 /**
  * Registry-backed ECS Storage System.
@@ -21,13 +21,13 @@ export class ComponentStoreService {
   // RPG Systems
   readonly animations = new Map<EntityId, SpriteAnimation>();
   readonly interactions = new Map<EntityId, Interaction>();
+  readonly dialogs = new Map<EntityId, DialogComponent>();
+  readonly portals = new Map<EntityId, PortalComponent>();
 
   /**
    * Registry of all component maps for automated lifecycle management.
    * Prevents "orphaned components" during entity deletion.
    */
-  // FIX: Explicitly providing generic types to the Map constructor to avoid incorrect 
-  // inference from the first array element, which causes type mismatches for subsequent entries.
   private readonly registries = new Map<string, Map<EntityId, any>>([
     ['transform', this.transforms],
     ['sprite', this.sprites],
@@ -37,7 +37,9 @@ export class ComponentStoreService {
     ['forceField', this.forceFields],
     ['player', this.players],
     ['animation', this.animations],
-    ['interaction', this.interactions]
+    ['interaction', this.interactions],
+    ['dialog', this.dialogs],
+    ['portal', this.portals]
   ]);
 
   // High-level State Signals
@@ -79,6 +81,8 @@ export class ComponentStoreService {
   getPlayer(id: EntityId): PlayerController2D | undefined { return this.players.get(id); }
   getAnimation(id: EntityId): SpriteAnimation | undefined { return this.animations.get(id); }
   getInteraction(id: EntityId): Interaction | undefined { return this.interactions.get(id); }
+  getDialog(id: EntityId): DialogComponent | undefined { return this.dialogs.get(id); }
+  getPortal(id: EntityId): PortalComponent | undefined { return this.portals.get(id); }
   
   /**
    * Utility for bulk component checks (e.g., for systems filtering).

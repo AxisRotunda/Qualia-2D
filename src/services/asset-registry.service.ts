@@ -29,51 +29,123 @@ export class AssetRegistryService {
 
   /**
    * Generates high-fidelity procedural "Dev Textures" in-memory.
-   * [RUN_REF]: Ensures engine is self-contained and visually cohesive.
+   * [RUN_INDUSTRY]: Implements "Hard Realism" via noise, gradients, and structural bevels.
    */
   async loadDefaults() {
     try {
       // 1. Hero Glyph (Directional Pointer)
       this.generateTexture('tex_hero', 128, 128, (ctx, w, h) => {
         const cx = w/2, cy = h/2;
-        ctx.strokeStyle = '#6366f1'; 
-        ctx.lineWidth = 10;
-        ctx.beginPath(); ctx.arc(cx, cy, 50, 0, Math.PI*2); ctx.stroke();
-        ctx.fillStyle = '#818cf8';
-        ctx.beginPath();
-        ctx.moveTo(cx + 40, cy); 
-        ctx.lineTo(cx - 20, cy - 30);
-        ctx.lineTo(cx - 10, cy);
-        ctx.lineTo(cx - 20, cy + 30);
-        ctx.fill();
+        
+        // Glow Gradient
+        const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 60);
+        grad.addColorStop(0, '#818cf8');
+        grad.addColorStop(1, '#4338ca');
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(cx, cy, 50, 0, Math.PI*2); ctx.fill();
+
+        // Metallic Rim
+        ctx.strokeStyle = '#c7d2fe'; 
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(cx, cy, 48, 0, Math.PI*2); ctx.stroke();
+
+        // Directional Chevron
+        ctx.fillStyle = '#ffffff';
         ctx.shadowColor = '#6366f1';
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.moveTo(cx + 35, cy); 
+        ctx.lineTo(cx - 15, cy - 25);
+        ctx.lineTo(cx - 5, cy);
+        ctx.lineTo(cx - 15, cy + 25);
+        ctx.fill();
+        ctx.shadowBlur = 0;
       });
 
-      // 2. Industrial Crate
+      // 2. Industrial Crate (Sci-Fi Cargo)
       this.generateTexture('tex_crate', 128, 128, (ctx, w, h) => {
-        ctx.fillStyle = '#1e293b'; ctx.fillRect(0,0,w,h);
-        ctx.strokeStyle = '#475569'; ctx.lineWidth = 6;
+        // Base Metal
+        ctx.fillStyle = '#334155'; // Slate 700
+        ctx.fillRect(0,0,w,h);
+        this.applyNoise(ctx, w, h, 15);
+
+        // Frame Bevels
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = '#1e293b'; // Darker
         ctx.strokeRect(4,4,w-8,h-8);
-        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(w,h); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w,0); ctx.lineTo(0,h); ctx.stroke();
-        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
-        ctx.strokeRect(0,0,w,h);
-      });
+        
+        // Inner Recess
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(16, 16, w-32, h-32);
+        
+        // Hazard Stripes (Diagonal)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(20, 20, w-40, h-40);
+        ctx.clip();
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0,0,w,h);
+        
+        ctx.fillStyle = '#ca8a04'; // Dark Yellow
+        for(let i=-w; i<w*2; i+=20) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i+10, 0);
+            ctx.lineTo(i-10+h, h);
+            ctx.lineTo(i-20+h, h);
+            ctx.fill();
+        }
+        ctx.restore();
 
-      // 3. Structural Wall
-      this.generateTexture('tex_wall', 128, 128, (ctx, w, h) => {
-        ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,w,h);
-        ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
-        ctx.beginPath(); 
-        for(let i=0; i<w; i+=32) { ctx.moveTo(i, 0); ctx.lineTo(i, h); }
-        for(let i=0; i<h; i+=32) { ctx.moveTo(0, i); ctx.lineTo(w, i); }
+        // Reinforcement X
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(10, 10); ctx.lineTo(w-10, h-10);
+        ctx.moveTo(w-10, 10); ctx.lineTo(10, h-10);
         ctx.stroke();
-        ctx.fillStyle = '#1e293b'; ctx.fillRect(10, 10, 20, 10);
+
+        // Rivets
+        ctx.fillStyle = '#94a3b8';
+        const r = 3;
+        const inset = 8;
+        ctx.beginPath();
+        ctx.arc(inset, inset, r, 0, Math.PI*2);
+        ctx.arc(w-inset, inset, r, 0, Math.PI*2);
+        ctx.arc(w-inset, h-inset, r, 0, Math.PI*2);
+        ctx.arc(inset, h-inset, r, 0, Math.PI*2);
+        ctx.fill();
       });
 
-      // 4. Hero Sprite Sheet (4x4 Grid - 128x128 total, 32x32 frames)
-      // Row 0: Down, Row 1: Up, Row 2: Left, Row 3: Right
+      // 3. Structural Wall (Reinforced Concrete)
+      this.generateTexture('tex_wall', 128, 128, (ctx, w, h) => {
+        // Concrete Base
+        ctx.fillStyle = '#0f172a'; 
+        ctx.fillRect(0,0,w,h);
+        this.applyNoise(ctx, w, h, 25);
+
+        // Plating Lines
+        ctx.strokeStyle = '#1e293b'; 
+        ctx.lineWidth = 2;
+        ctx.beginPath(); 
+        ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h);
+        ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
+        ctx.stroke();
+
+        // Tech Detailing
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(10, 10, 30, 10);
+        ctx.fillRect(w-40, h-20, 30, 10);
+
+        // Warning Light (Red)
+        ctx.fillStyle = '#7f1d1d';
+        ctx.beginPath(); ctx.arc(w/2, h/2, 6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(w/2, h/2, 2, 0, Math.PI*2); ctx.fill();
+      });
+
+      // 4. Hero Sprite Sheet (Updated for Consistency)
       this.generateTexture('tex_hero_sheet', 128, 128, (ctx, w, h) => {
         const frameSize = 32;
         const colors = ['#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'];
@@ -83,23 +155,24 @@ export class AssetRegistryService {
              const x = col * frameSize;
              const y = row * frameSize;
              
+             // Background
              ctx.fillStyle = row % 2 === 0 ? '#1e293b' : '#0f172a';
-             // ctx.fillRect(x, y, frameSize, frameSize); // Debug bg
              
              const cx = x + frameSize / 2;
              const cy = y + frameSize / 2;
              
+             // Body
              ctx.fillStyle = colors[col];
              ctx.beginPath();
-             ctx.arc(cx, cy, 10 + (col * 2), 0, Math.PI * 2);
+             ctx.arc(cx, cy, 10 + (col * 1), 0, Math.PI * 2);
              ctx.fill();
 
-             // Direction Indicator
+             // Visor / Direction Indicator
              ctx.fillStyle = '#fff';
-             if (row === 0) ctx.fillRect(cx - 2, cy + 8, 4, 4); // Down
-             if (row === 1) ctx.fillRect(cx - 2, cy - 12, 4, 4); // Up
-             if (row === 2) ctx.fillRect(cx - 12, cy - 2, 4, 4); // Left
-             if (row === 3) ctx.fillRect(cx + 8, cy - 2, 4, 4); // Right
+             if (row === 0) ctx.fillRect(cx - 3, cy + 6, 6, 3); // Down
+             if (row === 1) ctx.fillRect(cx - 3, cy - 9, 6, 3); // Up
+             if (row === 2) ctx.fillRect(cx - 9, cy - 3, 3, 6); // Left
+             if (row === 3) ctx.fillRect(cx + 6, cy - 3, 3, 6); // Right
            }
         }
       });
@@ -121,5 +194,18 @@ export class AssetRegistryService {
       img.src = canvas.toDataURL();
       this.textures.set(id, img);
     }
+  }
+
+  private applyNoise(ctx: CanvasRenderingContext2D, w: number, h: number, amount: number) {
+    const idata = ctx.getImageData(0, 0, w, h);
+    const data = idata.data;
+    for(let i = 0; i < data.length; i += 4) {
+       // Simple additive noise
+       const n = (Math.random() - 0.5) * amount;
+       data[i] = Math.max(0, Math.min(255, data[i] + n));
+       data[i+1] = Math.max(0, Math.min(255, data[i+1] + n));
+       data[i+2] = Math.max(0, Math.min(255, data[i+2] + n));
+    }
+    ctx.putImageData(idata, 0, 0);
   }
 }

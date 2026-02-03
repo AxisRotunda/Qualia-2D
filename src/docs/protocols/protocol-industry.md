@@ -1,10 +1,10 @@
 # [T0] Industry Protocol
-ID: PROTOCOL_INDUSTRY_V1.1 | Role: Standards & Modernization.
+ID: PROTOCOL_INDUSTRY_V1.2 | Role: Standards & Modernization.
 
 ## 1. INTENT
 To research, analyze, and integrate leading-edge industry standards from established 2D engines (Godot, Unity, PixiJS, Defold) into the Qualia2D architecture.
 
-## 2. RECENT CALIBRATIONS [v1.1]
+## 2. RECENT CALIBRATIONS [v1.2]
 
 ### 2.1 SPATIAL PIVOT ZOOM
 - **Standard**: Scaling from the center of the viewport is sub-optimal for high-density editing.
@@ -14,6 +14,13 @@ To research, analyze, and integrate leading-edge industry standards from establi
 ### 2.2 CROSS-DEVICE NORMALIZATION
 - **Mouse**: Wheel deltas mapped to multiplicative factors (0.9x / 1.1x).
 - **Touch**: Pinch distance deltas mapped to the same multiplicative logic, using the pinch center as the pivot point.
+
+### 2.3 PROCEDURAL MATERIAL SYNTHESIS
+- **Context**: In the absence of external asset packs, the engine must synthesize "Hard Realism" textures at runtime.
+- **Technique**: Canvas2D manipulation.
+  - **Noise**: Per-pixel variance to simulate concrete/metal grain.
+  - **Bevels**: Light/Dark border stroking to simulate depth.
+  - **Specularity**: Linear gradients to simulate metallic sheen.
 
 ## 3. LOGIC MATRIX: RUN_INDUSTRY [CONTEXT]
 

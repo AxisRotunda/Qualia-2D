@@ -1,8 +1,15 @@
+
 import { Injectable, inject } from '@angular/core';
 import { ComponentStoreService } from '../ecs/component-store.service';
 import { PhysicsEngine } from '../core/physics-engine.service';
 import { EntityGenerator, EntityId } from '../ecs/entity';
+import { PLAYER_ANIMATIONS } from '../../data/config/animation-config';
 
+/**
+ * Qualia2D Entity Factory.
+ * [RUN_REF]: Pure instantiation logic. 
+ * Decentralized configuration surface for better modularity.
+ */
 @Injectable({ providedIn: 'root' })
 export class EntityFactoryService {
   private ecs = inject(ComponentStoreService);
@@ -22,11 +29,26 @@ export class EntityFactoryService {
   spawnPlayer(x = 0, y = 0): EntityId {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
+    
+    // Core Data
     this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
-    this.ecs.sprites.set(id, { color: '#ffffff', textureId: 'tex_hero', width: 1.5, height: 1.5, layer: 3, opacity: 1 });
+    this.ecs.sprites.set(id, { color: '#ffffff', textureId: 'tex_hero_sheet', width: 1.5, height: 1.5, layer: 2, opacity: 1 });
     this.ecs.tags.set(id, { name: 'Hero_Unit', tags: new Set(['player']) });
+    
+    // Behavior Logic
     this.ecs.players.set(id, { speed: 18, turnSpeed: 12, lastFireTime: 0, fireRate: 200 });
     
+    // RPG Systems (Animation) - Now using PLAYER_ANIMATIONS config
+    this.ecs.animations.set(id, {
+      active: true,
+      state: 'idle',
+      facing: 'down',
+      timer: 0,
+      frameIndex: 0,
+      config: PLAYER_ANIMATIONS
+    });
+    
+    // Physics
     const rb = this.physics.createBody(id, 'dynamic', x, y);
     if (rb) {
         rb.setLinearDamping(0.6);

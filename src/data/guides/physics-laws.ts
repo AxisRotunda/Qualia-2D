@@ -1,30 +1,30 @@
 import { VisualArticle } from '../../services/documentation.service';
 
 /**
- * [RUN_GUIDE_GEN] Logic: Physical Laws
- * Source: physics-integration.md, ecs-architecture.md
+ * [RUN_GUIDE_GEN] Translation: PHYSICAL_SOLVER
+ * Authority: protocol-guide-constructor.md
  */
 export const PHYSICS_LAWS: VisualArticle = {
   id: 'physical_laws',
-  title: 'Physical Laws',
-  humanLabel: 'Forces & Matter',
+  title: 'PHYSICAL_SOLVER',
+  humanLabel: 'Simulation Laws',
   category: 'dynamics',
-  description: 'Reality on a plane. Qualia2D uses deterministic WASM solvers to simulate mass, collision, and gravity with zero room for error.',
+  description: 'The fundamental laws governing planar matter. Deterministic WASM solvers simulate mass, volume, and collision with absolute truth.',
   schemaId: 'physics',
   steps: [
     { 
-      label: 'Solid Mass', 
-      detail: 'Every object occupies real space with a calculable volume.', 
+      label: 'Rigid Integrity', 
+      detail: 'Every entity occupies discrete space defined by its physical collider hull and mass properties.', 
       icon: 'M4 4h16v16H4z' 
     },
     { 
-      label: 'Gravity', 
-      detail: 'A constant vertical force that grounds all dynamic matter.', 
+      label: 'Gravity Constants', 
+      detail: 'Simulation-wide vertical forces provide the grounding necessary for stable kinetic interaction.', 
       icon: 'M12 5v14M5 12l7 7 7-7' 
     },
     { 
-      label: 'Intersection', 
-      detail: 'Collisions are resolved with pixel-perfect mathematical truth.', 
+      label: 'Solver Accuracy', 
+      detail: 'Sub-stepping logic resolves collisions at 60Hz to prevent entity tunneling and kinetic collapse.', 
       icon: 'M12 2v4m0 12v4M2 12h4m12 0h4' 
     }
   ],

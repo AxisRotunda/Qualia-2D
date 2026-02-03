@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ComponentStoreService } from '../ecs/component-store.service';
 import { Input2DService } from '../../services/input-2d.service';
+import { SPRITE_SHEET_LAYOUT } from '../../data/config/animation-config';
 
 @Injectable({ providedIn: 'root' })
 export class AnimationSystem {
@@ -15,9 +16,7 @@ export class AnimationSystem {
       const sprite = this.ecs.getSprite(id);
       if (!sprite) return;
 
-      // 1. Determine State (Simple Movement Check)
-      // In a real system, this would come from a State Machine component
-      // For now, we infer from Input if it's the player
+      // 1. Sync State (For Player specifically)
       if (this.ecs.players.has(id)) {
         const move = this.input.moveVector();
         const isMoving = Math.abs(move.x) > 0.1 || Math.abs(move.y) > 0.1;
@@ -30,33 +29,24 @@ export class AnimationSystem {
         }
       }
 
-      // 2. Fetch Config
+      // 2. Advance Frame Timer
       const config = anim.config.get(anim.state);
       if (!config) return;
 
-      // 3. Advance Timer
       anim.timer += dt * config.speed;
       if (anim.timer >= 1) {
         anim.timer = 0;
         anim.frameIndex = (anim.frameIndex + 1) % config.count;
       }
 
-      // 4. Calculate UVs (Assuming 4-Direction Sheet)
-      // Row 0: Down, Row 1: Up, Row 2: Left, Row 3: Right
-      let rowOffset = 0;
-      switch(anim.facing) {
-        case 'down': rowOffset = 0; break;
-        case 'up': rowOffset = 1; break;
-        case 'left': rowOffset = 2; break;
-        case 'right': rowOffset = 3; break;
-      }
+      // 3. Map to Sprite UVs
+      const rowOffset = SPRITE_SHEET_LAYOUT.DIRECTIONS[anim.facing] || 0;
+      const fSize = SPRITE_SHEET_LAYOUT.FRAME_SIZE;
 
-      // Assuming standard 128x128 sheet with 32x32 frames (4x4 grid)
-      const frameSize = 32; 
-      sprite.frameWidth = frameSize;
-      sprite.frameHeight = frameSize;
-      sprite.frameX = anim.frameIndex * frameSize;
-      sprite.frameY = (config.row + rowOffset) * frameSize; // config.row is base offset if needed
+      sprite.frameWidth = fSize;
+      sprite.frameHeight = fSize;
+      sprite.frameX = anim.frameIndex * fSize;
+      sprite.frameY = (config.row + rowOffset) * fSize;
     });
   }
 }

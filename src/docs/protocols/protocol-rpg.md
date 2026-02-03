@@ -1,53 +1,42 @@
 # [T0] RPG Protocol: Systems & Mechanics
-ID: PROTOCOL_RPG_V1.0 | Role: Role-Playing Game Mechanics.
+ID: PROTOCOL_RPG_V1.1 | Role: Role-Playing Game Mechanics.
 
 ## 1. INTENT
-To implement industry-standard RPG features (Sprite Animation, Interaction, Dialog Triggers) within the ECS architecture, approximating the capabilities of engines like Godot for 2D top-down games.
+Implement industry-standard RPG features (Sprite Animation, Interaction, Dialog Triggers) within the ECS architecture, ensuring project-level persistence across scene fragments.
 
 ## 2. HARD STRUCTURAL DEFINITIONS
 
 ### 2.1 ANIMATION SYSTEM (Flipbook)
 - **Component**: `SpriteAnimation`.
 - **Logic**: Time-based frame advancement. Mutates `Sprite2D.frameX/Y`.
-- **State Machine**: Supports `idle`, `walk`, `run` states mapped to Sprite Sheet rows.
+- **Topology**: Primarily active in `top-down-rpg` and `top-down-action`.
 
 ### 2.2 INTERACTION SYSTEM (Area2D)
 - **Component**: `Interaction`.
-- **Logic**: Proximity check against the Player entity.
-- **Trigger**: Activated via the `Input.action` signal (Spacebar / Button A).
+- **Input**: Activated via the `Input.action` signal.
+- **Boundary**: Proximity check (Radius-based) in world units.
 
-## 3. COMPONENT SCHEMAS
+## 3. LOGIC MATRIX: RUN_RPG_SYS
 
-### SpriteAnimation
-```typescript
-interface SpriteAnimation {
-  active: boolean;
-  state: string; // 'idle', 'walk'
-  facing: 'down' | 'up' | 'left' | 'right';
-  timer: number;
-  frameIndex: number;
-  config: Map<string, { row: number, count: number, speed: number }>;
-}
-```
-
-### Interaction
-```typescript
-interface Interaction {
-  radius: number;
-  label: string;
-  triggerId: string; // Event ID for the command system
-}
-```
-
-## 4. LOGIC MATRIX: RUN_RPG_SYS
-
-| Step | System | Action |
+| Step | Action | Description |
 | :--- | :--- | :--- |
-| 01 | **INPUT** | Capture `Action` intent (Space/Touch). |
-| 02 | **INTERACT** | Query `Interaction` components within radius of Player. |
-| 03 | **ANIMATE** | Update `frameIndex` based on `dt`. Update `facing` based on `RigidBody` velocity. |
-| 04 | **RENDER** | Draw sub-rect of texture based on `frameX/Y` and `frameWidth/Height`. |
+| 01 | **SCAN** | Identify `Interaction` components within radius of `Player`. |
+| 02 | **DIALOG** | If `DialogComponent` present, push to `GameSessionService`. |
+| 03 | **PORTAL** | If `PortalComponent` present, trigger `SceneManager.transitionTo`. |
+| 04 | **PERSIST** | Update session flags or inventory based on `triggerId`. |
+
+## 4. SKELETAL GUIDELINES (SG)
+
+### Interaction Definition
+```typescript
+this.ecs.interactions.set(id, { 
+  radius: 2.5, 
+  label: 'Examine', 
+  triggerId: 'item_discovery_01' 
+});
+```
 
 ## 5. SAFEGUARDS
-- **Asset Bounds**: Ensure `frameIndex` never exceeds `count` to prevent "flickering" or blank rendering.
-- **Topology Check**: Interaction UI should only appear in `top-down-rpg` mode.
+- **Circular Avoidance**: Use `Injector` for lazy resolution of `Engine2DService` within interaction systems.
+- **Asset Bounds**: Frame indices must remain within the bounds of the active `SpriteAnimation.config`.
+- **Zoneless**: Interaction prompts must only appear if `EngineState.mode === 'play'`.

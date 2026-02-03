@@ -66,3 +66,15 @@ export interface Interaction {
   label: string;
   triggerId: string;
 }
+
+// [PROTOCOL_INDUSTRY] RPG Components
+export interface DialogComponent {
+  speaker: string;
+  text: string;
+}
+
+export interface PortalComponent {
+  targetSceneId: string;
+  spawnX: number;
+  spawnY: number;
+}

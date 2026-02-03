@@ -13,6 +13,7 @@
 | `RUN_REPAIR` | protocol-repair | Error recovery and stability. | [Repair](../protocols/protocol-repair.md) |
 | `RUN_UI` | protocol-ui | View layer audit. | [UI](../protocols/protocol-ui.md) |
 | `RUN_MEM_ARCH` | protocol-memory-arch | Optimize memory tiering and retrieval. | [Memory Arch](../protocols/protocol-memory-arch.md) |
+| `RUN_PROJECT` | protocol-project | **[NEW]** Project lifecycle and scene interplay. | [Project](../protocols/protocol-project.md) |
 
 ## 2. DOMAIN SPECIFIC VERBS
 
@@ -22,6 +23,7 @@
 | `RUN_MAT` | protocol-material | Surface physics and blending. | [Material](../protocols/protocol-material.md) |
 | `RUN_SPRITE` | protocol-sprite | Sprite rendering and atlas management. | [Sprite](../protocols/protocol-sprite.md) |
 | `RUN_POST` | protocol-post-processing | Optical fidelity and screen-space filters. | [Post-Processing](../protocols/protocol-post-processing.md) |
+| `RUN_ENV` | protocol-visual-core | **[NEW]** Environmental rendering (Backgrounds/Atmosphere). | [Visual Core](../protocols/protocol-visual-core.md) |
 | `RUN_ASSET` | protocol-asset-pipeline | Resource loading and cache management. | [Asset Pipeline](../protocols/protocol-asset-pipeline.md) |
 | `RUN_SCENE_OPT` | protocol-scene-optimizer | Level-logic deletion of out-of-bounds entities. | [Scene Opt](../protocols/protocol-scene-optimizer.md) |
 | `RUN_ARCHETYPE` | protocol-archetype | Time-sliced entity streaming. | [Archetype](../protocols/protocol-archetype.md) |

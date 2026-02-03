@@ -21,6 +21,7 @@ import { EngineSettingsComponent } from './app/ui/panels/engine-settings.compone
 import { SelectionToolbarComponent } from './app/ui/hud/selection-toolbar.component';
 import { PanelDrawerComponent } from './app/ui/panels/panel-drawer.component';
 import { LogViewerComponent } from './app/ui/hud/log-viewer.component';
+import { DialogOverlayComponent } from './app/ui/overlays/dialog-overlay.component';
 
 @Component({
   selector: 'app-root',
@@ -38,7 +39,8 @@ import { LogViewerComponent } from './app/ui/hud/log-viewer.component';
     EngineSettingsComponent,
     SelectionToolbarComponent,
     PanelDrawerComponent,
-    LogViewerComponent
+    LogViewerComponent,
+    DialogOverlayComponent
   ],
   templateUrl: './app.component.html',
   host: {

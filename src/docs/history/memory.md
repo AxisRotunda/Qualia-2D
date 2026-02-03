@@ -3,30 +3,16 @@
 ## [Init] Qualia2D Genesis
 - **Action**: Initial system synthesis. Established Zoneless shell and Rapier2D integration.
 
-## [v1.1 - v1.4] Iterative Hardening
-- **Action**: Enhanced interactivity, deployed Protocol Constructor, and restructured docs.
+## [v1.13 - v1.15] RPG Architecture Evolution
+- **Action**: Implemented `GameSessionService` and `InteractionSystem`.
+- **Outcome**: Narrative flows and multi-scene transitions enabled.
 
-## [v1.5 - v1.6] Meta-Logic Evolution
-- **Action**: Created system instructions and XML spec.
+## [v1.16] Stability Repair: Circular Dependency [NG0200]
+- **Action**: Resolved circular dependency `Engine2DService -> Runtime2DService -> InteractionSystem -> Engine2DService`.
+- **Fix**: Implemented lazy service resolution via `Injector`.
 
-## [v1.7] Protocol Correction & Manifesto Genesis
-- **Action**: Corrected protocols and generated Qualia2D Manifesto.
-
-## [v1.8] RPG Systems Integration
-- **Action**: Executed `RUN_RPG_SYS`. Added Animation and Interaction systems.
-
-## [v1.9] Architectural Refactor (Internal)
-- **Action**: Consolidated services and optimized RenderSystem.
-
-## [v1.10] Deep Refactor (RUN_REF)
-- **Action**: Executed `RUN_REF` protocol.
-- **Details**:
-  - Eliminated redundant services in `src/services/`.
-  - Enforced strict boundary: UI components now strictly use facades.
-  - Refactored `CameraService` and `SelectionSystem`.
-
-## [v1.11] UI & Config Refactor (RUN_REF)
-- **Action**: Consolidated overlay state in `EngineState2DService`.
-- **Action**: Extracted `LogViewerComponent` from `AppComponent` to isolate HUD logic.
-- **Action**: Created `src/data/config/visual-config.ts` to externalize rendering constants from `RenderSystem`.
-- **Outcome**: Portability Score (P) of the RenderSystem improved from 5 to 2. Root UI is now more maintainable and declarative.
+## [v1.17] RPG Documentation Sync (RUN_REF/KNOWLEDGE)
+- **Action**: Modularized RPG config in `src/data/config/`.
+- **Action**: Documented `Narrative Engine` and updated `ECS Architecture` dives.
+- **Action**: Refined `RPG Protocol` with session persistence logic.
+- **Outcome**: RPG systems are now architecture-pure and fully documented.

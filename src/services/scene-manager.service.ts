@@ -5,12 +5,14 @@ import { PhysicsEngine } from '../engine/core/physics-engine.service';
 import { EntityGenerator } from '../engine/ecs/entity';
 import type { ScenePreset2D } from '../engine/scene.types';
 import type { Engine2DService } from './engine-2d.service';
+import { ProjectService } from './project.service';
 
 @Injectable({ providedIn: 'root' })
 export class SceneManagerService {
   private state = inject(EngineState2DService);
   private ecs = inject(ComponentStoreService);
   private physics = inject(PhysicsEngine);
+  private project = inject(ProjectService);
 
   readonly currentScene = signal<ScenePreset2D | null>(null);
   readonly isTransitioning = signal(false);
@@ -39,7 +41,25 @@ export class SceneManagerService {
       this.ecs.clear();
       EntityGenerator.reset();
       this.state.selectedEntityId.set(null);
+      
+      // [PROTOCOL_PROJECT] Apply Scene Config
       if (scene.preferredTopology) this.state.setTopology(scene.preferredTopology);
+      
+      if (scene.config) {
+        // Apply Environment
+        this.state.setEnvironment(scene.config.env);
+        
+        // Apply Physics Config
+        if (scene.config.physics) {
+          this.state.gravityY.set(scene.config.physics.gravity.y);
+        }
+      } else {
+        // Fallback Defaults
+        this.state.setEnvironment({ type: 'solid', background: '#020617', gridOpacity: 0.1 });
+      }
+      
+      // Update Project Reference
+      this.project.updateLastScene(scene.id);
       
       // Yield to ensure cleanup is rendered/processed
       await new Promise(resolve => requestAnimationFrame(resolve));

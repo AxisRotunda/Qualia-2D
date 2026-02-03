@@ -1,4 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
+import type { SceneEnvironment } from '../engine/scene.types';
 
 export type EngineMode = 'edit' | 'play';
 export type ActivePanel = 'none' | 'hierarchy' | 'inspector' | 'settings';
@@ -19,9 +20,15 @@ export class EngineState2DService {
 
   // Simulation Globals
   readonly gravityY = signal<number>(-9.81);
-  readonly bgColor = signal<string>('#020617');
   readonly gridVisible = signal<boolean>(true);
   readonly debugPhysics = signal<boolean>(false);
+
+  // [PROTOCOL_VISUAL_CORE] Environment State
+  readonly envConfig = signal<SceneEnvironment>({
+    type: 'solid',
+    background: '#020617',
+    gridOpacity: 0.1
+  });
 
   // UI / Interaction Session
   readonly activePanel = signal<ActivePanel>('none');
@@ -73,5 +80,9 @@ export class EngineState2DService {
   updateGravity(val: string) {
     const num = parseFloat(val);
     if (!isNaN(num)) this.gravityY.set(num);
+  }
+
+  setEnvironment(env: SceneEnvironment) {
+    this.envConfig.set(env);
   }
 }

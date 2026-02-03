@@ -1,0 +1,94 @@
+import { Injectable, inject } from '@angular/core';
+import { ComponentStoreService } from '../ecs/component-store.service';
+import { EngineState2DService } from '../../services/engine-state-2d.service';
+import { Input2DService } from '../../services/input-2d.service';
+import { PLAYER_MOVEMENT_CONFIG } from '../../data/config/player-config';
+
+/**
+ * Qualia2D Player System.
+ * [RUN_REF]: Pure modularity. Handles the bridge between user intent and player physics.
+ */
+@Injectable({ providedIn: 'root' })
+export class PlayerSystem {
+  private ecs = inject(ComponentStoreService);
+  private state = inject(EngineState2DService);
+  private input = inject(Input2DService);
+
+  update(dt: number) {
+    const topology = this.state.topology();
+    const config = PLAYER_MOVEMENT_CONFIG[topology];
+    const move = this.input.moveVector();
+    const look = this.input.lookVector();
+
+    this.ecs.players.forEach((_, id) => {
+      const rb = this.ecs.rigidBodies.get(id);
+      const t = this.ecs.getTransform(id);
+      if (!rb || rb.bodyType !== 'dynamic' || !t) return;
+
+      const body = rb.handle;
+
+      switch (topology) {
+        case 'platformer':
+          this.processPlatformer(body, move, config, dt);
+          break;
+        case 'top-down-rpg':
+          this.processRPG(body, move, config, dt);
+          break;
+        case 'top-down-action':
+          this.processAction(body, t, move, look, config, dt);
+          break;
+      }
+    });
+  }
+
+  private processPlatformer(body: any, move: any, config: any, dt: number) {
+    body.setRotation(0, true); // Lock rotation for platformers
+    
+    const velocity = body.linvel();
+    const targetVelX = move.x * config.moveSpeed;
+    const accel = config.acceleration * dt;
+    
+    // Smooth acceleration to target speed
+    let nextVelX = velocity.x + (targetVelX - velocity.x) * Math.min(accel, 1.0);
+    
+    // Handle Jump (Y is normalized input in joypad for platformer)
+    let nextVelY = velocity.y;
+    if (move.y > 0.5 && Math.abs(velocity.y) < 0.1) {
+      nextVelY = config.jumpForce;
+    }
+
+    body.setLinvel({ x: nextVelX, y: nextVelY }, true);
+  }
+
+  private processRPG(body: any, move: any, config: any, dt: number) {
+    body.setRotation(0, true);
+    // Instant velocity for RPG snappiness
+    body.setLinvel({ x: move.x * config.moveSpeed, y: move.y * config.moveSpeed }, true);
+  }
+
+  private processAction(body: any, transform: any, move: any, look: any, config: any, dt: number) {
+    // 1. Rotation (Aiming)
+    let targetAngle = transform.rotation;
+    if (this.input.isUsingJoypad() && (look.x !== 0 || look.y !== 0)) {
+      targetAngle = Math.atan2(look.y, look.x);
+    } else if (!this.input.isUsingJoypad()) {
+      const cursor = this.input.cursorWorld();
+      targetAngle = Math.atan2(cursor.y - transform.y, cursor.x - transform.x);
+    }
+
+    // Smooth rotation lerp
+    const currentAngle = transform.rotation;
+    let diff = targetAngle - currentAngle;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    
+    const nextAngle = currentAngle + diff * Math.min(config.rotationSpeed * dt, 1.0);
+    body.setRotation(nextAngle, true);
+
+    // 2. Translation (Impulse-based movement)
+    if (move.x !== 0 || move.y !== 0) {
+      const force = config.moveSpeed * config.acceleration * dt;
+      body.applyImpulse({ x: move.x * force, y: move.y * force }, true);
+    }
+  }
+}

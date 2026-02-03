@@ -9,7 +9,21 @@ export const NEON_HOTLINE: ScenePreset2D = {
   tags: ['Action', 'Top-Down', 'Industry-Standard'],
   complexity: 'medium',
   preferredTopology: 'top-down-action',
+  
+  config: {
+    env: {
+      type: 'atmosphere',
+      background: '#0f172a', // Slate 900
+      horizon: '#312e81',    // Indigo 900
+      gridOpacity: 0.08
+    },
+    physics: {
+      gravity: { x: 0, y: 0 }
+    }
+  },
+
   load: (engine: Engine2DService) => {
+    // Topology now handled by config injection, but explict set remains for safety
     engine.state.setTopology('top-down-action');
     const boundSize = 20;
     const thickness = 1;

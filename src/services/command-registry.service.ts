@@ -16,6 +16,7 @@ export type QualiaVerb =
   | 'RUN_MAT' 
   | 'RUN_SPRITE'
   | 'RUN_POST'
+  | 'RUN_ENV'
   | 'RUN_ASSET'
   | 'RUN_SCENE_OPT'
   | 'RUN_PROTOCOL'
@@ -25,6 +26,7 @@ export type QualiaVerb =
   | 'RUN_ARCHETYPE'
   | 'RUN_ORACLE_SYNTH'
   | 'RUN_KALMAN_CALIB'
+  | 'RUN_PROJECT'
   | 'RUN_RPG_SYS';
 
 @Injectable({ providedIn: 'root' })
@@ -49,7 +51,7 @@ export class CommandRegistryService {
     
     // Tagging logic for automated Narrative Sync (memory.md)
     const tags = ['command'];
-    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB', 'RUN_ARCHETYPE', 'RUN_RPG_SYS'].includes(verb)) {
+    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB', 'RUN_ARCHETYPE', 'RUN_RPG_SYS', 'RUN_PROJECT', 'RUN_ENV'].includes(verb)) {
       tags.push('notable'); 
     }
 
@@ -63,7 +65,7 @@ export class CommandRegistryService {
         this.performIntelligentRepair(params || 'GENERAL_STABILITY');
         break;
       case 'RUN_INDUSTRY':
-        this.log(`INDUSTRY: CALIBRATING_MOBILE_UX`, ['notable', 'industry']);
+        this.log(`INDUSTRY: CALIBRATING_MATERIALS (HARD_REALISM)`, ['notable', 'industry']);
         break;
       case 'RUN_REF':
         this.log(`REF: INITIATING_MODULAR_ISOLATION`, ['notable', 'architectural']);
@@ -79,6 +81,9 @@ export class CommandRegistryService {
         break;
       case 'RUN_POST':
         this.log("VISUAL: APPLYING_OPTICAL_FILTERS", ['post_processing']);
+        break;
+      case 'RUN_ENV':
+        this.log("VISUAL: CALIBRATING_ATMOSPHERE", ['environment']);
         break;
       case 'RUN_ASSET':
         this.log("ASSET: AUDITING_RESOURCE_CACHE", ['asset_pipeline']);
@@ -102,6 +107,9 @@ export class CommandRegistryService {
         break;
       case 'RUN_RPG_SYS':
         this.log('RPG: SYSTEMS_INITIALIZED (ANIMATION/INTERACTION)', ['rpg', 'gameplay']);
+        break;
+      case 'RUN_PROJECT':
+        this.log('PROJECT: HIERARCHY_SYNC_INITIATED', ['project']);
         break;
       default:
         this.log(`WARN: Protocol ${verb} offline.`, ['warning']);
