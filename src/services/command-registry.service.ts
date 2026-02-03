@@ -24,7 +24,8 @@ export type QualiaVerb =
   | 'RUN_MEM_ARCH'
   | 'RUN_ARCHETYPE'
   | 'RUN_ORACLE_SYNTH'
-  | 'RUN_KALMAN_CALIB';
+  | 'RUN_KALMAN_CALIB'
+  | 'RUN_RPG_SYS';
 
 @Injectable({ providedIn: 'root' })
 export class CommandRegistryService {
@@ -48,7 +49,7 @@ export class CommandRegistryService {
     
     // Tagging logic for automated Narrative Sync (memory.md)
     const tags = ['command'];
-    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB', 'RUN_ARCHETYPE'].includes(verb)) {
+    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB', 'RUN_ARCHETYPE', 'RUN_RPG_SYS'].includes(verb)) {
       tags.push('notable'); 
     }
 
@@ -98,6 +99,9 @@ export class CommandRegistryService {
       case 'RUN_KALMAN_CALIB':
         this.kalman.reset();
         this.log('HYPER_CORE: KALMAN_STATE_RESET', ['optimization']);
+        break;
+      case 'RUN_RPG_SYS':
+        this.log('RPG: SYSTEMS_INITIALIZED (ANIMATION/INTERACTION)', ['rpg', 'gameplay']);
         break;
       default:
         this.log(`WARN: Protocol ${verb} offline.`, ['warning']);

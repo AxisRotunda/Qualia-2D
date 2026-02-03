@@ -2,9 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 import { PhysicsEngine } from '../engine/core/physics-engine.service';
 import { EngineState2DService } from './engine-state-2d.service';
-import { SelectionSystem } from '../engine/systems/selection-system';
+import { Selection2DService } from './selection-2d.service';
 import { Input2DService } from './input-2d.service';
-import { CameraService } from '../engine/core/camera.service';
+import { Camera2DService } from './camera-2d.service';
 import { EntityId } from '../engine/ecs/entity';
 
 @Injectable({ providedIn: 'root' })
@@ -12,9 +12,9 @@ export class Mutation2DService {
   private ecs = inject(ComponentStoreService);
   private physics = inject(PhysicsEngine);
   private state = inject(EngineState2DService);
-  private selection = inject(SelectionSystem);
+  private selection = inject(Selection2DService);
   private input = inject(Input2DService);
-  private camera = inject(CameraService);
+  private camera = inject(Camera2DService);
 
   deleteEntity(id: EntityId) {
     const rb = this.ecs.rigidBodies.get(id);

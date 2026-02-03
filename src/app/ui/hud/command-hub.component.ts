@@ -11,7 +11,7 @@ import { Engine2DService } from '../../../services/engine-2d.service';
       <!-- Panel Toggles -->
       <div class="flex items-center gap-1.5 pr-3 border-r border-white/10">
         <button 
-          (click)="state.isMainMenuOpen.set(true)"
+          (click)="state.setOverlay('main-menu')"
           class="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:bg-white/5 active:scale-90 text-slate-400 hover:text-white"
           aria-label="Home">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>

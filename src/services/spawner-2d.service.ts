@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
-import { CameraService } from '../engine/core/camera.service';
+import { Camera2DService } from './camera-2d.service';
 import { CommandRegistryService } from './command-registry.service';
 
 export interface StreamConfig {
@@ -14,7 +14,7 @@ export interface StreamConfig {
 export class Spawner2DService {
   private factory = inject(EntityFactoryService);
   private ecs = inject(ComponentStoreService);
-  private camera = inject(CameraService);
+  private camera = inject(Camera2DService);
   private commands = inject(CommandRegistryService);
 
   spawnFromTemplate(templateId: string, x = 0, y = 0) {

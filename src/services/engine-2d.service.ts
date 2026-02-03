@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
-import { CameraService } from '../engine/core/camera.service';
+import { Camera2DService } from './camera-2d.service';
 import { Input2DService } from './input-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 import { PhysicsEngine } from '../engine/core/physics-engine.service';
@@ -9,23 +9,22 @@ import { GameLoopService } from '../engine/runtime/game-loop.service';
 import { AssetRegistryService } from '../engine/core/asset-registry.service';
 import { SceneManagerService } from './scene-manager.service';
 import { Runtime2DService } from './runtime-2d.service';
-import { SelectionSystem } from '../engine/systems/selection-system';
+import { Selection2DService } from './selection-2d.service';
 import { Mutation2DService } from './mutation-2d.service';
 import { Spawner2DService } from './spawner-2d.service';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
-import { MemorySystem2DService } from './memory-2d.service';
 import { ENTITY_TEMPLATES, EntityTemplate } from '../data/prefabs/entity-blueprints';
 import type { ScenePreset2D } from '../engine/scene.types';
 import { EntityId } from '../engine/ecs/entity';
 
 /**
- * Qualia2D Primary Orchestrator.
- * [RUN_REF]: Enforces modular isolation and unidirectional flow.
+ * Qualia2D Primary Orchestrator Façade.
+ * [RUN_REF]: Enforces modular isolation. UI interacts with this Bridge.
  */
 @Injectable({ providedIn: 'root' })
 export class Engine2DService {
   readonly state = inject(EngineState2DService);
-  readonly camera = inject(CameraService);
+  readonly camera = inject(Camera2DService);
   readonly input = inject(Input2DService);
   readonly ecs = inject(ComponentStoreService);
   readonly sceneManager = inject(SceneManagerService);
@@ -36,10 +35,9 @@ export class Engine2DService {
   readonly factory = inject(EntityFactoryService);
   readonly loop = inject(GameLoopService);
   readonly runtime = inject(Runtime2DService);
-  readonly selection = inject(SelectionSystem);
+  readonly selection = inject(Selection2DService);
   readonly assets = inject(AssetRegistryService);
   readonly physics = inject(PhysicsEngine);
-  readonly memory = inject(MemorySystem2DService);
 
   readonly templates: EntityTemplate[] = ENTITY_TEMPLATES;
 
@@ -60,8 +58,12 @@ export class Engine2DService {
 
   spawnFromTemplate(templateId: string, x = 0, y = 0) { return this.spawner.spawnFromTemplate(templateId, x, y); }
   spawnAtCamera(templateId: string) { return this.spawner.spawnAtCamera(templateId); }
-  spawnBox(x = 0, y = 5, color = '#60a5fa', w = 1, h = 1, type: 'dynamic' | 'fixed' = 'dynamic') { return this.spawner.spawnBox(x, y, color, w, h, type); }
 
+  // Added spawnBox to facade per RUN_REF consolidation
+  spawnBox(x = 0, y = 5, color = '#60a5fa', w = 1, h = 1, type: 'dynamic' | 'fixed' = 'dynamic') {
+    return this.spawner.spawnBox(x, y, color, w, h, type);
+  }
+  
   deleteEntity(id: EntityId) { this.mutation.deleteEntity(id); }
   updateSpriteColor(id: EntityId, color: string) { this.mutation.updateSpriteColor(id, color); }
   updateEntityName(id: EntityId, name: string) { this.mutation.updateEntityName(id, name); }

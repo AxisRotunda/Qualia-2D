@@ -1,7 +1,7 @@
 
 import { Injectable, signal } from '@angular/core';
 import { EntityId } from './entity';
-import { Transform2D, Sprite2D, RigidBody2D, Collider2D, TagComponent, ForceField2D, PlayerController2D } from './components';
+import { Transform2D, Sprite2D, RigidBody2D, Collider2D, TagComponent, ForceField2D, PlayerController2D, SpriteAnimation, Interaction } from './components';
 
 /**
  * Registry-backed ECS Storage System.
@@ -17,6 +17,10 @@ export class ComponentStoreService {
   readonly tags = new Map<EntityId, TagComponent>();
   readonly forceFields = new Map<EntityId, ForceField2D>();
   readonly players = new Map<EntityId, PlayerController2D>();
+  
+  // RPG Systems
+  readonly animations = new Map<EntityId, SpriteAnimation>();
+  readonly interactions = new Map<EntityId, Interaction>();
 
   /**
    * Registry of all component maps for automated lifecycle management.
@@ -31,7 +35,9 @@ export class ComponentStoreService {
     ['collider', this.colliders],
     ['tag', this.tags],
     ['forceField', this.forceFields],
-    ['player', this.players]
+    ['player', this.players],
+    ['animation', this.animations],
+    ['interaction', this.interactions]
   ]);
 
   // High-level State Signals
@@ -71,6 +77,8 @@ export class ComponentStoreService {
   getSprite(id: EntityId): Sprite2D | undefined { return this.sprites.get(id); }
   getForceField(id: EntityId): ForceField2D | undefined { return this.forceFields.get(id); }
   getPlayer(id: EntityId): PlayerController2D | undefined { return this.players.get(id); }
+  getAnimation(id: EntityId): SpriteAnimation | undefined { return this.animations.get(id); }
+  getInteraction(id: EntityId): Interaction | undefined { return this.interactions.get(id); }
   
   /**
    * Utility for bulk component checks (e.g., for systems filtering).

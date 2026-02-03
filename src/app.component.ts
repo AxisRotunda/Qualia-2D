@@ -1,13 +1,13 @@
 import { Component, AfterViewInit, inject, ViewChild } from '@angular/core';
 import { Engine2DService } from './services/engine-2d.service';
-import { EngineState2DService } from './services/engine-state-2d.service';
+import { EngineState2DService, ActiveOverlay } from './services/engine-state-2d.service';
 import { CommandRegistryService, QualiaVerb } from './services/command-registry.service';
 import { Input2DService } from './services/input-2d.service';
 import { PwaService } from './services/pwa.service';
 import { DecimalPipe } from '@angular/common';
 import { SCENES } from './data/scene-presets';
 
-// UI Imports - Relocated to domain sub-directories
+// UI Imports
 import { ViewportComponent } from './app/ui/viewport/viewport.component';
 import { TelemetryComponent } from './app/ui/hud/telemetry.component';
 import { CommandHubComponent } from './app/ui/hud/command-hub.component';
@@ -20,6 +20,7 @@ import { HierarchyComponent } from './app/ui/panels/hierarchy.component';
 import { EngineSettingsComponent } from './app/ui/panels/engine-settings.component';
 import { SelectionToolbarComponent } from './app/ui/hud/selection-toolbar.component';
 import { PanelDrawerComponent } from './app/ui/panels/panel-drawer.component';
+import { LogViewerComponent } from './app/ui/hud/log-viewer.component';
 
 @Component({
   selector: 'app-root',
@@ -36,7 +37,8 @@ import { PanelDrawerComponent } from './app/ui/panels/panel-drawer.component';
     HierarchyComponent,
     EngineSettingsComponent,
     SelectionToolbarComponent,
-    PanelDrawerComponent
+    PanelDrawerComponent,
+    LogViewerComponent
   ],
   templateUrl: './app.component.html',
   host: {
@@ -64,14 +66,10 @@ export class AppComponent implements AfterViewInit {
     this.commands.execute(verb);
   }
 
-  toggleCreateMenu() {
-    this.input.reset(); 
-    this.state.isCreateMenuOpen.update(v => !v);
-  }
-
-  toggleSceneBrowser() {
+  toggleOverlay(overlay: ActiveOverlay) {
     this.input.reset();
-    this.state.isSceneBrowserOpen.update(v => !v);
+    const current = this.state.activeOverlay();
+    this.state.setOverlay(current === overlay ? 'none' : overlay);
   }
 
   loadScene(id: string) {
@@ -79,13 +77,13 @@ export class AppComponent implements AfterViewInit {
     if (scene) {
       this.input.reset();
       this.engine.loadScene(scene);
-      this.state.isSceneBrowserOpen.set(false);
+      this.state.setOverlay('none');
     }
   }
 
   spawnEntity(templateId: string) {
     this.engine.spawnAtCamera(templateId);
-    this.state.isCreateMenuOpen.set(false);
+    this.state.setOverlay('none');
     this.input.reset();
   }
 }

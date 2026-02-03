@@ -34,7 +34,7 @@ interface StickState {
           <div class="flex-1 h-full pointer-events-none"></div>
 
           <!-- Right Corridor -->
-          @if (state.topology() !== 'platformer') {
+          @if (state.topology() === 'top-down-action') {
              <div class="w-2/5 h-full pointer-events-auto"
                (touchstart)="onZoneStart($event, 'right')"
                (touchmove)="onZoneMove($event)"
@@ -56,8 +56,8 @@ interface StickState {
              </div>
         </div>
 
-        <!-- Right Stick Visual -->
-        @if (state.topology() !== 'platformer') {
+        <!-- Right Stick Visual (Action Only) -->
+        @if (state.topology() === 'top-down-action') {
           <div class="absolute w-32 h-32 -ml-16 -mt-16 rounded-full border border-white/10 bg-slate-900/40 backdrop-blur-xl flex items-center justify-center transition-opacity duration-150 ease-out will-change-transform"
                [style.left.px]="rightStick().originX"
                [style.top.px]="rightStick().originY"
@@ -70,17 +70,19 @@ interface StickState {
           </div>
         }
 
-        <!-- Jump Action (Platformer) -->
-        @if (state.topology() === 'platformer') {
+        <!-- JUMP (Platformer) / INTERACT (RPG) -->
+        @if (state.topology() === 'platformer' || state.topology() === 'top-down-rpg') {
            <div class="absolute bottom-8 right-8 flex flex-col gap-6 items-end p-4 pb-12 pr-12"
                 [class.pointer-events-none]="state.isOverlayOpen()"
                 [class.pointer-events-auto]="!state.isOverlayOpen()">
               <button 
-                (touchstart)="onJump($event, true)" 
-                (touchend)="onJump($event, false)"
-                (touchcancel)="onJump($event, false)"
+                (touchstart)="onAction($event, true)" 
+                (touchend)="onAction($event, false)"
+                (touchcancel)="onAction($event, false)"
                 class="w-20 h-20 rounded-full bg-slate-900/60 backdrop-blur-xl border border-white/20 active:bg-emerald-600 active:border-emerald-400 active:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all active:scale-95 flex items-center justify-center group shadow-2xl">
-                <span class="text-xl font-black text-white/90 group-active:text-white group-active:scale-110 transition-transform tracking-wider">JUMP</span>
+                <span class="text-xs font-black text-white/90 group-active:text-white group-active:scale-110 transition-transform tracking-widest">
+                  {{ state.topology() === 'platformer' ? 'JUMP' : 'ACT' }}
+                </span>
               </button>
            </div>
         }
@@ -148,11 +150,16 @@ export class VirtualJoypadComponent {
     this.updateEngineVectors();
   }
 
-  onJump(e: TouchEvent, isActive: boolean) {
+  onAction(e: TouchEvent, isActive: boolean) {
     if (this.state.isOverlayOpen()) return;
     e.preventDefault();
     this.input.isUsingJoypad.set(true);
-    this.input.moveVector.update(v => ({ x: v.x, y: isActive ? 1 : 0 }));
+    
+    if (this.state.topology() === 'platformer') {
+      this.input.moveVector.update(v => ({ x: v.x, y: isActive ? 1 : 0 }));
+    } else {
+      this.input.action.set(isActive);
+    }
   }
 
   private updateEngineVectors() {
@@ -171,7 +178,7 @@ export class VirtualJoypadComponent {
     }
 
     const r = this.rightStick();
-    if (r.active && this.state.topology() !== 'platformer') {
+    if (r.active && this.state.topology() === 'top-down-action') {
       const v = this.calculateVector(r);
       this.input.lookVector.set({ x: v.x, y: -v.y });
     } else {

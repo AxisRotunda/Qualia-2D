@@ -1,9 +1,9 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { Engine2DService } from '../../../services/engine-2d.service';
 import { EngineState2DService } from '../../../services/engine-state-2d.service';
-import { CameraService } from '../../../engine/core/camera.service';
+import { Camera2DService } from '../../../services/camera-2d.service';
 import { Input2DService } from '../../../services/input-2d.service';
-import { SelectionSystem } from '../../../engine/systems/selection-system';
+import { Selection2DService } from '../../../services/selection-2d.service';
 
 @Component({
   selector: 'app-viewport',
@@ -31,9 +31,9 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
   
   engine = inject(Engine2DService);
   state = inject(EngineState2DService);
-  camera = inject(CameraService);
+  camera = inject(Camera2DService);
   input = inject(Input2DService);
-  selection = inject(SelectionSystem);
+  selection = inject(Selection2DService);
 
   private isDraggingCamera = false;
   private lastX = 0;
@@ -81,7 +81,6 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
     
-    // Pivot zoom at mouse cursor
     const worldPos = this.camera.screenToWorld(
       e.clientX - rect.left, 
       e.clientY - rect.top, 
@@ -199,10 +198,8 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
         this.engine.renderer.height
       );
 
-      // Pivot zoom at pinch center
       this.camera.zoomAt(factor / (this.camera.zoom() / this.initialZoom), worldPos.x, worldPos.y);
       
-      // Update drag origin to allow simultaneous pan+zoom
       this.lastX = centerX;
       this.lastY = centerY;
     }

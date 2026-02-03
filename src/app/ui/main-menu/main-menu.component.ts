@@ -127,7 +127,7 @@ export class MainMenuComponent {
   launch(scene: any, topology: ControllerTopology) {
     this.engine.loadScene(scene);
     this.state.setTopology(topology);
-    this.state.isMainMenuOpen.set(false);
+    this.state.setOverlay('none');
     this.state.mode.set('play');
     this.selectedScene.set(null);
   }

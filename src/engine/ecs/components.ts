@@ -1,3 +1,4 @@
+
 export interface Transform2D {
   x: number;
   y: number;
@@ -15,6 +16,11 @@ export interface Sprite2D {
   opacity: number;
   flipX?: boolean;
   flipY?: boolean;
+  // Sprite Sheet Support
+  frameX?: number;
+  frameY?: number;
+  frameWidth?: number;
+  frameHeight?: number;
 }
 
 export interface RigidBody2D {
@@ -43,4 +49,20 @@ export interface PlayerController2D {
   turnSpeed: number;
   lastFireTime: number;
   fireRate: number; // ms between shots
+}
+
+export interface SpriteAnimation {
+  active: boolean;
+  state: string; // 'idle', 'walk'
+  facing: 'down' | 'up' | 'left' | 'right';
+  timer: number;
+  frameIndex: number;
+  // Config: State -> { row, count, speed }
+  config: Map<string, { row: number, count: number, speed: number }>;
+}
+
+export interface Interaction {
+  radius: number;
+  label: string;
+  triggerId: string;
 }

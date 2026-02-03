@@ -1,8 +1,13 @@
+
 import { Injectable } from '@angular/core';
 import { EntityId } from '../ecs/entity';
 import { ComponentStoreService } from '../ecs/component-store.service';
 import * as RAPIER from '@dimforge/rapier2d-compat';
 
+/**
+ * Deterministic Physics Core.
+ * [RUN_REF]: Merged picking and sync logic from redundant Physics2DService.
+ */
 @Injectable({ providedIn: 'root' })
 export class PhysicsEngine {
   world: RAPIER.World | null = null;
@@ -18,11 +23,15 @@ export class PhysicsEngine {
         this.world = new RAPIER.World({ x: 0.0, y: -9.81 });
         this.eventQueue = new RAPIER.EventQueue();
         this._ready = true;
+        console.log("Qualia2D: Physics Core Initialized");
     } catch (err) {
         console.error("Qualia2D: Rapier2D Init Failed", err);
     }
   }
 
+  /**
+   * Spatial Query for picking entities.
+   */
   pickEntityAt(x: number, y: number, radius = 0): EntityId | null {
     if (!this.world) return null;
     let selectedId: EntityId | null = null;
@@ -75,7 +84,7 @@ export class PhysicsEngine {
         if (rb.bodyType === 'dynamic') {
             const t = rb.handle.translation();
             const r = rb.handle.rotation();
-            const ecsTransform = this.store.transforms.get(id);
+            const ecsTransform = this.store.getTransform(id);
             if (ecsTransform) {
                 ecsTransform.x = t.x;
                 ecsTransform.y = t.y;

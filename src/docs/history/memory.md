@@ -10,18 +10,23 @@
 - **Action**: Created system instructions and XML spec.
 
 ## [v1.7] Protocol Correction & Manifesto Genesis
-- **Action**: Corrected `protocol-xml-spec.md` and `system-instructions.md`. Codified the 2D/3D sibling relationship.
+- **Action**: Corrected protocols and generated Qualia2D Manifesto.
 
-## [v1.8] Visual Protocol Expansion & Asset Overhaul
-- **Action**: Deployed `protocol-sprite.md` and `protocol-material.md`.
-- **Action**: Implemented Procedural Asset Generation in `AssetRegistryService`.
+## [v1.8] RPG Systems Integration
+- **Action**: Executed `RUN_RPG_SYS`. Added Animation and Interaction systems.
 
-## [v1.8.5] RUN_REF: Modular UI Evolution
-- **Action**: Refactored monolithic `MainMenuComponent` and reorganized UI layer into domain directories.
-- **Repair**: Applied explicit selection gating in `AppComponent` template to handle Entity ID 0 and fixed `NG0950` in `MenuLaunchModalComponent`.
+## [v1.9] Architectural Refactor (Internal)
+- **Action**: Consolidated services and optimized RenderSystem.
 
-## [v1.9] RUN_KNOWLEDGE: Technical Synthesis
-- **Action**: Executed full documentation sync. 
-- **Action**: Created architectural dives for `hyper-core.md` and `memory-tiering.md` to bridge protocol definitions with implementation.
-- **Action**: Updated `kernel.md` and `project-hierarchy.md` to reflect the integration of Kalman Fusion, Gesture Oracle, and IndexedDB persistence.
-- **Outcome**: The knowledge kernel is now 100% aligned with the Hyper-Core engine state.
+## [v1.10] Deep Refactor (RUN_REF)
+- **Action**: Executed `RUN_REF` protocol.
+- **Details**:
+  - Eliminated redundant services in `src/services/`.
+  - Enforced strict boundary: UI components now strictly use facades.
+  - Refactored `CameraService` and `SelectionSystem`.
+
+## [v1.11] UI & Config Refactor (RUN_REF)
+- **Action**: Consolidated overlay state in `EngineState2DService`.
+- **Action**: Extracted `LogViewerComponent` from `AppComponent` to isolate HUD logic.
+- **Action**: Created `src/data/config/visual-config.ts` to externalize rendering constants from `RenderSystem`.
+- **Outcome**: Portability Score (P) of the RenderSystem improved from 5 to 2. Root UI is now more maintainable and declarative.

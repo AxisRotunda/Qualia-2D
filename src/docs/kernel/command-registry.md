@@ -27,6 +27,7 @@
 | `RUN_ARCHETYPE` | protocol-archetype | Time-sliced entity streaming. | [Archetype](../protocols/protocol-archetype.md) |
 | `RUN_ORACLE_SYNTH` | protocol-hyper-core | Regenerate Gesture Automaton LUT. | [Hyper Core](../protocols/protocol-hyper-core.md) |
 | `RUN_KALMAN_CALIB` | protocol-hyper-core | Reset/Tune Kalman Filter covariance. | [Hyper Core](../protocols/protocol-hyper-core.md) |
+| `RUN_RPG_SYS` | protocol-rpg | RPG Systems (Animation, Interaction). | [RPG](../protocols/protocol-rpg.md) |
 
 ## 3. PROTOCOL EVOLUTION
 Operational verbs are not static. Use `RUN_PROTOCOL` to mutate existing logic or create new domain-specific capabilities (e.g., `RUN_SCENE_GEN`).

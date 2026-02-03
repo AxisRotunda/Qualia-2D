@@ -38,6 +38,7 @@ export class Input2DService {
   // Normalized Intent Vectors
   readonly moveVector = signal<Vector2>({ x: 0, y: 0 });
   readonly lookVector = signal<Vector2>({ x: 0, y: 0 });
+  readonly action = signal<boolean>(false);
 
   // Expose specific signals for high-frequency consumption
   readonly keys = signal<Set<string>>(new Set());
@@ -60,6 +61,11 @@ export class Input2DService {
       else next.delete(k);
       return next;
     });
+    
+    // Map Spacebar/E to Action
+    if (k === ' ' || k === 'e') {
+      this.action.set(isDown);
+    }
   }
 
   /**
@@ -79,13 +85,10 @@ export class Input2DService {
     this.kalman.correct(x, y);
     
     // 3. Oracle Classification
-    // Calculate normalized delta for gesture classification
-    // (Simplified: assuming normalized viewport space -1 to 1)
     if (dt > 0 && dt < 0.5) {
        const prev = this.cursorWorld();
-       const dx = (x - prev.x); // Should normalize based on viewport
+       const dx = (x - prev.x); 
        const dy = (y - prev.y);
-       // Pass raw deltas to oracle, logic inside handles discrete buckets
        const gesture = this.oracle.classify(dx, dy, dt);
        if (gesture !== GestureType.NONE) {
          this.lastGesture.set(gesture);
@@ -117,6 +120,7 @@ export class Input2DService {
     this.keys.set(new Set());
     this.moveVector.set({ x: 0, y: 0 });
     this.lookVector.set({ x: 0, y: 0 });
+    this.action.set(false);
     this.isUsingJoypad.set(false);
     this.isDragging.set(false);
     this.dragTargetPos.set(null);

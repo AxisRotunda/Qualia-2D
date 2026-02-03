@@ -1,8 +1,8 @@
-
 import { Injectable, signal, computed } from '@angular/core';
 
 export type EngineMode = 'edit' | 'play';
 export type ActivePanel = 'none' | 'hierarchy' | 'inspector' | 'settings';
+export type ActiveOverlay = 'none' | 'scene-browser' | 'create-menu' | 'main-menu';
 export type ControllerTopology = 'platformer' | 'top-down-rpg' | 'top-down-action';
 
 @Injectable({ providedIn: 'root' })
@@ -19,23 +19,24 @@ export class EngineState2DService {
 
   // Simulation Globals
   readonly gravityY = signal<number>(-9.81);
-  readonly bgColor = signal<string>('#0f172a');
+  readonly bgColor = signal<string>('#020617');
   readonly gridVisible = signal<boolean>(true);
   readonly debugPhysics = signal<boolean>(false);
 
   // UI / Interaction Session
   readonly activePanel = signal<ActivePanel>('none');
+  readonly activeOverlay = signal<ActiveOverlay>('main-menu');
   readonly selectedEntityId = signal<number | null>(null);
-  
-  // Overlay States
-  readonly isMainMenuOpen = signal<boolean>(true); // Starts Open
-  readonly isSceneBrowserOpen = signal<boolean>(false);
-  readonly isCreateMenuOpen = signal<boolean>(false);
 
-  // Derived: Global block for input / joystick
+  // Derived: Global block for input / viewport
   readonly isOverlayOpen = computed(() => {
-    return this.isSceneBrowserOpen() || this.isCreateMenuOpen() || this.loading() || this.isMainMenuOpen();
+    return this.activeOverlay() !== 'none' || this.loading();
   });
+
+  // Legacy compatibility for components using specific overlay signals
+  readonly isMainMenuOpen = computed(() => this.activeOverlay() === 'main-menu');
+  readonly isSceneBrowserOpen = computed(() => this.activeOverlay() === 'scene-browser');
+  readonly isCreateMenuOpen = computed(() => this.activeOverlay() === 'create-menu');
 
   readonly statusText = computed(() => {
     if (this.loading()) return 'LOADING';
@@ -60,6 +61,10 @@ export class EngineState2DService {
   
   setActivePanel(panel: ActivePanel) {
     this.activePanel.update(current => current === panel ? 'none' : panel);
+  }
+
+  setOverlay(overlay: ActiveOverlay) {
+    this.activeOverlay.set(overlay);
   }
 
   toggleGrid() { this.gridVisible.update(v => !v); }
