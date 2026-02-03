@@ -3,6 +3,8 @@ import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
 import { SceneManagerService } from './scene-manager.service';
 import { MemorySystem2DService } from './memory-2d.service';
+import { GestureOracleService } from '../engine/core/gesture-oracle.service';
+import { KalmanFilterService } from '../engine/core/kalman-filter.service';
 
 export type QualiaVerb = 
   | 'RUN_KNOWLEDGE' 
@@ -19,7 +21,9 @@ export type QualiaVerb =
   | 'RUN_PROTOCOL'
   | 'RUN_GUIDE_GEN'
   | 'RUN_INDUSTRY'
-  | 'RUN_MEM_ARCH';
+  | 'RUN_MEM_ARCH'
+  | 'RUN_ORACLE_SYNTH'
+  | 'RUN_KALMAN_CALIB';
 
 @Injectable({ providedIn: 'root' })
 export class CommandRegistryService {
@@ -27,6 +31,8 @@ export class CommandRegistryService {
   private ecs = inject(ComponentStoreService);
   private sceneManager = inject(SceneManagerService);
   private memory = inject(MemorySystem2DService);
+  private oracle = inject(GestureOracleService);
+  private kalman = inject(KalmanFilterService);
   
   readonly lastCommand = signal<QualiaVerb | null>(null);
   readonly commandLog = signal<string[]>([]);
@@ -41,7 +47,7 @@ export class CommandRegistryService {
     
     // Tagging logic for automated Narrative Sync (memory.md)
     const tags = ['command'];
-    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE'].includes(verb)) {
+    if (['RUN_REPAIR', 'RUN_REF', 'RUN_PROTOCOL', 'RUN_MEM_ARCH', 'RUN_MAT', 'RUN_SPRITE', 'RUN_ORACLE_SYNTH', 'RUN_KALMAN_CALIB'].includes(verb)) {
       tags.push('notable'); 
     }
 
@@ -80,6 +86,14 @@ export class CommandRegistryService {
         break;
       case 'RUN_MEM_ARCH':
         this.performMemoryAudit();
+        break;
+      case 'RUN_ORACLE_SYNTH':
+        this.oracle.synthesizeTable();
+        this.log('HYPER_CORE: GESTURE_LUT_REBUILT (32KB)', ['optimization']);
+        break;
+      case 'RUN_KALMAN_CALIB':
+        this.kalman.reset();
+        this.log('HYPER_CORE: KALMAN_STATE_RESET', ['optimization']);
         break;
       default:
         this.log(`WARN: Protocol ${verb} offline.`, ['warning']);

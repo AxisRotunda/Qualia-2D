@@ -35,6 +35,29 @@ export class RenderSystem {
     }
   }
 
+  /**
+   * [FRACTAL_BATCHING] Computes Morton Code (Z-Order Curve) for 2D coordinates.
+   * Used for spatial locality sorting.
+   */
+  private computeMorton(x: number, y: number): number {
+    // Normalize coords to positive integer space (arbitrary offset/scale)
+    let ix = Math.floor((x + 1000) * 10) & 0xFFFF;
+    let iy = Math.floor((y + 1000) * 10) & 0xFFFF;
+
+    // Interleave bits (Simplified for JS 32-bit ints)
+    ix = (ix | (ix << 8)) & 0x00FF00FF;
+    ix = (ix | (ix << 4)) & 0x0F0F0F0F;
+    ix = (ix | (ix << 2)) & 0x33333333;
+    ix = (ix | (ix << 1)) & 0x55555555;
+
+    iy = (iy | (iy << 8)) & 0x00FF00FF;
+    iy = (iy | (iy << 4)) & 0x0F0F0F0F;
+    iy = (iy | (iy << 2)) & 0x33333333;
+    iy = (iy | (iy << 1)) & 0x55555555;
+
+    return ix | (iy << 1);
+  }
+
   render() {
     if (!this.ctx || !this.canvas) return;
     
@@ -44,187 +67,191 @@ export class RenderSystem {
     const zoom = this.camera.zoom();
     const halfW = this.width / 2;
     const halfH = this.height / 2;
-    const time = performance.now() / 1000;
 
-    // 1. Clear Frame
+    // 1. Clear & Grid
     ctx.fillStyle = this.state.bgColor();
     ctx.fillRect(0, 0, this.width, this.height);
-    
-    // 2. Grid Layer
-    if (this.state.gridVisible()) {
-        this.drawGrid(ctx, camX, camY, zoom, halfW, halfH);
-    }
+    if (this.state.gridVisible()) this.drawGrid(ctx, camX, camY, zoom, halfW, halfH);
 
-    // 3. Project Reality
+    // 2. Scene Transform
     ctx.save();
     ctx.translate(halfW, halfH);
     ctx.scale(zoom, -zoom);
     ctx.translate(-camX, -camY);
 
-    // Sorted Entity Pass
-    const entities = [...this.store.entitiesList()].sort((a, b) => {
-      const layerA = this.store.getSprite(a)?.layer ?? 0;
-      const layerB = this.store.getSprite(b)?.layer ?? 0;
-      return layerA - layerB;
+    const time = performance.now() / 1000;
+
+    // 3. Entity Loop (Hyper-Optimized Sort)
+    // Sort by Layer (Primary) -> Morton Code (Secondary)
+    const sortedEntities = [...this.store.entitiesList()].sort((a, b) => {
+      const spriteA = this.store.getSprite(a);
+      const spriteB = this.store.getSprite(b);
+      const layerA = spriteA?.layer ?? 0;
+      const layerB = spriteB?.layer ?? 0;
+
+      if (layerA !== layerB) return layerA - layerB;
+
+      // Secondary Sort: Spatial Locality via Morton Code
+      const tA = this.store.getTransform(a);
+      const tB = this.store.getTransform(b);
+      if (tA && tB) {
+        return this.computeMorton(tA.x, tA.y) - this.computeMorton(tB.x, tB.y);
+      }
+      return 0;
     });
 
-    for (const id of entities) {
+    sortedEntities.forEach(id => {
         const t = this.store.getTransform(id);
-        if (!t) continue;
+        if (!t) return;
 
         ctx.save();
         ctx.translate(t.x, t.y);
         ctx.rotate(t.rotation);
         
-        this.drawEntityVisuals(ctx, id, zoom, time);
+        this.drawSprite(ctx, id, zoom);
+        this.drawForceField(ctx, id, zoom, time);
+        this.drawHighlight(ctx, id, zoom, time);
         
         ctx.restore();
 
-        this.drawInteractionOverlays(ctx, id, zoom, t);
-    }
+        this.drawDragLeash(ctx, id, zoom, t);
+    });
 
     ctx.restore();
   }
 
-  private drawEntityVisuals(ctx: CanvasRenderingContext2D, id: number, zoom: number, time: number) {
-      const s = this.store.getSprite(id);
-      const force = this.store.getForceField(id);
+  private drawSprite(ctx: CanvasRenderingContext2D, id: number, zoom: number) {
+    const s = this.store.getSprite(id);
+    if (!s) return;
+    
+    ctx.globalAlpha = s.opacity;
+    
+    // Check for Texture
+    const texture = s.textureId ? this.assets.getTexture(s.textureId) : null;
+    
+    if (texture) {
+      // Texture Rendering with Flipped logic
+      const scaleX = s.flipX ? -1 : 1;
+      const scaleY = s.flipY ? -1 : 1;
       
-      // Forces (Low Alpha Underlay)
-      if (force) {
-         this.drawForceFieldIndicator(ctx, force, zoom, time);
+      if (s.flipX || s.flipY) {
+        ctx.save();
+        ctx.scale(scaleX, scaleY);
       }
-
-      // Main Sprite Pass
-      if (s) {
-        ctx.globalAlpha = s.opacity;
-        const texture = s.textureId ? this.assets.getTexture(s.textureId) : null;
-        
-        // Emissive Bloom logic
-        const isEmissive = s.color === '#6366f1' || s.color === '#f43f5e' || s.color === '#10b981';
-        if (isEmissive) {
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = s.color;
-        }
-
-        if (texture) {
-            if (s.flipX || s.flipY) {
-              ctx.save();
-              ctx.scale(s.flipX ? -1 : 1, s.flipY ? -1 : 1);
-            }
-            ctx.drawImage(texture, -s.width/2, -s.height/2, s.width, s.height);
-            if (s.flipX || s.flipY) ctx.restore();
-        } else {
-            ctx.fillStyle = s.color;
-            ctx.fillRect(-s.width/2, -s.height/2, s.width, s.height);
-        }
-        
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1.0;
+      
+      ctx.drawImage(texture, -s.width / 2, -s.height / 2, s.width, s.height);
+      
+      if (s.flipX || s.flipY) {
+        ctx.restore();
       }
-
-      // Physics Debug Overlays
-      if (this.state.debugPhysics()) {
-        const sW = s ? s.width : 1;
-        const sH = s ? s.height : 1;
+    } else {
+      // Solid Fallback
+      ctx.fillStyle = s.color;
+      ctx.fillRect(-s.width / 2, -s.height / 2, s.width, s.height);
+    }
+    
+    if (this.state.debugPhysics()) {
         ctx.strokeStyle = '#f0f';
         ctx.lineWidth = 1 / zoom;
-        ctx.strokeRect(-sW/2, -sH/2, sW, sH);
-      }
-
-      // Selection Brackets
-      if (this.state.selectedEntityId() === id) {
-         this.drawSelectionBracket(ctx, s ? s.width : 1, s ? s.height : 1, zoom, time);
-      }
+        ctx.strokeRect(-s.width / 2, -s.height / 2, s.width, s.height);
+    }
+    ctx.globalAlpha = 1.0;
   }
 
-  private drawForceFieldIndicator(ctx: CanvasRenderingContext2D, field: any, zoom: number, time: number) {
+  private drawForceField(ctx: CanvasRenderingContext2D, id: number, zoom: number, time: number) {
+    const field = this.store.getForceField(id);
+    if (!field) return;
+
     const color = field.strength > 0 ? '#6366f1' : '#f43f5e';
-    const pulse = Math.sin(time * 6) * 0.1 + 0.9;
+    const pulse = Math.sin(time * 5) * 0.1 + 0.9;
     
     ctx.strokeStyle = color;
+    ctx.setLineDash([0.1, 0.1]);
     ctx.lineWidth = 2 / zoom;
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = 0.3;
     
     ctx.beginPath();
     ctx.arc(0, 0, field.radius * pulse, 0, Math.PI * 2);
     ctx.stroke();
-
-    const grad = ctx.createRadialGradient(0,0,0,0,0,field.radius);
-    grad.addColorStop(0, color + '00');
-    grad.addColorStop(1, color + '20');
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.arc(0,0,field.radius, 0, Math.PI*2); ctx.fill();
-    ctx.globalAlpha = 1.0;
-  }
-
-  private drawSelectionBracket(ctx: CanvasRenderingContext2D, w: number, h: number, zoom: number, time: number) {
-    const color = this.input.isDragging() ? '#60a5fa' : '#3b82f6';
-    const pad = 0.15;
-    const size = 0.35;
-    const hw = w/2 + pad;
-    const hh = h/2 + pad;
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3 / zoom;
-    ctx.lineCap = 'round';
-    ctx.globalAlpha = 0.8;
     
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.8;
     ctx.beginPath();
-    // Top Left
-    ctx.moveTo(-hw + size, -hh); ctx.lineTo(-hw, -hh); ctx.lineTo(-hw, -hh + size);
-    // Top Right
-    ctx.moveTo(hw - size, -hh); ctx.lineTo(hw, -hh); ctx.lineTo(hw, -hh + size);
-    // Bottom Left
-    ctx.moveTo(-hw + size, hh); ctx.lineTo(-hw, hh); ctx.lineTo(-hw, hh - size);
-    // Bottom Right
-    ctx.moveTo(hw - size, hh); ctx.lineTo(hw, hh); ctx.lineTo(hw, hh - size);
-    ctx.stroke();
+    ctx.arc(0, 0, 0.1, 0, Math.PI * 2);
+    ctx.fill();
     ctx.globalAlpha = 1.0;
   }
 
-  private drawInteractionOverlays(ctx: CanvasRenderingContext2D, id: number, zoom: number, t: any) {
+  private drawHighlight(ctx: CanvasRenderingContext2D, id: number, zoom: number, time: number) {
+    if (this.state.selectedEntityId() !== id) return;
+
+    const isDragging = this.input.isDragging();
+    const pulse = Math.sin(time * 12) * 0.2 + 0.8;
+    const s = this.store.getSprite(id);
+    
+    ctx.strokeStyle = isDragging ? '#60a5fa' : '#3b82f6';
+    ctx.lineWidth = (isDragging ? 8 : 4) / zoom;
+    ctx.setLineDash([]);
+    ctx.globalAlpha = pulse * 0.5;
+    
+    if (s) {
+        ctx.strokeRect(-s.width / 2 - 0.1, -s.height / 2 - 0.1, s.width + 0.2, s.height + 0.2);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1 / zoom;
+        ctx.globalAlpha = 1.0;
+        ctx.strokeRect(-s.width / 2, -s.height / 2, s.width, s.height);
+    } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, 0.35, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    ctx.globalAlpha = 1.0;
+  }
+
+  private drawDragLeash(ctx: CanvasRenderingContext2D, id: number, zoom: number, t: any) {
     if (this.state.selectedEntityId() !== id || !this.input.isDragging()) return;
+    
     const target = this.input.dragTargetPos();
     if (target && this.state.mode() === 'play') {
         ctx.beginPath();
         ctx.moveTo(t.x, t.y);
         ctx.lineTo(target.x, target.y);
-        ctx.strokeStyle = 'rgba(96, 165, 250, 0.4)';
+        ctx.strokeStyle = '#60a5fa';
         ctx.lineWidth = 2 / zoom;
         ctx.setLineDash([0.1, 0.1]);
         ctx.stroke();
         ctx.setLineDash([]);
-        
-        ctx.fillStyle = '#60a5fa';
-        ctx.beginPath(); ctx.arc(target.x, target.y, 0.1, 0, Math.PI*2); ctx.fill();
     }
   }
 
   private drawGrid(ctx: CanvasRenderingContext2D, camX: number, camY: number, zoom: number, halfW: number, halfH: number) {
     ctx.save();
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.25;
-    
     const gridSize = 1;
     const step = gridSize * zoom;
     const offsetX = (-camX * zoom + halfW) % step;
     const offsetY = (camY * zoom + halfH) % step;
-    
+
     ctx.beginPath();
-    for (let x = offsetX; x < this.width; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, this.height); }
-    for (let y = offsetY; y < this.height; y += step) { ctx.moveTo(0, y); ctx.lineTo(this.width, y); }
+    for (let x = offsetX; x < this.width; x += step) {
+        ctx.moveTo(x, 0); ctx.lineTo(x, this.height);
+    }
+    for (let y = offsetY; y < this.height; y += step) {
+        ctx.moveTo(0, y); ctx.lineTo(this.width, y);
+    }
     ctx.stroke();
     
-    ctx.globalAlpha = 0.6;
-    ctx.lineWidth = 2;
-    const ox = (-camX * zoom + halfW);
-    const oy = (camY * zoom + halfH);
-    
-    if (ox >= 0 && ox <= this.width) { ctx.strokeStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox, this.height); ctx.stroke(); }
-    if (oy >= 0 && oy <= this.height) { ctx.strokeStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(this.width, oy); ctx.stroke(); }
-    
+    const originScreenX = (-camX * zoom + halfW);
+    const originScreenY = (camY * zoom + halfH);
+    if (originScreenX >= 0 && originScreenX <= this.width) {
+        ctx.strokeStyle = '#ef444466';
+        ctx.beginPath(); ctx.moveTo(originScreenX, 0); ctx.lineTo(originScreenX, this.height); ctx.stroke();
+    }
+    if (originScreenY >= 0 && originScreenY <= this.height) {
+        ctx.strokeStyle = '#22c55e66';
+        ctx.beginPath(); ctx.moveTo(0, originScreenY); ctx.lineTo(this.width, originScreenY); ctx.stroke();
+    }
     ctx.restore();
   }
 }

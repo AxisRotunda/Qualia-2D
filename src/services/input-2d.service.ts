@@ -1,5 +1,7 @@
 
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { GestureOracleService, GestureType } from '../engine/core/gesture-oracle.service';
+import { KalmanFilterService } from '../engine/core/kalman-filter.service';
 
 export interface Vector2 { x: number; y: number; }
 export type InteractionDevice = 'mouse' | 'touch';
@@ -14,9 +16,13 @@ export interface RawInputState {
 /**
  * Unified Input Orchestration Service.
  * Translates hardware events into deterministic engine intent.
+ * Now augmented with Gesture Oracle and Kalman Fusion.
  */
 @Injectable({ providedIn: 'root' })
 export class Input2DService {
+  private oracle = inject(GestureOracleService);
+  private kalman = inject(KalmanFilterService);
+
   // Raw Hardware State (Internal)
   private _raw = signal<RawInputState>({
     keys: new Set(),
@@ -39,6 +45,10 @@ export class Input2DService {
   readonly isDragging = signal<boolean>(false);
   readonly dragTargetPos = signal<Vector2 | null>(null);
 
+  // Gesture State
+  readonly lastGesture = signal<GestureType>(GestureType.NONE);
+  private lastCursorTime = 0;
+
   /**
    * Updates key state with normalization.
    */
@@ -54,9 +64,37 @@ export class Input2DService {
 
   /**
    * Sets the world-space cursor position.
+   * Applies Kalman filtering for prediction/smoothing.
    */
   setCursor(x: number, y: number) {
-    this.cursorWorld.set({ x, y });
+    const now = performance.now();
+    const dt = (now - this.lastCursorTime) / 1000;
+    
+    // 1. Kalman Predict Step
+    if (dt > 0) {
+      this.kalman.predict(dt);
+    }
+    
+    // 2. Kalman Correct Step
+    this.kalman.correct(x, y);
+    
+    // 3. Oracle Classification
+    // Calculate normalized delta for gesture classification
+    // (Simplified: assuming normalized viewport space -1 to 1)
+    if (dt > 0 && dt < 0.5) {
+       const prev = this.cursorWorld();
+       const dx = (x - prev.x); // Should normalize based on viewport
+       const dy = (y - prev.y);
+       // Pass raw deltas to oracle, logic inside handles discrete buckets
+       const gesture = this.oracle.classify(dx, dy, dt);
+       if (gesture !== GestureType.NONE) {
+         this.lastGesture.set(gesture);
+       }
+    }
+
+    const smoothPos = this.kalman.getPredictedPosition();
+    this.cursorWorld.set(smoothPos);
+    this.lastCursorTime = now;
   }
 
   /**
@@ -66,6 +104,7 @@ export class Input2DService {
     this.isDragging.set(active);
     if (pos) {
       this.dragTargetPos.set(pos);
+      this.kalman.calibrate(pos.x, pos.y); // Reset filter on new grab
     } else if (!active) {
       this.dragTargetPos.set(null);
     }
@@ -81,5 +120,6 @@ export class Input2DService {
     this.isUsingJoypad.set(false);
     this.isDragging.set(false);
     this.dragTargetPos.set(null);
+    this.kalman.reset();
   }
 }

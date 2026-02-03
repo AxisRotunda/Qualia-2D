@@ -21,6 +21,16 @@
 
 ## [v1.10] RUN_INDUSTRY: Pivot-Zoom Calibration
 - **Action**: Researched and implemented "Pivot-Zoom" across mouse and touch devices.
-- **Context**: `CameraService.zoomAt` and `ViewportComponent` interaction logic.
-- **Outcome**: UX parity with high-end tools (Figma/Godot). Zooming is now relative to the pointer/pinch-center.
-- **Performance**: Remains O(1) in the tick cycle.
+
+## [v1.12] RUN_REPAIR: Touch Unresponsiveness
+- **Action**: Implemented `pointer-events` gating on Overlays and Viewport.
+
+## [v1.13] RUN_ORACLE_SYNTH: Hyper-Optimized Core
+- **Action**: Deployed `GestureOracleService` (LUT) and `KalmanFilterService` (SIMD-Mimic).
+- **Optimization**: Integrated Morton Code sorting into `RenderSystem`.
+
+## [v1.14] RUN_HYPER_CORE: Integration & Scene Enrichment
+- **Action**: Integrated `KalmanFilterService` into `CameraService` for predictive follow-smoothing.
+- **Action**: Mutated `Kinetic Chaos` scene to include `GravityWell` prefabs, demonstrating `protocol-forces.md`.
+- **Action**: Refined `TelemetryComponent` visual layout for Obsidian-class cognitive state readout.
+- **Outcome**: Engine achieves 0-latency perceived tracking and demonstrates complex dynamic force interactions.

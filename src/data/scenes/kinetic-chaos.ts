@@ -1,21 +1,46 @@
 import type { Engine2DService } from '../../services/engine-2d.service';
 import type { ScenePreset2D } from '../../engine/scene.types';
 
+/**
+ * [RUN_SCENE_GEN]: Kinetic Chaos (Force-Enhanced)
+ * Demonstrates high-density physics interaction combined with dynamic force fields.
+ */
 export const KINETIC_CHAOS: ScenePreset2D = {
   id: 'stress_test',
   name: 'Kinetic Chaos',
-  description: 'High-density physics node stress test.',
-  tags: ['Benchmark', 'Stress-Test'],
+  description: 'High-density physics node stress test with dynamic gravity wells.',
+  tags: ['Benchmark', 'Stress-Test', 'Forces'],
   complexity: 'stress-test',
   preferredTopology: 'platformer',
   load: (engine: Engine2DService) => {
+    // 1. Physics Context
     engine.state.setTopology('platformer');
+    
+    // 2. Structural Bounds
     engine.spawnBox(0, -10, '#1e293b', 100, 2, 'fixed');
     
-    for(let i = 0; i < 60; i++) {
-      const x = (i % 10) * 2 - 10;
-      const y = Math.floor(i / 10) * 2;
-      engine.spawnBox(x, y, '#8b5cf6', 0.8, 0.8, 'dynamic');
+    // 3. The Core: Central Gravity Well
+    // Placed above the main crowd to stir the dynamic entities
+    engine.factory.spawnGravityWell(0, 5, 45, 12);
+    
+    // 4. Peripheral Repulsors (Rose-themed)
+    engine.factory.spawnGravityWell(-15, 0, -30, 6);
+    engine.factory.spawnGravityWell(15, 0, -30, 6);
+
+    // 5. Massive Density Spawn
+    const cols = 15;
+    const rows = 10;
+    const spacing = 1.2;
+    
+    for(let i = 0; i < cols * rows; i++) {
+      const x = (i % cols) * spacing - (cols * spacing / 2);
+      const y = Math.floor(i / cols) * spacing + 2;
+      
+      const color = Math.random() > 0.5 ? '#8b5cf6' : '#6366f1';
+      engine.spawnBox(x, y, color, 0.8, 0.8, 'dynamic');
     }
+
+    // 6. Player Injection
+    engine.factory.spawnPlayer(0, 10);
   }
 };

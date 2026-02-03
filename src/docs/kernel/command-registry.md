@@ -24,6 +24,8 @@
 | `RUN_POST` | protocol-post-processing | Optical fidelity and screen-space filters. | [Post-Processing](../protocols/protocol-post-processing.md) |
 | `RUN_ASSET` | protocol-asset-pipeline | Resource loading and cache management. | [Asset Pipeline](../protocols/protocol-asset-pipeline.md) |
 | `RUN_SCENE_OPT` | protocol-scene-optimizer | Level-logic deletion of out-of-bounds entities. | [Scene Opt](../protocols/protocol-scene-optimizer.md) |
+| `RUN_ORACLE_SYNTH` | protocol-hyper-core | Regenerate Gesture Automaton LUT. | [Hyper Core](../protocols/protocol-hyper-core.md) |
+| `RUN_KALMAN_CALIB` | protocol-hyper-core | Reset/Tune Kalman Filter covariance. | [Hyper Core](../protocols/protocol-hyper-core.md) |
 
 ## 3. PROTOCOL EVOLUTION
 Operational verbs are not static. Use `RUN_PROTOCOL` to mutate existing logic or create new domain-specific capabilities (e.g., `RUN_SCENE_GEN`).

@@ -25,7 +25,12 @@
 
 ### /src/engine (Core Simulation Module)
 - `ecs/`: Entity and Component stores.
-- `core/`: Irreducible atoms (Physics, Camera, Assets).
+- `core/`: Irreducible atoms.
+  - `physics-engine.service.ts`: Rapier2D Wrapper.
+  - `camera.service.ts`: Projection Matrix.
+  - `asset-registry.service.ts`: Resource Cache.
+  - `gesture-oracle.service.ts`: **[NEW]** Input Automaton (LUT).
+  - `kalman-filter.service.ts`: **[NEW]** Prediction (SIMD-Mimic).
 - `systems/`: Logic processors (Physics, Render, Selection, Controller).
 - `factory/`: Instantiation logic (EntityFactory).
 - `runtime/`: The high-frequency RAF loop.
@@ -42,9 +47,8 @@
 ### /src/docs (Logic & Protocol Kernel)
 - `kernel/`: Structural foundations.
 - `protocols/`: Operational verb definitions.
-  - `protocol-constructor.md`: Genesis logic.
-  - `protocol-memory-arch.md`: Memory tiering logic.
-- `agent-ops/`: **[NEW]** Context Packs for External AI Agents.
+  - `protocol-hyper-core.md`: **[NEW]** Optimization laws.
+- `agent-ops/`: Context Packs for External AI Agents.
 - `engine/`: Deep architectural dives (ECS, Physics, Render, Input, Scenes, Camera).
 - `visual/`: Obsidian Glass design language.
 - `history/`: Session memory and repair logs.
