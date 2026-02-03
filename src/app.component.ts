@@ -20,6 +20,7 @@ import { CreateMenuOverlayComponent } from './app/ui/overlays/create-menu.compon
 import { HierarchyComponent } from './app/ui/hierarchy.component';
 import { EngineSettingsComponent } from './app/ui/engine-settings.component';
 import { SelectionToolbarComponent } from './app/ui/selection-toolbar.component';
+import { PanelDrawerComponent } from './app/ui/panels/panel-drawer.component';
 
 @Component({
   selector: 'app-root',
@@ -35,7 +36,8 @@ import { SelectionToolbarComponent } from './app/ui/selection-toolbar.component'
     CreateMenuOverlayComponent,
     HierarchyComponent,
     EngineSettingsComponent,
-    SelectionToolbarComponent
+    SelectionToolbarComponent,
+    PanelDrawerComponent
   ],
   templateUrl: './app.component.html',
   host: {

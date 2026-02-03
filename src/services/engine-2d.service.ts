@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { Camera2DService } from './camera-2d.service';
@@ -9,20 +10,19 @@ import { GameLoopService } from '../engine/runtime/game-loop.service';
 import { AssetRegistryService } from './asset-registry.service';
 import { EntityId } from '../engine/ecs/entity';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
-import { ControllerSystem2DService } from '../engine/systems/controller-system.service';
-import { PhysicsSystem2DService } from '../engine/systems/physics-system.service';
 import { SceneManagerService } from './scene-manager.service';
+import { Runtime2DService } from './runtime-2d.service';
+import { Selection2DService } from './selection-2d.service';
+import { ENTITY_TEMPLATES, EntityTemplate } from '../data/prefabs/entity-blueprints';
 import type { ScenePreset2D } from '../engine/scene.types';
 
-export interface EntityTemplate {
-  id: string;
-  name: string;
-  category: 'primitive' | 'dynamic' | 'force';
-  icon: string;
-}
-
+/**
+ * High-Level Engine Orchestrator.
+ * [RUN_REF]: Now acts as a lightweight Bridge following Modular Isolation (P <= 3).
+ */
 @Injectable({ providedIn: 'root' })
 export class Engine2DService {
+  // logic Orchestrators
   readonly state = inject(EngineState2DService);
   readonly camera = inject(Camera2DService);
   readonly input = inject(Input2DService);
@@ -34,22 +34,19 @@ export class Engine2DService {
   readonly assets = inject(AssetRegistryService);
 
   private loop = inject(GameLoopService);
-  private controllers = inject(ControllerSystem2DService);
-  private physicsSystem = inject(PhysicsSystem2DService);
+  private runtime = inject(Runtime2DService);
+  private selection = inject(Selection2DService);
 
-  readonly templates: EntityTemplate[] = [
-    { id: 'box_static', name: 'Static Box', category: 'primitive', icon: 'M4 4h16v16H4z' },
-    { id: 'box_dynamic', name: 'Dynamic Box', category: 'dynamic', icon: 'M21 8V16L12 21L3 16V8L12 3L21 8Z' },
-    { id: 'gravity_well', name: 'Gravity Well', category: 'force', icon: 'M12 2v4m0 12v4M2 12h4m12 0h4' },
-    { id: 'sensor_area', name: 'Trigger Zone', category: 'primitive', icon: 'M12 3v18M3 12h18' }
-  ];
+  readonly templates: EntityTemplate[] = ENTITY_TEMPLATES;
 
   async init(canvas: HTMLCanvasElement, initialScene: ScenePreset2D) {
     this.renderer.attach(canvas);
     await this.physics.init();
-    await this.assets.loadDefaults(); // Pre-load core textures
+    await this.assets.loadDefaults(); 
     await this.loadScene(initialScene);
-    this.loop.start((dt) => this.tick(dt));
+    
+    // Start the game loop with the specialized runtime tick
+    this.loop.start((dt) => this.runtime.tick(dt));
   }
 
   async loadScene(scene: ScenePreset2D) {
@@ -59,31 +56,7 @@ export class Engine2DService {
     if (playerId) this.camera.followedEntityId.set(playerId);
   }
 
-  private tick(dt: number) {
-    const dtSeconds = dt / 1000;
-    
-    if (this.state.mode() === 'play' && !this.state.isPaused()) {
-        const start = performance.now();
-        if (this.physics.world) {
-            this.controllers.applyTopologyRules(dtSeconds);
-            this.physicsSystem.applyForces(dtSeconds);
-            this.physicsSystem.applyDraggingForces(dtSeconds);
-            this.controllers.update(dtSeconds);
-        }
-        this.physics.step(dtSeconds); 
-        this.physics.syncTransformsToECS();
-        this.state.setPhysicsTime(performance.now() - start);
-
-        const followId = this.camera.followedEntityId();
-        if (followId !== null) {
-          const t = this.ecs.getTransform(followId);
-          if (t) this.camera.updateFollow(t.x, t.y, dtSeconds);
-        }
-    }
-    
-    this.renderer.render();
-    this.state.setFps(1000 / (dt || 1));
-  }
+  // --- Entity Management ---
 
   spawnFromTemplate(templateId: string, x = 0, y = 0) {
     return this.factory.spawnFromTemplate(templateId, x, y);
@@ -99,14 +72,16 @@ export class Engine2DService {
       this.physics.world.removeRigidBody(rb.handle);
     }
     this.ecs.removeEntity(id);
+    
     if (this.state.selectedEntityId() === id) {
-      this.state.selectedEntityId.set(null);
-      this.input.setDragging(false);
+      this.selection.clearSelection();
     }
     if (this.camera.followedEntityId() === id) {
       this.camera.followedEntityId.set(null);
     }
   }
+
+  // --- Mutation Facade ---
 
   updateSpriteColor(id: EntityId, color: string) {
     const s = this.ecs.sprites.get(id);
@@ -142,37 +117,15 @@ export class Engine2DService {
     }
   }
 
-  selectEntityAt(screenX: number, screenY: number): number | null {
-    const tolerance = this.input.interactionDevice() === 'touch' ? 0.6 : 0.05;
-    const worldPos = this.camera.screenToWorld(screenX, screenY, this.renderer.width, this.renderer.height);
-    let foundId = this.physics.pickEntityAt(worldPos.x, worldPos.y, tolerance);
-    
-    if (foundId === null) {
-      const entities = this.ecs.entitiesList();
-      for (let i = entities.length - 1; i >= 0; i--) {
-        const id = entities[i];
-        if (this.ecs.rigidBodies.has(id)) continue;
-        const t = this.ecs.getTransform(id);
-        const field = this.ecs.getForceField(id);
-        if (t && field) {
-          const dx = worldPos.x - t.x;
-          const dy = worldPos.y - t.y;
-          if (dx*dx + dy*dy < (tolerance + 0.3) * (tolerance + 0.3)) { foundId = id; break; }
-        }
-      }
-    }
+  // --- Interaction Facade ---
 
-    this.state.selectedEntityId.set(foundId);
-    if (foundId) {
-      this.input.setDragging(true, worldPos);
-    }
-    return foundId;
+  selectEntityAt(screenX: number, screenY: number): number | null {
+    return this.selection.selectAt(screenX, screenY);
   }
 
   resetScene() {
-    if (this.sceneManager.currentScene()) {
-      this.loadScene(this.sceneManager.currentScene()!);
-    }
+    const current = this.sceneManager.currentScene();
+    if (current) this.loadScene(current);
   }
 
   togglePlay() {

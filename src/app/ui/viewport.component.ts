@@ -4,6 +4,7 @@ import { Engine2DService } from '../../services/engine-2d.service';
 import { EngineState2DService } from '../../services/engine-state-2d.service';
 import { Camera2DService } from '../../services/camera-2d.service';
 import { Input2DService } from '../../services/input-2d.service';
+import { Selection2DService } from '../../services/selection-2d.service';
 
 @Component({
   selector: 'app-viewport',
@@ -33,6 +34,7 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
   state = inject(EngineState2DService);
   camera = inject(Camera2DService);
   input = inject(Input2DService);
+  selection = inject(Selection2DService);
 
   private isDraggingCamera = false;
   private lastX = 0;
@@ -90,13 +92,13 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
     if (e.button === 2 || e.button === 1) {
         this.startCameraDrag(e.clientX, e.clientY);
     } else if (e.button === 0) {
-        const foundId = this.engine.selectEntityAt(x, y);
+        // [RUN_REF]: Direct selection service usage
+        const foundId = this.selection.selectAt(x, y);
         if (foundId !== null) {
           this.lastX = e.clientX;
           this.lastY = e.clientY;
         } else {
-          this.state.selectedEntityId.set(null);
-          this.input.setDragging(false);
+          this.selection.clearSelection();
           this.startCameraDrag(e.clientX, e.clientY);
         }
     }
@@ -122,7 +124,6 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
 
   onTouchStart(e: TouchEvent) {
     if (this.state.isOverlayOpen()) return;
-    // INDUSTRY_STANDARD: Prevent default only if we are interacting with the game surface
     e.preventDefault();
     
     this.input.interactionDevice.set('touch');
@@ -137,13 +138,10 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
 
       if (this.state.mode() === 'play') {
           this.longPressTimeout = setTimeout(() => {
-              const foundId = this.engine.selectEntityAt(x, y);
-              if (foundId) {
-                // Select entity in play mode via long press
-              }
+              this.selection.selectAt(x, y);
           }, 400);
       } else {
-          const foundId = this.engine.selectEntityAt(x, y);
+          const foundId = this.selection.selectAt(x, y);
           if (foundId === null) {
             this.startCameraDrag(e.touches[0].clientX, e.touches[0].clientY);
           }

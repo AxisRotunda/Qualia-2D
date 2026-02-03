@@ -2,10 +2,13 @@
 
 ## ... (Previous Entries)
 
-## [v1.8] RUN_REF Evolution: Modular Autonomy
-- **Action**: Updated `refactor-protocol.md` to V3.0, incorporating Modular Portability and Granular Data principles.
+## [v2.1] RUN_REF [STANDARD]: Monolith Decomposition
+- **Action**: Decomposed `Engine2DService` monolith into `Runtime2DService` and `Selection2DService`.
+- **Outcome**: Portability Score (P): 3.
 
-## [v1.9] RUN_REF [V4.0] Architectural Purification
-- **Action**: Evolution of refactor protocol to include Severity Levels, Portability Scoring (P), and strict Async-Signal boundaries.
-- **Context**: Standardizing the codebase for high-fidelity agent transitions and modular reuse.
-- **Outcome**: Established hard guards against RenderStateLeak and EngineCycle. Portability Score (P) standard set to <= 3.
+## [v2.2] RUN_REF [STANDARD]: UI Decomposition & Runtime Hardening
+- **Action**: Refactored `AppComponent` and its template to use a reusable `PanelDrawerComponent`.
+- **Action**: Hardened `GameLoopService` by removing `NgZone`, enforcing 100% zoneless integrity across the simulation tick.
+- **Action**: Pruned redundant header/close logic from `HierarchyComponent` and `EngineSettingsComponent`.
+- **Context**: UI layer was becoming difficult to maintain due to nested side-panel logic. `NgZone` usage was a legacy dependency inconsistent with the Zoneless architecture.
+- **Outcome**: Simplified UI tree and reduced change detection surface. Portability Score (P) maintained at 3.

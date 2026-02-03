@@ -1,6 +1,10 @@
 
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 
+/**
+ * High-performance Game Loop.
+ * [RUN_REF]: Pure Zoneless implementation. No longer depends on NgZone to minimize overhead.
+ */
 @Injectable({ providedIn: 'root' })
 export class GameLoopService {
   private running = false;
@@ -8,17 +12,11 @@ export class GameLoopService {
   private frameId = 0;
   private callback: ((dt: number) => void) | null = null;
 
-  constructor(private zone: NgZone) {}
-
   start(callback: (dt: number) => void) {
     this.callback = callback;
     this.running = true;
     this.lastTime = performance.now();
-    
-    // Run outside Angular to prevent CD churn on every frame
-    this.zone.runOutsideAngular(() => {
-        this.loop();
-    });
+    this.loop();
   }
 
   stop() {

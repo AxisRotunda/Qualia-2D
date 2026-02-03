@@ -14,7 +14,7 @@
 ### /src/app/ui (Modular View Layer)
 - `viewport/`: Canvas & Interaction isolation.
 - `hud/`: Telemetry, Command Hub, Overlays.
-- `panels/`: Hierarchy, Inspector, Settings drawers.
+- `panels/`: Hierarchy, Inspector, Settings, and reusable PanelDrawer components.
 - `main-menu/`: Full-screen navigation and guides.
 
 ### /src/data (Resource & Content Layer)

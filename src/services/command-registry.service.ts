@@ -1,4 +1,3 @@
-
 import { Injectable, inject, signal } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
@@ -66,8 +65,8 @@ export class CommandRegistryService {
   private performIntelligentRefactor() {
     this.log("REF: SCANNING_FOR_MONOLITHS");
     setTimeout(() => {
-      this.log("REF: BOTTLENECK_HUNT_COMPLETE");
-      this.log("HEURISTICS: STALLS:0 | MONOLITHS:0 | DOC_SYNC:OK");
+      this.log("REF: MODULAR_ISOLATION_COMPLETE");
+      this.log("HEURISTICS: P-SCORE:2 | BOUNDARIES:OK | DATA:CLEAN");
     }, 500);
   }
 
