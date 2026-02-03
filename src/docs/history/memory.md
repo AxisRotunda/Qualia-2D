@@ -24,7 +24,6 @@
 
 ## [v1.11] RUN_GUIDE_GEN: Human Translation Protocol
 - **Action**: Deployed `PROTOCOL_GUIDE_GEN_V1.0` to manage interactive guide synthesis.
-- **Action**: Refined 'Movement DNA', 'Physical Laws', and 'Tactile Link' guides.
 
 ## [v1.12] RUN_REPAIR: Touch Unresponsiveness
 - **Action**: Implemented `REPAIR_TOUCH_V1.0` to fix event bubbling on mobile.
@@ -36,6 +35,10 @@
 - **Action**: Synthesized `forces-dynamics.ts` and registered it in `GUIDE_REGISTRY`.
 
 ## [v1.15] RUN_KNOWLEDGE: External Context Synthesis
-- **Action**: Generated `README.md` for GitHub presentation.
-- **Action**: Created `src/docs/agent-ops/` containing 4 "Context Packs" for external AI agents (New Scene, New Entity, New Guide, Mod UI).
-- **Outcome**: The codebase is now self-documenting for both humans (README) and AI Agents (Context Packs).
+- **Action**: Generated README and Context Packs for external agents.
+
+## [v1.16] RUN_REPAIR: NG0950 Input Failure
+- **Action**: Identified and resolved `NG0950` error caused by constructor access to required signal inputs in `MenuLaunchModalComponent`.
+- **Action**: Moved required input access to `ngOnInit`.
+- **Action**: Hardened `SelectionToolbarComponent` guard in `app.component.html` with explicit null checks.
+- **Outcome**: Runtime stability restored. Engine initialization is now correctly sequenced.

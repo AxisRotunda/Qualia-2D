@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, OnInit } from '@angular/core';
 import { ControllerTopology } from '../../../services/engine-state-2d.service';
 import { ScenePreset2D } from '../../../engine/scene.types';
 
@@ -47,7 +47,7 @@ import { ScenePreset2D } from '../../../engine/scene.types';
     </div>
   `
 })
-export class MenuLaunchModalComponent {
+export class MenuLaunchModalComponent implements OnInit {
   scene = input.required<ScenePreset2D>();
   topologies: ControllerTopology[] = ['platformer', 'top-down-action', 'top-down-rpg'];
   
@@ -56,9 +56,12 @@ export class MenuLaunchModalComponent {
   launch = output<ControllerTopology>();
   cancel = output<void>();
 
-  constructor() {
-    // Sync initial topology preference if scene provides one
-    const initial = this.scene()?.preferredTopology;
-    if (initial) this.selectedTopology.set(initial);
+  ngOnInit() {
+    // [REPAIR_INPUT_REQ]: Signal inputs are only available after the constructor.
+    // Sync initial topology preference from the required scene input.
+    const initial = this.scene().preferredTopology;
+    if (initial) {
+      this.selectedTopology.set(initial);
+    }
   }
 }
