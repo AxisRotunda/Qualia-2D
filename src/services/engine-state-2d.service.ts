@@ -28,12 +28,13 @@ export class EngineState2DService {
   readonly selectedEntityId = signal<number | null>(null);
   
   // Overlay States
+  readonly isMainMenuOpen = signal<boolean>(true); // Starts Open
   readonly isSceneBrowserOpen = signal<boolean>(false);
   readonly isCreateMenuOpen = signal<boolean>(false);
 
   // Derived: Global block for input / joystick
   readonly isOverlayOpen = computed(() => {
-    return this.isSceneBrowserOpen() || this.isCreateMenuOpen() || this.loading();
+    return this.isSceneBrowserOpen() || this.isCreateMenuOpen() || this.loading() || this.isMainMenuOpen();
   });
 
   readonly statusText = computed(() => {

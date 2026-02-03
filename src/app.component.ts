@@ -14,6 +14,12 @@ import { TelemetryComponent } from './app/ui/telemetry.component';
 import { CommandHubComponent } from './app/ui/command-hub.component';
 import { InspectorComponent } from './app/ui/inspector.component';
 import { VirtualJoypadComponent } from './app/ui/virtual-joypad.component';
+import { MainMenuComponent } from './app/ui/main-menu.component';
+import { SceneBrowserOverlayComponent } from './app/ui/overlays/scene-browser.component';
+import { CreateMenuOverlayComponent } from './app/ui/overlays/create-menu.component';
+import { HierarchyComponent } from './app/ui/hierarchy.component';
+import { EngineSettingsComponent } from './app/ui/engine-settings.component';
+import { SelectionToolbarComponent } from './app/ui/selection-toolbar.component';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +29,13 @@ import { VirtualJoypadComponent } from './app/ui/virtual-joypad.component';
     TelemetryComponent,
     CommandHubComponent,
     InspectorComponent,
-    VirtualJoypadComponent
+    VirtualJoypadComponent,
+    MainMenuComponent,
+    SceneBrowserOverlayComponent,
+    CreateMenuOverlayComponent,
+    HierarchyComponent,
+    EngineSettingsComponent,
+    SelectionToolbarComponent
   ],
   templateUrl: './app.component.html',
   host: {
@@ -52,12 +64,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   toggleCreateMenu() {
-    this.input.reset(); // INDUSTRY_STANDARD: Flush inputs to prevent stuck thumbsticks
+    this.input.reset(); 
     this.state.isCreateMenuOpen.update(v => !v);
   }
 
   toggleSceneBrowser() {
-    this.input.reset(); // INDUSTRY_STANDARD: Flush inputs to prevent stuck thumbsticks
+    this.input.reset();
     this.state.isSceneBrowserOpen.update(v => !v);
   }
 

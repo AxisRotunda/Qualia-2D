@@ -2,8 +2,8 @@
 
 ## / (Root)
 - `index.tsx`: Application Bootstrapper (Zoneless).
-- `index.html`: Main entry point, Tailwind & Import Maps.
-- `metadata.json`: Engine metadata and permissions.
+- `index.html`: Main entry point (Tailwind + Import Maps).
+- `metadata.json`: Engine metadata.
 - `manifest.json`: PWA Manifest.
 - `service-worker.js`: Offline caching.
 
@@ -11,34 +11,33 @@
 - `app.component.ts`: Root UI Orchestrator.
 - `app.component.html`: High-level Layout.
 
-### /src/app/ui (Modular HUD)
-- `viewport.component.ts`: Canvas & Raw Input isolation.
-- `telemetry.component.ts`: Real-time engine readout.
-- `command-hub.component.ts`: Main navigation island.
-- `inspector.component.ts`: Property mutation engine.
-- `virtual-joypad.component.ts`: Floating mobile touch interface.
+### /src/app/ui (Modular View Layer)
+- `viewport/`: Canvas & Interaction isolation.
+- `hud/`: Telemetry, Command Hub, Overlays.
+- `panels/`: Hierarchy, Inspector, Settings drawers.
+- `main-menu/`: Full-screen navigation and guides.
 
-### /src/engine
-- `ecs/`: Entity and Component stores.
-- `factory/`: Template instantiation services.
-- `systems/`: Physics and Controller logic.
-- `runtime/`: RAF-based loop.
-- `scene.types.ts`: Scene definition interfaces.
+### /src/data (Resource & Content Layer)
+- `guides/`: Human-readable documentation fragments.
+- `scenes/`: Procedural reality fragments.
+- `prefabs/`: Entity templates and blueprints.
+- `index.ts`: Barrel export for all engine content.
 
-### /src/services
-- `engine-2d.service.ts`: Main engine orchestrator.
-- `engine-state-2d.service.ts`: Session and metadata signals.
-- `camera-2d.service.ts`: Camera state and math.
-- `input-2d.service.ts`: Input registry and interaction state.
+### /src/engine (Core Simulation Module)
+- `ecs/`: Entity and Component stores (The "Memory").
+- `systems/`: Logic processors (Physics, AI, Movement).
+- `factory/`: Instantiation logic.
+- `runtime/`: The high-frequency RAF loop.
+
+### /src/services (Orchestration Layer)
+- `engine-2d.service.ts`: Primary Bridge (UI <-> Engine).
+- `state-2d.service.ts`: Global Signal-state registry.
+- `input-2d.service.ts`: Hardware-to-Intent translation.
 - `physics-2d.service.ts`: Rapier2D WASM wrapper.
-- `renderer-2d.service.ts`: Canvas2D rendering system.
-- `scene-manager.service.ts`: Scene loading logic.
-- `command-registry.service.ts`: T0 Verb execution logic.
-- `asset-registry.service.ts`: Texture and asset lifecycle manager.
-- `pwa.service.ts`: (NEW) App installation and lifecycle.
+- `renderer-2d.service.ts`: Canvas2D drawing system.
 
-### /src/docs
+### /src/docs (Logic & Protocol Kernel)
 - `kernel/`: Structural foundations.
-- `protocols/`: Operational logic definitions.
-- `visual/`: Design language documentation.
-- `history/`: Memory logs.
+- `protocols/`: Operational verb definitions.
+- `visual/`: Obsidian Glass design language.
+- `history/`: Session memory and repair logs.
