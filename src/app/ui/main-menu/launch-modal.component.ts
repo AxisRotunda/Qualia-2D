@@ -1,9 +1,48 @@
-
 import { Component, input, output, signal, computed } from '@angular/core';
 import { ControllerTopology } from '../../../services/engine-state-2d.service';
 import { ScenePreset2D } from '../../../engine/scene.types';
 import { DecimalPipe } from '@angular/common';
 
+// Component Configuration
+const MODAL_CONFIG = {
+  ANIMATION: {
+    GLOW_BLUR: '120px',
+    BACKDROP_BLUR: 'backdrop-blur-2xl',
+    FADE_DURATION: 300,
+    ZOOM_DURATION: 300,
+  },
+  TOPOLOGY_ICONS: {
+    platformer: 'M12 19V5M5 12l7-7 7 7',
+    'top-down-action': 'circle:M12 12 10/path:m4.93 4.93 14.14 14.14',
+    'top-down-rpg': 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  },
+  TOPOLOGY_COLORS: {
+    platformer: 'emerald',
+    'top-down-action': 'rose',
+    'top-down-rpg': 'indigo',
+  },
+  COMPLEXITY_MAPPING: {
+    low: 1,
+    medium: 3,
+    high: 4,
+    'stress-test': 5,
+  } as const,
+  DEFAULTS: {
+    TOPOLOGY: 'platformer' as ControllerTopology,
+    GRAVITY: -9.81,
+    ENV_TYPE: 'Standard',
+    COMPLEXITY_SCORE: 2,
+  },
+} as const;
+
+/**
+ * Launch Modal Component V2.0
+ * Displays scene configuration details and initializes simulation with selected topology.
+ * Features:
+ * - Topology-derived visual theming
+ * - Physics configuration preview
+ * - Complexity visualization
+ */
 @Component({
   selector: 'app-menu-launch-modal',
   standalone: true,
@@ -14,9 +53,7 @@ import { DecimalPipe } from '@angular/common';
           
           <!-- Ambient Glow (Derived from Topology) -->
           <div class="absolute -top-32 -right-32 w-80 h-80 blur-[120px] rounded-full pointer-events-none opacity-40"
-               [class.bg-emerald-500]="topology() === 'platformer'"
-               [class.bg-rose-500]="topology() === 'top-down-action'"
-               [class.bg-indigo-500]="topology() === 'top-down-rpg'">
+               [class]="topologyGlowClass()">
           </div>
 
           <!-- Header -->
@@ -30,7 +67,7 @@ import { DecimalPipe } from '@angular/common';
                 </div>
                 <h2 class="text-5xl md:text-6xl font-black text-white leading-none tracking-tighter">{{ scene().name }}</h2>
               </div>
-              <button (click)="cancel.emit()" class="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-all active:scale-90 shadow-xl border border-white/5">
+              <button (click)="cancel.emit()" class="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 text-slate-400 hover:text-white transition-all active:scale-90 shadow-xl border border-white/5" aria-label="Close modal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 6-12 12m0-12 12 12"/></svg>
               </button>
           </header>
@@ -45,21 +82,17 @@ import { DecimalPipe } from '@angular/common';
                     <div class="space-y-2">
                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em]">Kernel_Mode</span>
                        <div class="flex items-center gap-3 text-white">
-                          @if (topology() === 'platformer') {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-400"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-                          } @else if (topology() === 'top-down-action') {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-rose-400"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
-                          } @else {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
-                          }
-                          <span class="text-lg font-black uppercase tracking-tight">{{ topology().replace('-', ' ') }}</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class]="topologyIconColorClass()">
+                            <path [attr.d]="topologyIconPath()"></path>
+                          </svg>
+                          <span class="text-lg font-black uppercase tracking-tight">{{ topologyDisplay() }}</span>
                        </div>
                     </div>
                     
                     <div class="space-y-2">
                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em]">Load_Complexity</span>
                        <div class="flex items-center gap-2">
-                          @for (i of [1,2,3,4,5]; track i) {
+                          @for (i of complexityIndicators; track i) {
                              <div class="w-1.5 h-6 rounded-full transition-colors"
                                   [class.bg-indigo-500]="i <= complexityScore()"
                                   [class.bg-white/5]="i > complexityScore()">
@@ -77,7 +110,7 @@ import { DecimalPipe } from '@angular/common';
                     </div>
                     <div class="space-y-1">
                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em]">Environment</span>
-                       <div class="text-xl font-mono font-bold text-white uppercase">{{ scene().config?.env?.type || 'Standard' }}</div>
+                       <div class="text-xl font-mono font-bold text-white uppercase">{{ environmentType() }}</div>
                     </div>
                  </div>
 
@@ -98,21 +131,81 @@ export class MenuLaunchModalComponent {
   launch = output<ControllerTopology>();
   cancel = output<void>();
 
-  // CoT: Topology is now strictly derived from the scene definition. 
-  // No user mutation allowed during launch. Industry Standard alignment.
-  topology = computed(() => this.scene().preferredTopology || 'platformer');
-  
-  // CoT: Extract gravity from config or default to standard earth gravity
-  gravityY = computed(() => this.scene().config?.physics?.gravity.y ?? -9.81);
+  // Configuration data
+  protected readonly complexityIndicators = [1, 2, 3, 4, 5];
 
-  // CoT: Visual score for complexity bar
+  /**
+   * Derives topology from scene definition with fallback
+   */
+  topology = computed(() => 
+    this.scene().preferredTopology || MODAL_CONFIG.DEFAULTS.TOPOLOGY
+  );
+  
+  /**
+   * Extracts gravity configuration with standard earth gravity fallback
+   */
+  gravityY = computed(() => 
+    this.scene().config?.physics?.gravity.y ?? MODAL_CONFIG.DEFAULTS.GRAVITY
+  );
+
+  /**
+   * Extracts environment type with fallback
+   */
+  environmentType = computed(() => 
+    this.scene().config?.env?.type || MODAL_CONFIG.DEFAULTS.ENV_TYPE
+  );
+
+  /**
+   * Maps complexity level to visual score (1-5 scale)
+   */
   complexityScore = computed(() => {
-    switch (this.scene().complexity) {
-        case 'low': return 1;
-        case 'medium': return 3;
-        case 'high': return 4;
-        case 'stress-test': return 5;
-        default: return 2;
-    }
+    const complexity = this.scene().complexity;
+    return MODAL_CONFIG.COMPLEXITY_MAPPING[complexity] ?? MODAL_CONFIG.DEFAULTS.COMPLEXITY_SCORE;
+  });
+
+  /**
+   * Returns formatted topology display text
+   */
+  topologyDisplay = computed(() => 
+    this.topology().replace(/-/g, ' ')
+  );
+
+  /**
+   * Returns topology-specific glow color class
+   */
+  topologyGlowClass = computed(() => {
+    const topology = this.topology();
+    const colorMap: Record<string, string> = {
+      'platformer': 'bg-emerald-500',
+      'top-down-action': 'bg-rose-500',
+      'top-down-rpg': 'bg-indigo-500',
+    };
+    return colorMap[topology] || 'bg-indigo-500';
+  });
+
+  /**
+   * Returns topology-specific icon color class
+   */
+  topologyIconColorClass = computed(() => {
+    const topology = this.topology();
+    const colorMap: Record<string, string> = {
+      'platformer': 'text-emerald-400',
+      'top-down-action': 'text-rose-400',
+      'top-down-rpg': 'text-indigo-400',
+    };
+    return colorMap[topology] || 'text-indigo-400';
+  });
+
+  /**
+   * Returns topology-specific icon SVG path
+   */
+  topologyIconPath = computed(() => {
+    const topology = this.topology();
+    const pathMap: Record<string, string> = {
+      'platformer': 'M12 19V5M5 12l7-7 7 7',
+      'top-down-action': 'm4.93 4.93 14.14 14.14',
+      'top-down-rpg': 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+    };
+    return pathMap[topology] || pathMap['top-down-rpg'];
   });
 }
