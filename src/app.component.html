@@ -83,13 +83,15 @@
   <!-- INSPECTOR / SETTINGS DRAWER (RIGHT) -->
   <app-panel-drawer 
     side="right" 
-    [title]="state.activePanel() === 'settings' ? 'Engine' : 'Properties'" 
-    [visible]="state.activePanel() === 'inspector' || state.activePanel() === 'settings'"
+    [title]="state.activePanel() === 'settings' ? 'Engine' : (state.activePanel() === 'scene-inspector' ? 'Fragment' : 'Properties')" 
+    [visible]="state.activePanel() === 'inspector' || state.activePanel() === 'settings' || state.activePanel() === 'scene-inspector'"
     (close)="state.setActivePanel('none')">
     @if (state.activePanel() === 'inspector') {
       <app-inspector />
     } @else if (state.activePanel() === 'settings') {
       <app-engine-settings />
+    } @else if (state.activePanel() === 'scene-inspector') {
+      <app-scene-inspector />
     }
   </app-panel-drawer>
 </div>

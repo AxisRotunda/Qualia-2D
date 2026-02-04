@@ -12,8 +12,9 @@ import { ViewportComponent } from './app/ui/viewport/viewport.component';
 import { TelemetryComponent } from './app/ui/hud/telemetry.component';
 import { CommandHubComponent } from './app/ui/hud/command-hub.component';
 import { InspectorComponent } from './app/ui/panels/inspector.component';
+import { SceneInspectorComponent } from './app/ui/panels/scene-inspector.component';
 import { VirtualJoypadComponent } from './app/ui/hud/virtual-joypad.component';
-import { MainMenuComponent } from './app/ui/main-menu/main-menu.component';
+import { MainMenuComponent } from './app/ui/main-menu.component';
 import { SceneBrowserOverlayComponent } from './app/ui/overlays/scene-browser.component';
 import { CreateMenuOverlayComponent } from './app/ui/overlays/create-menu.component';
 import { HierarchyComponent } from './app/ui/panels/hierarchy.component';
@@ -31,6 +32,7 @@ import { DialogOverlayComponent } from './app/ui/overlays/dialog-overlay.compone
     TelemetryComponent,
     CommandHubComponent,
     InspectorComponent,
+    SceneInspectorComponent,
     VirtualJoypadComponent,
     MainMenuComponent,
     SceneBrowserOverlayComponent,

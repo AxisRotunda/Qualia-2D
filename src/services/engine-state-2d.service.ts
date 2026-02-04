@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import type { SceneEnvironment } from '../engine/scene.types';
 
 export type EngineMode = 'edit' | 'play';
-export type ActivePanel = 'none' | 'hierarchy' | 'inspector' | 'settings';
+export type ActivePanel = 'none' | 'hierarchy' | 'inspector' | 'settings' | 'scene-inspector';
 export type ActiveOverlay = 'none' | 'scene-browser' | 'create-menu' | 'main-menu';
 export type ControllerTopology = 'platformer' | 'top-down-rpg' | 'top-down-action';
 

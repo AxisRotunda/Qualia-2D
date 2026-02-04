@@ -26,6 +26,18 @@ import { Engine2DService } from '../../../services/engine-2d.service';
           aria-label="Hierarchy">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
         </button>
+        
+        <button 
+          (click)="state.setActivePanel('scene-inspector')"
+          class="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:bg-white/5 active:scale-90"
+          [class.bg-indigo-600]="state.activePanel() === 'scene-inspector'"
+          [class.text-white]="state.activePanel() === 'scene-inspector'"
+          [class.text-slate-400]="state.activePanel() !== 'scene-inspector'"
+          aria-label="Scene Inspector">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+          <div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-indigo-500 rounded-full border border-slate-900 shadow-sm"></div>
+        </button>
+
         <button 
           (click)="state.setActivePanel('settings')"
           class="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:bg-white/5 active:scale-90"

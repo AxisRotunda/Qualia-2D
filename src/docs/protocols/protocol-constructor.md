@@ -1,58 +1,44 @@
 # [T0] Protocol Constructor
-ID: PROTOCOL_CONSTRUCTOR_V2.1 | Role: Meta-Genesis Framework.
+ID: PROTOCOL_CONSTRUCTOR_V3.0 | Version: 3.0 | Role: Meta-Genesis & Evolution Framework.
 
 ## 1. INTENT
-This protocol governs the genesis, iteration, and structural integrity of all Qualia2D operational verbs. It ensures that every new command is deterministic, documented, and adheres to the engine's axial foundations via **Hard Structural Definitions (HSD)** and **Skeletal Guidelines (SG)**.
+Govern the genesis, validation, and recursive evolution of all Qualia2D operational verbs. v3.0 introduces **Structural Integrity Hashing (SIH)** and **Meta-Iteration Pipelines** to ensure engine logic remains deterministic during high-frequency agent interaction.
 
-## 2. HARD STRUCTURAL DEFINITIONS (THE SCHEMA)
-Every protocol file MUST contain the following mandatory sections to be considered valid. Omission of any section constitutes a protocol failure.
+## 2. HARD STRUCTURAL DEFINITIONS (HSD)
 
-### [H0] IDENTITY
-- **Header**: `# [Tn] Protocol Name`
-- **Metadata**: `ID: [UNIQUE_ID] | Version: [X.Y] | Role: [PURPOSE]`
+### [H0] IDENTITY & SIH
+- **SIH Requirement**: Every protocol must contain a `STRUCTURAL_HASH` generated via `[ID]_[VERSION]_[TIMESTAMP]`.
+- **Validation**: Any mutation involving this protocol must verify the SIH against the `CommandRegistryService`.
 
 ### [H1] CONTEXTUAL ANCHOR
-- Clear mapping to the `src/` directory and existing services.
-- Dependency list (e.g., `Requires: ComponentStoreService, Physics2DService`).
-- **Source of Truth**: Links to related kernel or visual docs.
+- **Authority**: Must link to at least one Axial Directive and one Engine Dive.
+- **Dependencies**: Explicit list of injected services (e.g., `Requires: ComponentStoreService`).
 
-### [H2] HARD STRUCTURAL DEFINITIONS (HSD)
-- **Invariants**: Rules that cannot be broken (e.g., "Must use Signals", "Must use Tailwind").
-- **Classes/Constants**: Specific string literals or config values that must be used.
-- **Target Definitions**: If the protocol targets specific sub-systems (like `RUN_UI`), define the targets here.
+### [H2] META-INTELLIGENCE REQUIREMENTS (NEW)
+- **Advanced Safeguards**: Must include a "Failure Manifold" (what to do if the logic breaks the WASM boundary).
+- **Refined Formatting**: Data structures must use TypedArrays or Signal-Maps for O(1) validation.
+- **Meta-Heuristics**: Define the search criteria for the agent to determine if this protocol is the "Optimal Path".
 
-### [H3] LOGIC MATRIX
-- A concrete mapping of **INPUT** (Verb Params) -> **PROCESS** (Step-by-step logic) -> **OUTPUT** (State/File changes).
-- Must include a table of operations for complex verbs.
-- **Heuristics**: If the protocol involves optimization, define the search criteria.
+## 3. LOGIC MATRIX: RUN_PROTOCOL [TARGET]
 
-### [H4] SKELETAL GUIDELINES (SG)
-- **Code Templates**: Reusable, copy-paste ready HTML/TS snippets.
-- **Implementation Patterns**: "Hard" rules for implementation (e.g., specific tailwind class combinations).
-- **Boilerplate**: Standardized error handling or logging structures.
+| Step | Action | Description |
+| :--- | :--- | :--- |
+| 01 | **CALIBRATE** | Retrieve the target protocol and its current SIH. |
+| 02 | **META-SCAN** | Analyze `memory.md` for efficiency bottlenecks in previous iterations. |
+| 03 | **MUTATE** | Apply the requested change while adhering to HSD V3.0. |
+| 04 | **HASH** | Regenerate the `STRUCTURAL_HASH`. |
+| 05 | **VERIFY** | Invoke `RUN_VALIDATE` to ensure zero violation of Axial Directives. |
 
-### [H5] SAFEGUARDS
-- Specific prohibitions (e.g., "No NaN leaks", "Zoneless integrity", "WASM boundary").
-- **Recovery**: Diagnostic steps for when the protocol fails.
+## 4. META-ITERATION PIPELINE (SELF-LEARNING)
+Protocols are no longer static. They must undergo "Iterative Validation":
+1. **Detection**: Identify redundant logic patterns across multiple protocols.
+2. **Abstraction**: Extract redundant logic into a "Core Primitive" (e.g., `protocol-validator.md`).
+3. **Synthesis**: Update the registry to point to the new primitive, reducing the token footprint of sub-protocols.
 
-## 3. GENESIS & ITERATION LOGIC
+## 5. SAFEGUARDS
+- **Infinite Loop Guard**: Meta-iteration cannot trigger a `RUN_PROTOCOL` on itself within the same transaction.
+- **SIH Mismatch**: Rejection of mutation if the input hash does not match the T3 Narrative state.
+- **Zoneless Integrity**: No mutation may introduce asynchronous callbacks that bypass the `GameLoopService`.
 
-### BRANCH A: GENESIS (New Protocol)
-1. **Verify Uniqueness**: Check `command-registry.md` to prevent verb collisions.
-2. **Path Allocation**: Determine if the protocol lives in `protocols/` (General) or a sub-domain.
-3. **Skeleton Injection**: Generate the MD file using the schema in Section 2, ensuring **HSD** and **SG** are populated.
-4. **Verb Registration**: Update `CommandRegistryService.ts` and `command-registry.md`.
-5. **Hierarchy Sync**: Update `project-hierarchy.md`.
-
-### BRANCH B: ITERATION (Existing Protocol)
-1. **Bottleneck Analysis**: Check `memory.md` for previous stalls related to the protocol.
-2. **Schema Audit**: Ensure the existing file meets the V2.1 Hard Structural Definitions.
-3. **Logic Refinement**: Update the Logic Matrix for better efficiency/determinism.
-4. **Version Increment**: Update the metadata header.
-5. **Memory Log**: Update `src/docs/history/memory.md` with the "Action/Context/Outcome".
-
-## 4. DESIGN PRINCIPLES
-- **Irreducibility**: Protocols should target the smallest possible domain (e.g., `RUN_PHYS` vs `RUN_SIMULATION`).
-- **AI-Density**: Documentation must be optimized for Agent ingestion (High-density mapping, no fluff).
-- **Determinism**: The same input parameters must always result in the same structural output.
-- **Self-Enforcement**: The protocol document itself must contain the rules to enforce its own correct usage.
+## 6. STRUCTURAL_HASH
+SIH: `QUALIA_META_3.0_57F2A`

@@ -42,20 +42,17 @@ export class SceneManagerService {
       EntityGenerator.reset();
       this.state.selectedEntityId.set(null);
       
-      // [PROTOCOL_PROJECT] Apply Scene Config
+      // [PROTOCOL_PROJECT] Apply Merged Configuration (Defaults + Project Overrides)
+      const mergedConfig = this.project.getMergedSceneConfig(scene);
+
       if (scene.preferredTopology) this.state.setTopology(scene.preferredTopology);
       
-      if (scene.config) {
-        // Apply Environment
-        this.state.setEnvironment(scene.config.env);
-        
-        // Apply Physics Config
-        if (scene.config.physics) {
-          this.state.gravityY.set(scene.config.physics.gravity.y);
-        }
-      } else {
-        // Fallback Defaults
-        this.state.setEnvironment({ type: 'solid', background: '#020617', gridOpacity: 0.1 });
+      // Apply Environment
+      this.state.setEnvironment(mergedConfig.env);
+      
+      // Apply Physics Config
+      if (mergedConfig.physics) {
+        this.state.gravityY.set(mergedConfig.physics.gravity.y);
       }
       
       // Update Project Reference
