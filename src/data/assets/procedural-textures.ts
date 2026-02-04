@@ -1,6 +1,6 @@
 /**
  * Obsidian Glass: Procedural Asset Synthesis [DATA LAYER]
- * ID: PROCEDURAL_TEXTURES_V1.1
+ * ID: PROCEDURAL_TEXTURES_V1.2
  */
 
 export type TextureGenerator = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
@@ -87,6 +87,60 @@ export const STRUCTURAL_WALL: TextureGenerator = (ctx, w, h) => {
   ctx.fillRect(w-40, h-20, 30, 10);
 };
 
+export const TOXIC_DRUM: TextureGenerator = (ctx, w, h) => {
+  const grad = ctx.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, '#064e3b');
+  grad.addColorStop(0.5, '#065f46');
+  grad.addColorStop(1, '#064e3b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+  
+  ctx.fillStyle = '#10b981';
+  ctx.fillRect(0, h * 0.2, w, 10);
+  ctx.fillRect(0, h * 0.8, w, 10);
+  
+  // Hazard Icon
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.35, h * 0.6);
+  ctx.lineTo(w * 0.65, h * 0.6);
+  ctx.lineTo(w * 0.5, h * 0.4);
+  ctx.closePath();
+  ctx.stroke();
+};
+
+export const STRUCTURAL_GLASS: TextureGenerator = (ctx, w, h) => {
+  ctx.fillStyle = 'rgba(186, 230, 253, 0.2)';
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(2, 2, w - 4, h - 4);
+  
+  // Shine lines
+  ctx.beginPath();
+  ctx.moveTo(10, 10); ctx.lineTo(40, 40);
+  ctx.moveTo(20, 10); ctx.lineTo(50, 40);
+  ctx.stroke();
+};
+
+export const KINETIC_PLATFORM: TextureGenerator = (ctx, w, h) => {
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, w, h);
+  
+  // Grip pattern
+  ctx.fillStyle = '#0f172a';
+  for(let i = 0; i < w; i += 8) {
+    for(let j = 0; j < h; j += 8) {
+      ctx.fillRect(i + 2, j + 2, 4, 4);
+    }
+  }
+  
+  ctx.strokeStyle = '#4f46e5';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(0, 0, w, h);
+};
+
 export const HERO_SPRITE_SHEET: TextureGenerator = (ctx, w, h) => {
   const frameSize = 32;
   const colors = ['#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'];
@@ -108,54 +162,12 @@ export const HERO_SPRITE_SHEET: TextureGenerator = (ctx, w, h) => {
   }
 };
 
-// [PROTOCOL_INDUSTRY] Fantasy Assets
-export const FANTASY_TREE: TextureGenerator = (ctx, w, h) => {
-  const cx = w/2, cy = h/2;
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.beginPath(); ctx.ellipse(cx, h-10, 20, 8, 0, 0, Math.PI*2); ctx.fill();
-  
-  // Trunk
-  ctx.fillStyle = '#78350f';
-  ctx.fillRect(cx-4, h-40, 8, 30);
-  
-  // Foliage (Triangles)
-  ctx.fillStyle = '#059669';
-  ctx.beginPath(); ctx.moveTo(cx, 10); ctx.lineTo(cx+25, 50); ctx.lineTo(cx-25, 50); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(cx, 30); ctx.lineTo(cx+30, 80); ctx.lineTo(cx-30, 80); ctx.fill();
-};
-
-export const MYSTIC_PORTAL: TextureGenerator = (ctx, w, h) => {
-  const cx = w/2, cy = h/2;
-  const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 50);
-  grad.addColorStop(0, '#10b981'); // Emerald
-  grad.addColorStop(1, '#020617');
-  
-  ctx.fillStyle = grad;
-  ctx.beginPath(); ctx.arc(cx, cy, 45, 0, Math.PI*2); ctx.fill();
-  
-  // Runes
-  ctx.strokeStyle = '#6ee7b7';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx, cy-45); ctx.lineTo(cx, cy+45); ctx.stroke();
-};
-
-export const NPC_ELDER: TextureGenerator = (ctx, w, h) => {
-  ctx.fillStyle = '#f59e0b'; // Amber robes
-  ctx.fillRect(w/4, h/3, w/2, h/2);
-  ctx.fillStyle = '#fcd34d'; // Face
-  ctx.beginPath(); ctx.arc(w/2, h/3, 12, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#fff'; // Beard
-  ctx.beginPath(); ctx.moveTo(w/2 - 10, h/3 + 5); ctx.lineTo(w/2, h/2 + 10); ctx.lineTo(w/2 + 10, h/3 + 5); ctx.fill();
-};
-
 export const PROCEDURAL_REGISTRY: Record<string, TextureGenerator> = {
   'tex_hero': HERO_GLYPH,
   'tex_crate': INDUSTRIAL_CRATE,
   'tex_wall': STRUCTURAL_WALL,
-  'tex_hero_sheet': HERO_SPRITE_SHEET,
-  'tex_tree': FANTASY_TREE,
-  'tex_portal': MYSTIC_PORTAL,
-  'tex_npc': NPC_ELDER
+  'tex_toxic': TOXIC_DRUM,
+  'tex_glass': STRUCTURAL_GLASS,
+  'tex_platform': KINETIC_PLATFORM,
+  'tex_hero_sheet': HERO_SPRITE_SHEET
 };

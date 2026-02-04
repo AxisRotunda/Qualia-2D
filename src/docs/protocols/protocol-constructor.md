@@ -1,44 +1,40 @@
 # [T0] Protocol Constructor
-ID: PROTOCOL_CONSTRUCTOR_V3.0 | Version: 3.0 | Role: Meta-Genesis & Evolution Framework.
+ID: PROTOCOL_CONSTRUCTOR_V4.0 | Version: 4.0 | Role: Meta-Genesis Framework.
 
 ## 1. INTENT
-Govern the genesis, validation, and recursive evolution of all Qualia2D operational verbs. v3.0 introduces **Structural Integrity Hashing (SIH)** and **Meta-Iteration Pipelines** to ensure engine logic remains deterministic during high-frequency agent interaction.
+Govern the genesis and recursive evolution of QualiaVerbs. v4.0 introduces **Step-Back Prompting** and **Hypotheses-to-Theories (HtT)** to ensure scientific empiricism in code mutation.
 
 ## 2. HARD STRUCTURAL DEFINITIONS (HSD)
 
-### [H0] IDENTITY & SIH
-- **SIH Requirement**: Every protocol must contain a `STRUCTURAL_HASH` generated via `[ID]_[VERSION]_[TIMESTAMP]`.
-- **Validation**: Any mutation involving this protocol must verify the SIH against the `CommandRegistryService`.
+### [H0.5] HYPOTHESIS & THEORY PHASE (HtT)
+Before any protocol mutation:
+1. **Hypothesis**: "Mutating [target] will improve [metric] by [expected %]".
+2. **Falsification**: "This fails if [observable condition]".
+3. **Theory**: After mutation, measure delta. If validated → promote to **Proven Pattern** in `memory.md`.
 
-### [H1] CONTEXTUAL ANCHOR
-- **Authority**: Must link to at least one Axial Directive and one Engine Dive.
-- **Dependencies**: Explicit list of injected services (e.g., `Requires: ComponentStoreService`).
+### [H1] SIH DETERMINISM
+- **Mandate**: `SIH` must now include a `reasoning_chain_hash` for deterministic continuity.
+- **Sync**: Recalculate hash after every `RUN_VALIDATE`.
 
-### [H2] META-INTELLIGENCE REQUIREMENTS (NEW)
-- **Advanced Safeguards**: Must include a "Failure Manifold" (what to do if the logic breaks the WASM boundary).
-- **Refined Formatting**: Data structures must use TypedArrays or Signal-Maps for O(1) validation.
-- **Meta-Heuristics**: Define the search criteria for the agent to determine if this protocol is the "Optimal Path".
+## 3. LOGIC MATRIX: RUN_PROTOCOL [TARGET] (V4.0)
 
-## 3. LOGIC MATRIX: RUN_PROTOCOL [TARGET]
+| Step | Action | Description | Reasoning Layer |
+| :--- | :--- | :--- | :--- |
+| 00 | **STEP-BACK** | Generate high-level context | "Why does this exist? What invariant does it maintain?" |
+| 01 | **CALIBRATE** | Retrieve Protocol + SIH | Verify no race conditions. |
+| 02 | **META-SCAN** | RAG retrieval from memory | Find Top-5 similar ops + outcomes. |
+| 03 | **HYPOTHESIS** | State falsifiable outcome | "Works because [causal chain]. Predicted impact: [metric]." |
+| 04 | **DECOMPOSE** | Atomic sub-mutations | Target single files/services. |
+| 05 | **MUTATE** | Apply with inline CoT | `// CoT: [Causal reasoning for this line]`. |
+| 06 | **HASH** | Regenerate `STRUCTURAL_HASH` | Cryptographic verification. |
+| 07 | **VALIDATE** | Regression test suite | If fails → rollback + Log Anti-Pattern. |
 
-| Step | Action | Description |
-| :--- | :--- | :--- |
-| 01 | **CALIBRATE** | Retrieve the target protocol and its current SIH. |
-| 02 | **META-SCAN** | Analyze `memory.md` for efficiency bottlenecks in previous iterations. |
-| 03 | **MUTATE** | Apply the requested change while adhering to HSD V3.0. |
-| 04 | **HASH** | Regenerate the `STRUCTURAL_HASH`. |
-| 05 | **VERIFY** | Invoke `RUN_VALIDATE` to ensure zero violation of Axial Directives. |
+## 4. META-ITERATION PIPELINE
 
-## 4. META-ITERATION PIPELINE (SELF-LEARNING)
-Protocols are no longer static. They must undergo "Iterative Validation":
-1. **Detection**: Identify redundant logic patterns across multiple protocols.
-2. **Abstraction**: Extract redundant logic into a "Core Primitive" (e.g., `protocol-validator.md`).
-3. **Synthesis**: Update the registry to point to the new primitive, reducing the token footprint of sub-protocols.
+### 4.1 COMPLEXITY-BASED EXEMPLAR SELECTION
+1. **Rank past ops**: Simple (1-3 steps) vs Complex (7+ steps).
+2. **Few-Shot**: Include 2-3 complex exemplars in new protocol genesis.
+3. **Curation**: Prune redundant/outdated examples every 50 mutations.
 
-## 5. SAFEGUARDS
-- **Infinite Loop Guard**: Meta-iteration cannot trigger a `RUN_PROTOCOL` on itself within the same transaction.
-- **SIH Mismatch**: Rejection of mutation if the input hash does not match the T3 Narrative state.
-- **Zoneless Integrity**: No mutation may introduce asynchronous callbacks that bypass the `GameLoopService`.
-
-## 6. STRUCTURAL_HASH
-SIH: `QUALIA_META_3.0_57F2A`
+## 5. STRUCTURAL_HASH
+SIH: `QUALIA_CONST_4.0_F7A31`

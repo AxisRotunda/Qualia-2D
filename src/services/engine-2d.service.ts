@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { Camera2DService } from './camera-2d.service';
@@ -13,7 +14,7 @@ import { Selection2DService } from './selection-2d.service';
 import { Mutation2DService } from './mutation-2d.service';
 import { Spawner2DService } from './spawner-2d.service';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
-import { ENTITY_TEMPLATES, EntityTemplate } from '../data/prefabs/entity-blueprints';
+import { BLUEPRINTS, EntityBlueprint } from '../data/prefabs/entity-blueprints';
 import type { ScenePreset2D } from '../engine/scene.types';
 import { EntityId } from '../engine/ecs/entity';
 
@@ -39,7 +40,7 @@ export class Engine2DService {
   readonly assets = inject(AssetRegistryService);
   readonly physics = inject(PhysicsEngine);
 
-  readonly templates: EntityTemplate[] = ENTITY_TEMPLATES;
+  readonly templates: EntityBlueprint[] = BLUEPRINTS;
 
   async init(canvas: HTMLCanvasElement, initialScene: ScenePreset2D) {
     this.renderer.attach(canvas);
@@ -73,4 +74,15 @@ export class Engine2DService {
   selectEntityAt(screenX: number, screenY: number) { return this.selection.selectAt(screenX, screenY); }
   resetScene() { const current = this.sceneManager.currentScene(); if (current) this.loadScene(current); }
   togglePlay() { this.state.toggleMode(); this.input.setDragging(false); }
+
+  /**
+   * [RUN_UI] Focus camera on a specific entity.
+   */
+  focusEntity(id: EntityId) {
+    const t = this.ecs.getTransform(id);
+    if (t) {
+      this.camera.setAt(t.x, t.y);
+      this.camera.followedEntityId.set(null); // Break any existing follow
+    }
+  }
 }

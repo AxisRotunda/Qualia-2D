@@ -12,7 +12,7 @@ import { MenuSettingsTabComponent } from './main-menu/settings-tab.component';
 import { MenuLaunchModalComponent } from './main-menu/launch-modal.component';
 import { MenuProjectsTabComponent } from './main-menu/projects-tab.component';
 
-type MenuTab = 'play' | 'projects' | 'guide' | 'settings';
+type MenuTab = 'projects' | 'play' | 'guide' | 'settings';
 
 @Component({
   selector: 'app-main-menu',
@@ -20,28 +20,72 @@ type MenuTab = 'play' | 'projects' | 'guide' | 'settings';
   imports: [
     DecimalPipe, 
     MenuPlayTabComponent, 
-    MenuProjectsTabComponent,
+    MenuProjectsTabComponent, 
     MenuGuideTabComponent, 
     MenuSettingsTabComponent,
     MenuLaunchModalComponent
   ],
   template: `
-    <div class="fixed inset-0 z-[90] bg-[#020617] text-slate-200 font-sans select-none overflow-hidden">
+    <div class="fixed inset-0 z-[90] bg-[#020617] text-slate-200 font-sans select-none overflow-hidden flex flex-col md:flex-row">
       
-      <!-- BACKGROUND ATMOSPHERE -->
-      <div class="absolute inset-0 pointer-events-none overflow-hidden">
-        <div class="absolute -top-[20%] left-1/4 w-[800px] h-[800px] bg-indigo-500/10 blur-[120px] rounded-full mix-blend-screen animate-pulse duration-[10s]"></div>
-        <div class="absolute top-[20%] -right-[10%] w-[600px] h-[600px] bg-rose-500/10 blur-[120px] rounded-full mix-blend-screen animate-pulse duration-[8s]"></div>
+      <!-- ATMOSPHERE LAYER -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-[20%] -left-[10%] w-[1000px] h-[1000px] bg-indigo-950/20 blur-[150px] rounded-full mix-blend-screen opacity-60"></div>
+        <div class="absolute bottom-[10%] right-[10%] w-[800px] h-[800px] bg-slate-800/10 blur-[120px] rounded-full mix-blend-overlay"></div>
       </div>
 
-      <!-- MAIN CONTENT LAYER -->
-      <main class="absolute inset-0 z-0">
+      <!-- SIDEBAR DOCK (Desktop: Left, Mobile: Bottom) -->
+      <nav class="relative z-50 order-2 md:order-1 w-full md:w-24 md:h-full bg-slate-950/80 backdrop-blur-3xl border-t md:border-t-0 md:border-r border-white/5 flex md:flex-col items-center justify-between py-4 md:py-8 px-6 md:px-0 shadow-2xl">
+        
+        <!-- Brand / Logo -->
+        <div class="hidden md:flex flex-col items-center gap-4">
+           <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-[0_0_20px_rgba(99,102,241,0.4)]">Q2D</div>
+        </div>
+
+        <!-- Navigation Pills -->
+        <div class="flex md:flex-col items-center justify-between md:justify-center w-full md:w-auto gap-1 md:gap-6">
+          @for (tab of tabs; track tab.id) {
+            <button (click)="activeTab.set(tab.id)" 
+              class="group relative w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all duration-300"
+              [class.bg-white/10]="activeTab() === tab.id"
+              [class.text-white]="activeTab() === tab.id"
+              [class.text-slate-500]="activeTab() !== tab.id"
+              [class.hover:bg-white/5]="activeTab() !== tab.id">
+              
+              <!-- Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform group-hover:scale-110 group-active:scale-95">
+                <path [attr.d]="tab.icon"></path>
+              </svg>
+
+              <!-- Active Indicator (Desktop: Left Border, Mobile: Bottom Dot) -->
+              @if (activeTab() === tab.id) {
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-r-full hidden md:block shadow-[0_0_12px_#6366f1]"></div>
+                <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-500 rounded-full md:hidden"></div>
+              }
+
+              <!-- Tooltip (Desktop Only) -->
+              <div class="absolute left-full ml-4 px-3 py-1.5 bg-slate-900 border border-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 hidden md:block">
+                <span class="text-[9px] font-black uppercase tracking-widest text-white">{{ tab.label }}</span>
+              </div>
+            </button>
+          }
+        </div>
+
+        <!-- System Status -->
+        <div class="hidden md:flex flex-col items-center gap-3">
+           <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+           <span class="text-[8px] font-mono font-bold text-slate-600 rotate-180" style="writing-mode: vertical-rl;">v1.9.0</span>
+        </div>
+      </nav>
+
+      <!-- MAIN CONTENT VIEWPORT -->
+      <main class="relative z-10 order-1 md:order-2 flex-1 h-full overflow-hidden bg-gradient-to-br from-transparent to-slate-950/50">
          @switch (activeTab()) {
-           @case ('play') {
-             <app-menu-play-tab (select)="selectedScene.set($event)" />
-           }
            @case ('projects') {
-             <app-menu-projects-tab />
+             <app-menu-projects-tab (openSceneBrowser)="activeTab.set('play')" />
+           }
+           @case ('play') {
+             <app-menu-play-tab (select)="selectedScene.set($event)" (back)="activeTab.set('projects')" />
            }
            @case ('guide') {
              <app-menu-guide-tab (launch)="launchModuleSim($event)" />
@@ -52,60 +96,13 @@ type MenuTab = 'play' | 'projects' | 'guide' | 'settings';
          }
       </main>
 
-      <!-- FLOATING NAVIGATION HEADER -->
-      <header class="absolute top-0 inset-x-0 z-50 flex flex-col items-center pt-8 pb-12 pointer-events-none bg-gradient-to-b from-[#020617] via-[#020617]/80 to-transparent">
-        <div class="flex flex-col items-center gap-1 mb-6 animate-in slide-in-from-top-4 duration-700">
-          <div class="flex items-center gap-3">
-             <div class="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-[10px] font-black shadow-[0_0_20px_rgba(99,102,241,0.5)]">Q</div>
-             <h1 class="text-xl font-black tracking-tighter text-white drop-shadow-2xl uppercase">Qualia_2D</h1>
-          </div>
-          <div class="text-[7px] text-indigo-500/50 uppercase font-black tracking-[0.5em]">{{ project.activeProject()?.name || 'Loading_Session' }}</div>
-        </div>
-
-        <nav class="pointer-events-auto flex items-center gap-1 p-1.5 bg-slate-950/40 backdrop-blur-3xl rounded-full border border-white/5 shadow-[0_16px_48px_rgba(0,0,0,0.6)] animate-in zoom-in-95 duration-500 delay-100">
-          @for (tab of tabs; track tab.id) {
-            <button (click)="activeTab.set(tab.id)" 
-              class="relative px-6 py-3 rounded-full flex items-center gap-3 transition-all active:scale-95 group overflow-hidden"
-              [class.bg-white/5]="activeTab() === tab.id"
-              [class.text-white]="activeTab() === tab.id"
-              [class.text-slate-500]="activeTab() !== tab.id"
-              [class.hover:text-slate-300]="activeTab() !== tab.id">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="relative z-10 transition-transform group-hover:scale-110">
-                <path [attr.d]="tab.icon"></path>
-              </svg>
-              <span class="relative z-10 text-[9px] font-black uppercase tracking-[0.2em] hidden sm:inline">{{ tab.label }}</span>
-              
-              @if (activeTab() === tab.id) {
-                <div class="absolute inset-x-4 bottom-0 h-px bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,1)]"></div>
-              }
-            </button>
-          }
-        </nav>
-      </header>
-
-      <!-- LAUNCH MODAL -->
+      <!-- LAUNCH MODAL (Global Overlay) -->
       @if (selectedScene(); as scene) {
         <app-menu-launch-modal 
           [scene]="scene" 
           (launch)="launch(scene, $event)" 
           (cancel)="selectedScene.set(null)" />
       }
-
-      <!-- FOOTER TELEMETRY -->
-      <footer class="absolute bottom-8 inset-x-0 flex justify-center pointer-events-none z-10 animate-in slide-in-from-bottom-4 duration-1000">
-         <div class="flex items-center gap-8 px-8 py-3 bg-slate-950/40 backdrop-blur-md rounded-full border border-white/5">
-            <div class="flex items-center gap-3">
-               <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-               <span class="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest">Simulation_Ready</span>
-            </div>
-            <div class="h-4 w-px bg-white/10"></div>
-            <div class="flex gap-4">
-              <span class="text-[9px] font-mono text-slate-600 font-bold uppercase">v1.9.0</span>
-              <span class="text-[9px] font-mono text-slate-600 font-bold uppercase">PROJECT_STABLE</span>
-            </div>
-         </div>
-      </footer>
     </div>
   `
 })
@@ -116,11 +113,11 @@ export class MainMenuComponent {
   storage = inject(StorageService);
   project = inject(ProjectService);
 
-  readonly tabs = [
-    { id: 'projects', label: 'Workspaces', icon: 'M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z M3 9V5a2 2 0 0 1 2-2h6l2 2h7a2 2 0 0 1 2 2v2' },
-    { id: 'play', label: 'Reality_Matrix', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' },
-    { id: 'guide', label: 'Human_Doc', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-    { id: 'settings', label: 'Engine_Config', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }
+  readonly tabs: { id: MenuTab, label: string, icon: string }[] = [
+    { id: 'projects', label: 'Projects', icon: 'M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z M3 9V5a2 2 0 0 1 2-2h6l2 2h7a2 2 0 0 1 2 2v2' },
+    { id: 'play', label: 'Scenes', icon: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z M9 12l6-4-6-4v8z' },
+    { id: 'guide', label: 'Guides', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+    { id: 'settings', label: 'Config', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }
   ];
 
   readonly activeTab = signal<MenuTab>('projects');

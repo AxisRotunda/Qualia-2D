@@ -14,19 +14,19 @@ export type QualiaVerb =
   | 'RUN_UI' 
   | 'RUN_PHYS' 
   | 'RUN_MAT' 
-  | 'RUN_SPRITE'
-  | 'RUN_POST'
-  | 'RUN_ENV'
-  | 'RUN_ASSET'
-  | 'RUN_SCENE_OPT'
-  | 'RUN_PROTOCOL'
-  | 'RUN_GUIDE_GEN'
-  | 'RUN_INDUSTRY'
-  | 'RUN_MEM_ARCH'
-  | 'RUN_ARCHETYPE'
-  | 'RUN_ORACLE_SYNTH'
-  | 'RUN_KALMAN_CALIB'
-  | 'RUN_PROJECT'
+  | 'RUN_SPRITE' 
+  | 'RUN_POST' 
+  | 'RUN_ENV' 
+  | 'RUN_ASSET' 
+  | 'RUN_SCENE_OPT' 
+  | 'RUN_PROTOCOL' 
+  | 'RUN_GUIDE_GEN' 
+  | 'RUN_INDUSTRY' 
+  | 'RUN_MEM_ARCH' 
+  | 'RUN_ARCHETYPE' 
+  | 'RUN_ORACLE_SYNTH' 
+  | 'RUN_KALMAN_CALIB' 
+  | 'RUN_PROJECT' 
   | 'RUN_RPG_SYS';
 
 @Injectable({ providedIn: 'root' })
@@ -55,9 +55,16 @@ export class CommandRegistryService {
       tags.push('notable'); 
     }
 
+    // [HtT Evolution]: Added reasoning depth tags
+    if (verb === 'RUN_PROTOCOL') tags.push('scientific_mutation', 'step_back');
+    if (verb === 'RUN_REPAIR') tags.push('causal_trace');
+
     this.log(logMsg, tags);
 
     switch (verb) {
+      case 'RUN_PROTOCOL':
+        this.log(`PROTOCOL: EVOLVING_TARGET: ${params || 'UNSPECIFIED'}`, ['notable', 'scientific_mutation']);
+        break;
       case 'RUN_GUIDE_GEN':
         this.log(`GENESIS: TRANSLATING_DOMAIN: ${params || 'ALL'}`, ['notable', 'documentation']);
         break;

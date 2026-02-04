@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { EntityFactoryService } from '../engine/factory/entity-factory.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
@@ -17,18 +18,28 @@ export class Spawner2DService {
   private camera = inject(Camera2DService);
   private commands = inject(CommandRegistryService);
 
+  /**
+   * Spawns an entity from a Blueprint ID at a specific world location.
+   */
   spawnFromTemplate(templateId: string, x = 0, y = 0) {
     return this.factory.spawnFromTemplate(templateId, x, y);
   }
 
+  /**
+   * Spawns an entity from a Blueprint ID at the center of the current camera view.
+   */
   spawnAtCamera(templateId: string) {
     const followId = this.camera.followedEntityId();
     const t = followId !== null ? this.ecs.getTransform(followId) : null;
+    
+    // Offset slightly if following a player to avoid stacking directly on top
     const x = t ? t.x : this.camera.x();
     const y = t ? t.y + 2 : this.camera.y() + 5;
+    
     return this.spawnFromTemplate(templateId, x, y);
   }
 
+  // Legacy Support for Scene Scripts
   spawnBox(x = 0, y = 5, color = '#60a5fa', w = 1, h = 1, type: 'dynamic' | 'fixed' = 'dynamic') {
     return this.factory.spawnBox(x, y, color, w, h, type);
   }
