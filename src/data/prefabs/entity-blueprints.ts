@@ -2,7 +2,7 @@ export interface EntityBlueprint {
   id: string;
   name: string;
   description: string;
-  category: 'primitive' | 'logistics' | 'structure' | 'hazard' | 'mechanism' | 'interactive';
+  category: 'primitive' | 'logistics' | 'structure' | 'hazard' | 'mechanism' | 'interactive' | 'sport';
   icon: string;
   complexity: number; // 1-10
   
@@ -195,6 +195,35 @@ export const BLUEPRINTS: EntityBlueprint[] = [
       physics: { type: 'fixed', shape: 'cuboid' },
       interaction: { label: 'Query Database', radius: 3.0, triggerId: 'terminal_01' },
       tags: ['interactive', 'data']
+    }
+  },
+
+  // --- SPORT (DEMO) ---
+  {
+    id: 'sport_ball_std',
+    name: 'Match Ball',
+    description: 'Regulation physics sphere. High bounce.',
+    category: 'sport',
+    complexity: 3,
+    icon: 'M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0',
+    components: {
+      sprite: { textureId: 'tex_ball_soccer', width: 0.8, height: 0.8, layer: 2 },
+      physics: { type: 'dynamic', shape: 'ball', mass: 0.5, restitution: 0.85, friction: 0.4 },
+      tags: ['sport', 'ball']
+    }
+  },
+  {
+    id: 'sport_goal_post',
+    name: 'Goal Frame',
+    description: 'Standard goal dimensions with sensor net.',
+    category: 'sport',
+    complexity: 4,
+    icon: 'M4 4h16v16',
+    components: {
+      sprite: { textureId: 'tex_goal', width: 4, height: 3, layer: 1 },
+      physics: { type: 'fixed', shape: 'cuboid', sensor: true },
+      interaction: { label: 'Check Score', radius: 2, triggerId: 'goal_check' },
+      tags: ['sport', 'structure']
     }
   }
 ];

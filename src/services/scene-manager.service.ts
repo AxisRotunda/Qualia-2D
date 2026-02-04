@@ -1,3 +1,4 @@
+
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { EngineState2DService } from './engine-state-2d.service';
 import { ComponentStoreService } from '../engine/ecs/component-store.service';
@@ -45,7 +46,13 @@ export class SceneManagerService {
       // [PROTOCOL_PROJECT] Apply Merged Configuration (Defaults + Project Overrides)
       const mergedConfig = this.project.getMergedSceneConfig(scene);
 
-      if (scene.preferredTopology) this.state.setTopology(scene.preferredTopology);
+      // [PROTOCOL_TOPOLOGY_V2.0] Strict Binding
+      if (mergedConfig.topology) {
+        this.state.setTopology(mergedConfig.topology);
+      } else if (scene.preferredTopology) {
+        // Fallback to template preference if config is partial
+        this.state.setTopology(scene.preferredTopology);
+      }
       
       // Apply Environment
       this.state.setEnvironment(mergedConfig.env);

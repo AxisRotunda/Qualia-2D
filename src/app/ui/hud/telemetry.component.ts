@@ -24,29 +24,29 @@ import { DecimalPipe } from '@angular/common';
           </span>
         </div>
         <div class="flex flex-col -space-y-1">
-          <span class="text-[9px] font-black uppercase tracking-[0.3em] text-white">{{ state.statusText() }}</span>
-          <span class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Active_Stream</span>
+          <span class="text-[10px] font-black uppercase tracking-tight text-white">{{ state.statusText() }}</span>
+          <span class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Live Simulation</span>
         </div>
       </div>
 
       <!-- Core Telemetry -->
       <div class="flex items-center gap-6 px-5 border-r border-white/5">
         <div class="flex flex-col">
-          <span class="text-[7px] text-slate-500 font-black uppercase tracking-tighter">Velocity</span>
+          <span class="text-[7px] text-slate-500 font-black uppercase tracking-tighter">Performance</span>
           <span class="text-xs font-mono font-bold text-white tracking-tighter">{{ state.fps() | number:'1.0-0' }}<span class="text-[8px] ml-0.5 text-slate-500">fps</span></span>
         </div>
         <div class="flex flex-col">
-          <span class="text-[7px] text-slate-500 font-black uppercase tracking-tighter">Nodes</span>
-          <span class="text-xs font-mono font-bold text-white tracking-tighter">{{ ecs.entityCount() }}<span class="text-[8px] ml-0.5 text-slate-500">ecs</span></span>
+          <span class="text-[7px] text-slate-500 font-black uppercase tracking-tighter">Objects</span>
+          <span class="text-xs font-mono font-bold text-white tracking-tighter">{{ ecs.entityCount() }}<span class="text-[8px] ml-0.5 text-slate-500">nodes</span></span>
         </div>
       </div>
 
-      <!-- Cognitive Load (Memory Tiers) -->
+      <!-- Engine Memory -->
       <div class="flex items-center gap-4 pl-5">
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between gap-4">
-             <span class="text-[7px] text-slate-500 font-black uppercase tracking-tighter">Cognitive_State</span>
-             <span class="text-[7px] font-mono font-black text-indigo-400 uppercase">Tier_Σ:{{ memory.stats().t2 }}</span>
+             <span class="text-[7px] text-slate-500 font-black uppercase tracking-tighter">Engine Memory</span>
+             <span class="text-[7px] font-mono font-black text-indigo-400 uppercase">Tier_{{ memory.stats().t2 }}</span>
           </div>
           <div class="w-28 h-1 bg-white/5 rounded-full overflow-hidden flex gap-0.5">
             <div class="h-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all duration-700" [style.width.%]="memPercent().t0"></div>
@@ -63,9 +63,6 @@ export class TelemetryComponent {
   public ecs = inject(ComponentStoreService);
   public memory = inject(MemorySystem2DService);
 
-  /**
-   * Calculates the distribution of memory across tiers for visual readout.
-   */
   memPercent = computed(() => {
     const s = this.memory.stats();
     const total = (s.t0 + s.t1 + s.t2) || 1;

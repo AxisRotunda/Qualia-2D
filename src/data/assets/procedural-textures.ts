@@ -162,6 +162,73 @@ export const HERO_SPRITE_SHEET: TextureGenerator = (ctx, w, h) => {
   }
 };
 
+// --- SLIME SOCCER ASSETS ---
+
+export const SLIME_AVATAR: TextureGenerator = (ctx, w, h) => {
+  const cx = w/2, cy = h; 
+  // Slime Body (Semi-Circle)
+  ctx.fillStyle = '#ec4899';
+  ctx.beginPath();
+  ctx.arc(cx, cy, w/2 - 4, Math.PI, 0);
+  ctx.fill();
+  
+  // Highlight
+  ctx.fillStyle = '#fbcfe8';
+  ctx.beginPath();
+  ctx.ellipse(cx - 20, cy - 40, 10, 6, Math.PI / 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eye
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(cx + 15, cy - 30, 12, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(cx + 18, cy - 30, 5, 0, Math.PI*2); ctx.fill();
+};
+
+export const SOCCER_BALL: TextureGenerator = (ctx, w, h) => {
+  const cx = w/2, cy = h/2;
+  const r = w/2 - 2;
+  
+  // White Base
+  ctx.fillStyle = '#f8fafc';
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  
+  // Pentagons (Approx)
+  ctx.fillStyle = '#1e293b';
+  ctx.beginPath(); ctx.arc(cx, cy, r * 0.3, 0, Math.PI*2); ctx.fill(); // Center
+  
+  for(let i=0; i<5; i++) {
+    const angle = (i * 2 * Math.PI) / 5;
+    const px = cx + Math.cos(angle) * (r * 0.7);
+    const py = cy + Math.sin(angle) * (r * 0.7);
+    ctx.beginPath(); ctx.arc(px, py, r * 0.25, 0, Math.PI*2); ctx.fill();
+  }
+  
+  // Outline
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+};
+
+export const SOCCER_GOAL: TextureGenerator = (ctx, w, h) => {
+  // Posts
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(4, h); ctx.lineTo(4, 4); ctx.lineTo(w-4, 4); ctx.lineTo(w-4, h);
+  ctx.stroke();
+  
+  // Net
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  for(let i=10; i<w; i+=10) { ctx.moveTo(i, 4); ctx.lineTo(i-5, h); }
+  for(let j=10; j<h; j+=10) { ctx.moveTo(4, j); ctx.lineTo(w-4, j); }
+  ctx.stroke();
+  ctx.globalAlpha = 1.0;
+};
+
 export const PROCEDURAL_REGISTRY: Record<string, TextureGenerator> = {
   'tex_hero': HERO_GLYPH,
   'tex_crate': INDUSTRIAL_CRATE,
@@ -169,5 +236,8 @@ export const PROCEDURAL_REGISTRY: Record<string, TextureGenerator> = {
   'tex_toxic': TOXIC_DRUM,
   'tex_glass': STRUCTURAL_GLASS,
   'tex_platform': KINETIC_PLATFORM,
-  'tex_hero_sheet': HERO_SPRITE_SHEET
+  'tex_hero_sheet': HERO_SPRITE_SHEET,
+  'tex_slime': SLIME_AVATAR,
+  'tex_ball_soccer': SOCCER_BALL,
+  'tex_goal': SOCCER_GOAL
 };

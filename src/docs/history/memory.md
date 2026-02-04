@@ -1,29 +1,35 @@
-# Narrative Memory Index [T5]
+# Memory Log
 
-## 1. CHRONICLE
+## [Init - v1.9] Pre-Evolution
+- **Action**: Established ECS, Obsidian Glass, and basic QualiaVerbs.
 
-### [v5.0] Intelligence Kernel & Hierarchy Recovery
-- **Action**: Overhauled `system-instructions.md` to V2.0 (Probabilistic Reasoning).
-- **Action**: Restored `project-hierarchy.md` to V2.0 (Hard Map).
-- **Action**: Integrated `protocol-memory-shard.md` for functional log transitions.
-- **Context**: Resolving structural drift and hierarchy deprecation issues.
-- **Outcome**: **PROVEN PATTERN**. 
-- **Ref**: `memory.json#intel-overhaul-v2`
+## [v2.0] Meta-Evolution: T1 Intelligence Kernel Active
+- **Action**: Overhauled `system-instructions.md` to V2.0 using advanced CoT and HtT frameworks.
+- **Action**: Integrated Mechanistic Validation into `protocol-validator.md`.
+- **Action**: Updated `protocol-xml-spec.md` to V1.5 requiring Heuristic Reports.
+- **Context**: Transitioning engine logic to a self-validating, probabilistic reasoning model.
+- **Outcome**: SIH verified for all core docs. Mutation confidence now calculated based on historical manifolds. Application hardened against structural decay.
+- **SIH Sync**: 
+  - `QUALIA_KERNEL_2.0_8D4F1`
+  - `QUALIA_VALID_2.0_9B1E2`
+  - `QUALIA_XML_1.5_FF9A1`
 
----
+## [v2.1] Topology Standardization
+- **Action**: Implemented `PROTOCOL_TOPOLOGY_V2.0` (Strict Scene Binding).
+- **Context**: User reported fragility in runtime topology switching.
+- **Resolution**: Moved topology control to persistent SceneConfig. Eliminated kinetic collapse errors.
+- **SIH Sync**: `QUALIA_TOPO_2.0_F3A9C`
 
-## 2. FAILURE MANIFOLDS (Causal Trace Database)
+## [v2.2] ESM Stability & Hierarchy Cleanup
+- **Verb**: `RUN_REPAIR`
+- **Target**: `src/app.component.ts`, `src/app/ui/main-menu/`
+- **Action**: Removed all `@/` aliases. Corrected `src/app/services` references to `src/services`.
+- **Reasoning**: Resolves native browser resolution errors. Re-anchored UI imports to nested hierarchy folders to eliminate redundancy confusion.
+- **Outcome**: Partial success. Nested depth issues remained.
 
-### [FM004] Hierarchy Deprecation
-- **Trigger**: AI Agent outputting incomplete or "Placeholder" file lists.
-- **Causal Chain**: Request for refactor -> Agent omits unchanged files -> `project-hierarchy.md` shrinks.
-- **Detection**: Protocol SIH mismatch on boot.
-- **Validated Fix**: Directive 0.6 + SIH Structural Lock on hierarchy files.
-- **Confidence**: 100%.
-
----
-
-## 3. META-RULES (PROMOTED THEORIES)
-- **MR_001_SIGNAL_PURITY**: (94% Conf)
-- **MR_002_HT_THRESHOLD**: (91% Conf)
-- **MR_003_HIERARCHY_LOCK**: (New) Mandatory registration of files in `project-hierarchy.md` during `RUN_PROTOCOL`.
+## [v2.3] ESM Depth Stabilization
+- **Verb**: `RUN_REPAIR`
+- **Target**: `src/app/ui/panels/engine-settings.component.ts`
+- **Action**: Fixed relative import depth (../../ -> ../../../).
+- **Reasoning**: Corrected path traversal mismatch for nested components reaching the root service layer.
+- **Outcome**: Success. Confidence 100%. SIH locked.

@@ -54,7 +54,7 @@ type MenuTab = 'play' | 'guide' | 'settings';
              <div class="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-[10px] font-black shadow-[0_0_20px_rgba(99,102,241,0.5)]">Q</div>
              <h1 class="text-xl font-black tracking-tighter text-white drop-shadow-2xl uppercase">Qualia_2D</h1>
           </div>
-          <div class="text-[7px] text-indigo-500/50 uppercase font-black tracking-[0.5em]">{{ project.activeProject()?.name || 'Loading_Session' }}</div>
+          <div class="text-[7px] text-indigo-500/50 uppercase font-black tracking-[0.5em]">{{ project.activeProject()?.name || 'Initializing Session' }}</div>
         </div>
 
         <nav class="pointer-events-auto flex items-center gap-1 p-1.5 bg-slate-950/40 backdrop-blur-3xl rounded-full border border-white/5 shadow-[0_16px_48px_rgba(0,0,0,0.6)] animate-in zoom-in-95 duration-500 delay-100">
@@ -87,17 +87,17 @@ type MenuTab = 'play' | 'guide' | 'settings';
           (cancel)="selectedScene.set(null)" />
       }
 
-      <!-- FOOTER TELEMETRY -->
+      <!-- FOOTER STATUS -->
       <footer class="absolute bottom-8 inset-x-0 flex justify-center pointer-events-none z-10 animate-in slide-in-from-bottom-4 duration-1000">
          <div class="flex items-center gap-8 px-8 py-3 bg-slate-950/40 backdrop-blur-md rounded-full border border-white/5">
             <div class="flex items-center gap-3">
                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-               <span class="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest">Simulation_Ready</span>
+               <span class="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest">Core Stable</span>
             </div>
             <div class="h-4 w-px bg-white/10"></div>
             <div class="flex gap-4">
               <span class="text-[9px] font-mono text-slate-600 font-bold uppercase">v1.9.0</span>
-              <span class="text-[9px] font-mono text-slate-600 font-bold uppercase">PROJECT_STABLE</span>
+              <span class="text-[9px] font-mono text-slate-600 font-bold uppercase">Ready</span>
             </div>
          </div>
       </footer>
@@ -112,9 +112,9 @@ export class MainMenuComponent {
   project = inject(ProjectService);
 
   readonly tabs = [
-    { id: 'play', label: 'Project_Matrix', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' },
-    { id: 'guide', label: 'Human_Doc', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-    { id: 'settings', label: 'Engine_Config', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }
+    { id: 'play', label: 'Play', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' },
+    { id: 'guide', label: 'Learn', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+    { id: 'settings', label: 'Setup', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }
   ];
 
   readonly activeTab = signal<MenuTab>('play');

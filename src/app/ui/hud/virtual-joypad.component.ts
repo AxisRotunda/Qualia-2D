@@ -22,7 +22,7 @@ interface StickState {
         <div class="absolute inset-x-0 bottom-0 h-3/5 flex pointer-events-none" 
              [class.pointer-events-auto]="!state.isOverlayOpen()">
           
-          <!-- Left Corridor -->
+          <!-- Left Corridor (Movement) -->
           <div class="w-2/5 h-full pointer-events-auto"
                (touchstart)="onZoneStart($event, 'left')"
                (touchmove)="onZoneMove($event)"
@@ -30,10 +30,9 @@ interface StickState {
                (touchcancel)="onZoneEnd($event, 'left')">
           </div>
 
-          <!-- Safe Interaction Gap (Center) -->
           <div class="flex-1 h-full pointer-events-none"></div>
 
-          <!-- Right Corridor -->
+          <!-- Right Corridor (Action/Aim) -->
           @if (state.topology() === 'top-down-action') {
              <div class="w-2/5 h-full pointer-events-auto"
                (touchstart)="onZoneStart($event, 'right')"
@@ -56,7 +55,7 @@ interface StickState {
              </div>
         </div>
 
-        <!-- Right Stick Visual (Action Only) -->
+        <!-- Right Stick Visual -->
         @if (state.topology() === 'top-down-action') {
           <div class="absolute w-32 h-32 -ml-16 -mt-16 rounded-full border border-white/10 bg-slate-900/40 backdrop-blur-xl flex items-center justify-center transition-opacity duration-150 ease-out will-change-transform"
                [style.left.px]="rightStick().originX"
@@ -70,19 +69,22 @@ interface StickState {
           </div>
         }
 
-        <!-- JUMP (Platformer) / INTERACT (RPG) -->
+        <!-- JUMP (Platformer) / ACT (RPG) -->
         @if (state.topology() === 'platformer' || state.topology() === 'top-down-rpg') {
-           <div class="absolute bottom-8 right-8 flex flex-col gap-6 items-end p-4 pb-12 pr-12"
-                [class.pointer-events-none]="state.isOverlayOpen()"
-                [class.pointer-events-auto]="!state.isOverlayOpen()">
+           <div class="absolute bottom-12 right-12 flex flex-col gap-6 items-end pointer-events-auto">
               <button 
                 (touchstart)="onAction($event, true)" 
                 (touchend)="onAction($event, false)"
                 (touchcancel)="onAction($event, false)"
-                class="w-20 h-20 rounded-full bg-slate-900/60 backdrop-blur-xl border border-white/20 active:bg-emerald-600 active:border-emerald-400 active:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all active:scale-95 flex items-center justify-center group shadow-2xl">
-                <span class="text-xs font-black text-white/90 group-active:text-white group-active:scale-110 transition-transform tracking-widest">
-                  {{ state.topology() === 'platformer' ? 'JUMP' : 'ACT' }}
-                </span>
+                class="w-24 h-24 rounded-full bg-indigo-600/40 backdrop-blur-3xl border-2 border-indigo-500/50 active:bg-indigo-500 active:scale-95 transition-all shadow-2xl flex items-center justify-center group">
+                <div class="flex flex-col items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-white group-active:translate-y-[-4px] transition-transform">
+                    <path d="m17 11-5-5-5 5M17 18l-5-5-5 5"/>
+                  </svg>
+                  <span class="text-[10px] font-black text-white/90 tracking-widest mt-1">
+                    {{ state.topology() === 'platformer' ? 'JUMP' : 'ACT' }}
+                  </span>
+                </div>
               </button>
            </div>
         }
@@ -109,11 +111,8 @@ export class VirtualJoypadComponent {
     const stick = zone === 'left' ? this.leftStick : this.rightStick;
 
     stick.set({
-      active: true,
-      originX: touch.clientX,
-      originY: touch.clientY,
-      currentX: touch.clientX,
-      currentY: touch.clientY,
+      active: true, originX: touch.clientX, originY: touch.clientY,
+      currentX: touch.clientX, currentY: touch.clientY,
       identifier: touch.identifier
     });
 
@@ -156,7 +155,7 @@ export class VirtualJoypadComponent {
     this.input.isUsingJoypad.set(true);
     
     if (this.state.topology() === 'platformer') {
-      this.input.moveVector.update(v => ({ x: v.x, y: isActive ? 1 : 0 }));
+      this.input.jump.set(isActive);
     } else {
       this.input.action.set(isActive);
     }
@@ -167,14 +166,12 @@ export class VirtualJoypadComponent {
     if (l.active) {
       const v = this.calculateVector(l);
       if (this.state.topology() === 'platformer') {
-        this.input.moveVector.set({ x: v.x, y: this.input.moveVector().y }); 
+        this.input.moveVector.set({ x: v.x, y: 0 }); // Platformer: Stick is X-only
       } else {
         this.input.moveVector.set({ x: v.x, y: -v.y });
       }
-    } else if (this.state.topology() !== 'platformer') {
-       this.input.moveVector.set({ x: 0, y: 0 });
     } else {
-       this.input.moveVector.set({ x: 0, y: this.input.moveVector().y });
+      this.input.moveVector.set({ x: 0, y: 0 });
     }
 
     const r = this.rightStick();
@@ -191,16 +188,10 @@ export class VirtualJoypadComponent {
     const dx = s.currentX - s.originX;
     const dy = s.currentY - s.originY;
     const dist = Math.hypot(dx, dy);
-    
     if (dist === 0) return { x: 0, y: 0 };
-    
     const rawMag = Math.min(dist / maxDist, 1.0);
     const angle = Math.atan2(dy, dx);
-    
-    return {
-      x: Math.cos(angle) * rawMag,
-      y: Math.sin(angle) * rawMag
-    };
+    return { x: Math.cos(angle) * rawMag, y: Math.sin(angle) * rawMag };
   }
 
   private calculatePuckOffset(s: StickState) {
@@ -208,7 +199,6 @@ export class VirtualJoypadComponent {
     let dx = s.currentX - s.originX;
     let dy = s.currentY - s.originY;
     const dist = Math.hypot(dx, dy);
-    
     if (dist > maxDist) {
       const angle = Math.atan2(dy, dx);
       dx = Math.cos(angle) * maxDist;

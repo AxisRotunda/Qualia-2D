@@ -6,8 +6,9 @@ import { PLAYER_ANIMATIONS } from '../../data/config/animation-config';
 import { BLUEPRINTS, EntityBlueprint } from '../../data/prefabs/entity-blueprints';
 
 /**
- * Qualia2D Entity Factory [V2.5]
+ * Qualia2D Entity Factory [V2.6]
  * [RUN_REF]: Assembler pattern updated with industry-standard physical property injection.
+ * [RUN_REPAIR]: Fixed missing spawnGravityWell method.
  */
 @Injectable({ providedIn: 'root' })
 export class EntityFactoryService {
@@ -86,6 +87,38 @@ export class EntityFactoryService {
       });
     }
 
+    return id;
+  }
+
+  /**
+   * Spawns a localized gravitational well.
+   * [RUN_PHYS]: Manual component attachment for dynamic force fields.
+   */
+  spawnGravityWell(x: number, y: number, strength: number, radius: number): EntityId {
+    const id = EntityGenerator.generate();
+    this.ecs.addEntity(id);
+    
+    // CoT: Manual assembly for procedural force field entities not defined in static blueprints.
+    this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
+    this.ecs.tags.set(id, { name: `GravityWell_${id}`, tags: new Set(['mechanism', 'gravity']) });
+    
+    // Visual encoding: Attraction (Blue/Indigo), Repulsion (Red/Rose)
+    this.ecs.sprites.set(id, { 
+      color: strength > 0 ? '#6366f1' : '#f43f5e', 
+      width: 0.5, 
+      height: 0.5, 
+      layer: 2, 
+      opacity: 0.4 
+    });
+    
+    this.ecs.forceFields.set(id, { strength, radius, active: true });
+    
+    const rb = this.physics.createBody(id, 'fixed', x, y);
+    if (rb) {
+      const col = this.physics.createCollider(id, rb, 0.5, 0.5);
+      if (col) col.setSensor(true);
+    }
+    
     return id;
   }
 

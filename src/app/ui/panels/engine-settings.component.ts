@@ -1,3 +1,4 @@
+
 import { Component, inject } from '@angular/core';
 import { EngineState2DService } from '../../../services/engine-state-2d.service';
 import { DecimalPipe } from '@angular/common';
@@ -8,27 +9,7 @@ import { DecimalPipe } from '@angular/common';
   imports: [DecimalPipe],
   template: `
     <div class="space-y-10 animate-in slide-in-from-right-4 duration-500">
-      <!-- Topology Selector -->
-      <div class="space-y-4">
-        <label class="block text-slate-500 text-[9px] uppercase font-black tracking-widest px-1">Control Topology</label>
-        <div class="grid grid-cols-1 gap-2">
-          @for (topo of topologies; track topo) {
-            <button (click)="state.setTopology(topo)" 
-              class="w-full p-5 rounded-[2rem] border text-left transition-all active:scale-95 flex items-center justify-between group"
-              [class.bg-indigo-600]="state.topology() === topo" 
-              [class.border-indigo-400/30]="state.topology() === topo" 
-              [class.border-white/5]="state.topology() !== topo">
-              <span class="text-[10px] font-black uppercase text-white tracking-wide group-hover:translate-x-1 transition-transform">
-                {{ topo.replace('-', ' ') }}
-              </span>
-              @if (state.topology() === topo) {
-                <div class="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
-              }
-            </button>
-          }
-        </div>
-      </div>
-
+      
       <!-- System Toggles -->
       <div class="space-y-4">
         <label class="block text-slate-500 text-[9px] uppercase font-black tracking-widest px-1">Visual Debug</label>
@@ -65,11 +46,14 @@ import { DecimalPipe } from '@angular/common';
               class="flex-1 accent-indigo-500">
             <span class="text-xs font-mono font-bold text-white w-12 text-right">{{ state.gravityY() | number:'1.1-1' }}</span>
          </div>
+         <p class="text-[8px] text-slate-600 leading-relaxed">
+           Modifying global gravity affects all dynamic bodies instantly. 
+           For topology changes, use the Scene Inspector.
+         </p>
       </div>
     </div>
   `
 })
 export class EngineSettingsComponent {
   state = inject(EngineState2DService);
-  topologies: any[] = ['platformer', 'top-down-rpg', 'top-down-action'];
 }

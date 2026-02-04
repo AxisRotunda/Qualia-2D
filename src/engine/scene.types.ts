@@ -1,3 +1,4 @@
+
 import type { Engine2DService } from '../services/engine-2d.service';
 import type { ControllerTopology } from '../services/engine-state-2d.service';
 
@@ -17,6 +18,7 @@ export interface ScenePhysicsConfig {
 export interface SceneConfig {
   env: SceneEnvironment;
   physics?: ScenePhysicsConfig;
+  topology?: ControllerTopology; // [PROTOCOL_TOPOLOGY_V2.0] Strict Binding
 }
 
 export interface ScenePreset2D {

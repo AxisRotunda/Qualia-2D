@@ -6,7 +6,7 @@ import { PLAYER_MOVEMENT_CONFIG } from '../../data/config/player-config';
 
 /**
  * Qualia2D Player System.
- * [RUN_REF]: Pure modularity. Handles the bridge between user intent and player physics.
+ * [RUN_PHYS]: Refined kinetic impulses for jumping and movement.
  */
 @Injectable({ providedIn: 'root' })
 export class PlayerSystem {
@@ -19,6 +19,7 @@ export class PlayerSystem {
     const config = PLAYER_MOVEMENT_CONFIG[topology];
     const move = this.input.moveVector();
     const look = this.input.lookVector();
+    const jumping = this.input.jump();
 
     this.ecs.players.forEach((_, id) => {
       const rb = this.ecs.rigidBodies.get(id);
@@ -29,7 +30,7 @@ export class PlayerSystem {
 
       switch (topology) {
         case 'platformer':
-          this.processPlatformer(body, move, config, dt);
+          this.processPlatformer(body, move, jumping, config, dt);
           break;
         case 'top-down-rpg':
           this.processRPG(body, move, config, dt);
@@ -41,33 +42,34 @@ export class PlayerSystem {
     });
   }
 
-  private processPlatformer(body: any, move: any, config: any, dt: number) {
-    body.setRotation(0, true); // Lock rotation for platformers
+  private processPlatformer(body: any, move: any, jumping: boolean, config: any, dt: number) {
+    body.setRotation(0, true); 
     
     const velocity = body.linvel();
     const targetVelX = move.x * config.moveSpeed;
     const accel = config.acceleration * dt;
     
-    // Smooth acceleration to target speed
+    // Horizontal Movement
     let nextVelX = velocity.x + (targetVelX - velocity.x) * Math.min(accel, 1.0);
     
-    // Handle Jump (Y is normalized input in joypad for platformer)
+    // Grounded Jump Check: Vertical velocity near-zero
+    // [HtT]: Stability threshold 0.2 to account for micro-jitter
     let nextVelY = velocity.y;
-    if (move.y > 0.5 && Math.abs(velocity.y) < 0.1) {
+    if (jumping && Math.abs(velocity.y) < 0.2) {
       nextVelY = config.jumpForce;
+      // CoT: Apply direct velocity reset for snappy vertical lift
+      body.setLinvel({ x: nextVelX, y: nextVelY }, true);
+    } else {
+      body.setLinvel({ x: nextVelX, y: nextVelY }, true);
     }
-
-    body.setLinvel({ x: nextVelX, y: nextVelY }, true);
   }
 
   private processRPG(body: any, move: any, config: any, dt: number) {
     body.setRotation(0, true);
-    // Instant velocity for RPG snappiness
     body.setLinvel({ x: move.x * config.moveSpeed, y: move.y * config.moveSpeed }, true);
   }
 
   private processAction(body: any, transform: any, move: any, look: any, config: any, dt: number) {
-    // 1. Rotation (Aiming)
     let targetAngle = transform.rotation;
     if (this.input.isUsingJoypad() && (look.x !== 0 || look.y !== 0)) {
       targetAngle = Math.atan2(look.y, look.x);
@@ -76,7 +78,6 @@ export class PlayerSystem {
       targetAngle = Math.atan2(cursor.y - transform.y, cursor.x - transform.x);
     }
 
-    // Smooth rotation lerp
     const currentAngle = transform.rotation;
     let diff = targetAngle - currentAngle;
     while (diff < -Math.PI) diff += Math.PI * 2;
@@ -85,7 +86,6 @@ export class PlayerSystem {
     const nextAngle = currentAngle + diff * Math.min(config.rotationSpeed * dt, 1.0);
     body.setRotation(nextAngle, true);
 
-    // 2. Translation (Impulse-based movement)
     if (move.x !== 0 || move.y !== 0) {
       const force = config.moveSpeed * config.acceleration * dt;
       body.applyImpulse({ x: move.x * force, y: move.y * force }, true);

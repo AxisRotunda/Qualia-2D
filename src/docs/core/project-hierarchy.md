@@ -1,5 +1,5 @@
 # Project Hierarchy: Qualia2D Hard Mapping
-ID: HIERARCHY_V2.0 | Role: Structural Truth.
+ID: HIERARCHY_V2.1 | Role: Structural Truth.
 
 ## 1. ROOT ARCHITECTURE
 - `index.html`: Entry point & ESM Import Map.
@@ -48,6 +48,7 @@ ID: HIERARCHY_V2.0 | Role: Structural Truth.
 ## 5. /src/data (Static State)
 - `scene-presets.ts`: Registry.
 - `scenes/`: `neon-hotline`, `physics-lab`, `ghost-village`, `kinetic-chaos`.
+- `demos/`: **[NEW]** `slime-soccer.ts`, `index.ts`.
 - `prefabs/`: `entity-blueprints.ts`.
 - `guides/`: `index.ts`, `kinetic-translation`, `physics-laws`, `interface-logic`, `forces-dynamics`, `memory-stratification`, `player-mastery`, `guide-to-guides`.
 - `config/`: `visual-config`, `animation-config`, `topology-config`, `player-config`.
@@ -57,7 +58,7 @@ ID: HIERARCHY_V2.0 | Role: Structural Truth.
 - `kernel.md`: Index.
 - `qualia2d-manifesto.md`: Vision.
 - `kernel/`: `axial-directives.md`, `safeguards.md`, `command-registry.md`.
-- `protocols/`: `refactor`, `constructor`, `knowledge`, `optimize`, `repair`, `ui`, `dynamics`, `material`, `scene-optimizer`, `forces`, `industry`, `topology`, `pwa`, `spawning`, `archetype`, `hyper-core`, `rpg`, `visual-core`, `project`, `memory-shard`.
+- `protocols/`: `refactor`, `constructor`, `knowledge`, `optimize`, `repair`, `ui`, `dynamics`, `material`, `scene-optimizer`, `forces`, `industry`, `topology`, `pwa`, `spawning`, `archetype`, `hyper-core`, `rpg`, `visual-core`, `project`, `memory-shard`, `demo-projects`.
 - `history/`: `memory.md`, `memory.json`.
 - `repair-logs/`: Issue traces.
 - `meta-rules/`: Proven Patterns.
@@ -68,4 +69,4 @@ ID: HIERARCHY_V2.0 | Role: Structural Truth.
 - **Deprecation Ban**: No file in this list may be deleted or modified such that its core intent is lost without a corresponding `RUN_KNOWLEDGE` audit.
 - **SIH Lock**: Major files must match registry hashes.
 
-STRUCTURAL_HASH: QUALIA_HIERARCHY_2.0_7F2A1
+STRUCTURAL_HASH: QUALIA_HIERARCHY_2.1_8A3B2

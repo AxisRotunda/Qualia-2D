@@ -1,24 +1,43 @@
 # [T0] Topology Protocol
-ID: PROTOCOL_TOPOLOGY_V1.1 | Role: Physics Context Management.
+ID: PROTOCOL_TOPOLOGY_V2.0 | Role: Physics Context Management.
 
 ## 1. INTENT
-Govern the engine's behavior across different Physics Modes (Platformer, Top-Down, Zero-G).
+Govern the engine's behavior across different Physics Modes (Platformer, Top-Down, Zero-G). V2.0 enforces **Strict Scene Binding**, treating Topology as a fundamental property of the Scene Fragment rather than a volatile engine setting.
 
 ## 2. HARD STRUCTURAL DEFINITIONS
-- **Physics Mode Signal**: `EngineState2DService.physicsMode`.
-- **Modes**:
-  1. `platformer`: Gravity -Y (Variable). Ground Friction. Impulse-based Jump.
-  2. `top-down`: Zero Gravity. High Linear Damping (0.90). Snappy movement.
-  3. `zero-g`: Zero Gravity. Low Linear Damping (0.995). Newtonian Inertia.
+- **Source of Truth**: `SceneConfig.topology` (Persisted in Project Data).
+- **Runtime Signal**: `EngineState2DService.topology` (Derived from Scene Load).
+- **Restriction**: Runtime switching via global settings is **forbidden** to prevent simulation destabilization.
 
-## 3. LOGIC MATRIX
-1. **Switch Mode**: Immediately reset `world.gravity`.
-2. **Apply Damping**: In `tick()`, iterate all dynamic bodies and scale velocity by `factor` if not in platformer mode.
-3. **Controller Tick**: Map active keyboard keys to force vectors based on the active mode (Impulse vs Thruster).
+## 3. TOPOLOGY STANDARDS (INDUSTRY ALIGNMENT)
 
-## 4. INDUSTRY STANDARDS
-- **Normalization**: Movement vectors must be normalized before applying strength to prevent diagonal speed-boost exploits.
-- **Time Correction**: Damping should be frame-rate independent `vel *= pow(factor, dt)`.
+### 3.1 PLATFORMER (Side-View)
+- **Gravity**: -Y (Standard 9.81 or Custom).
+- **Damping**: Low (0.0). Air resistance only.
+- **Input Mapping**:
+  - `Move X`: Lateral impulse.
+  - `Move Y`: Ignored (replaced by Jump).
+  - `Look`: Ignored (Character faces motion).
+
+### 3.2 TOP-DOWN RPG (Zelda-like)
+- **Gravity**: Zero.
+- **Damping**: Instant (1.0). Velocity stops immediately on input release.
+- **Input Mapping**:
+  - `Move X/Y`: Direct velocity mapping.
+  - `Look`: Ignored (Character faces motion).
+
+### 3.3 TOP-DOWN ACTION (Twin-Stick)
+- **Gravity**: Zero.
+- **Damping**: High (0.92). Drifty inertia.
+- **Input Mapping**:
+  - `Move X/Y`: Thruster impulse (Acceleration).
+  - `Look X/Y`: Independent Turret rotation.
+
+## 4. LOGIC MATRIX
+1. **Scene Load**: `SceneManager` extracts `topology` from `mergedConfig`.
+2. **Apply**: `EngineState.setTopology()` is called *once* during transition.
+3. **Physics Reset**: Gravity and Damping are reapplied.
 
 ## 5. SAFEGUARDS
-- **Reset Guard**: Switching modes does not auto-reset scene, but scene loading forces the intended mode.
+- **Lock**: Topology changes require a Scene Reload to re-initialize physics bodies correctly.
+- **Normalization**: Input vectors are always normalized before reaching the topology solver.

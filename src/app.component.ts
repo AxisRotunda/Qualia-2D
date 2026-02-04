@@ -1,3 +1,5 @@
+// CoT: Standardizing module resolution for native ESM environments.
+// All imports must start with ./ or ../ and point to canonical hierarchy locations.
 import { Component, AfterViewInit, inject, ViewChild } from '@angular/core';
 import { Engine2DService } from './services/engine-2d.service';
 import { EngineState2DService, ActiveOverlay } from './services/engine-state-2d.service';
@@ -7,14 +9,14 @@ import { PwaService } from './services/pwa.service';
 import { DecimalPipe } from '@angular/common';
 import { SCENES } from './data/scene-presets';
 
-// UI Imports
+// UI Imports: Re-anchored to hierarchy-approved nested folders
 import { ViewportComponent } from './app/ui/viewport/viewport.component';
 import { TelemetryComponent } from './app/ui/hud/telemetry.component';
 import { CommandHubComponent } from './app/ui/hud/command-hub.component';
 import { InspectorComponent } from './app/ui/panels/inspector.component';
 import { SceneInspectorComponent } from './app/ui/panels/scene-inspector.component';
 import { VirtualJoypadComponent } from './app/ui/hud/virtual-joypad.component';
-import { MainMenuComponent } from './app/ui/main-menu.component';
+import { MainMenuComponent } from './app/ui/main-menu/main-menu.component';
 import { SceneBrowserOverlayComponent } from './app/ui/overlays/scene-browser.component';
 import { CreateMenuOverlayComponent } from './app/ui/overlays/create-menu.component';
 import { HierarchyComponent } from './app/ui/panels/hierarchy.component';
