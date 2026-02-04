@@ -10,8 +10,10 @@ import { MenuPlayTabComponent } from './play-tab.component';
 import { MenuGuideTabComponent } from './guide-tab.component';
 import { MenuSettingsTabComponent } from './settings-tab.component';
 import { MenuLaunchModalComponent } from './launch-modal.component';
+import { MenuProjectsTabComponent } from './projects-tab.component';
 
-type MenuTab = 'play' | 'guide' | 'settings';
+// CoT: Included 'projects' in type to enable workspace navigation
+type MenuTab = 'projects' | 'play' | 'guide' | 'settings';
 
 @Component({
   selector: 'app-main-menu',
@@ -21,7 +23,8 @@ type MenuTab = 'play' | 'guide' | 'settings';
     MenuPlayTabComponent, 
     MenuGuideTabComponent, 
     MenuSettingsTabComponent,
-    MenuLaunchModalComponent
+    MenuLaunchModalComponent,
+    MenuProjectsTabComponent
   ],
   template: `
     <div class="fixed inset-0 z-[90] bg-[#020617] text-slate-200 font-sans select-none overflow-hidden">
@@ -35,8 +38,11 @@ type MenuTab = 'play' | 'guide' | 'settings';
       <!-- MAIN CONTENT LAYER -->
       <main class="absolute inset-0 z-0">
          @switch (activeTab()) {
+           @case ('projects') {
+             <app-menu-projects-tab (openSceneBrowser)="activeTab.set('play')" />
+           }
            @case ('play') {
-             <app-menu-play-tab (select)="selectedScene.set($event)" />
+             <app-menu-play-tab (select)="selectedScene.set($event)" (back)="activeTab.set('projects')" />
            }
            @case ('guide') {
              <app-menu-guide-tab (launch)="launchModuleSim($event)" />
@@ -111,13 +117,16 @@ export class MainMenuComponent {
   storage = inject(StorageService);
   project = inject(ProjectService);
 
+  // CoT: Added 'projects' to the tab registry to enable Demo/Workspace access
   readonly tabs = [
-    { id: 'play', label: 'Play', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' },
+    { id: 'projects', label: 'Workspaces', icon: 'M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z M3 9V5a2 2 0 0 1 2-2h6l2 2h7a2 2 0 0 1 2 2v2' },
+    { id: 'play', label: 'Scenes', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' },
     { id: 'guide', label: 'Learn', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
     { id: 'settings', label: 'Setup', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }
   ];
 
-  readonly activeTab = signal<MenuTab>('play');
+  // CoT: Defaulting to 'projects' so users can see Demos and Workspaces at first launch
+  readonly activeTab = signal<MenuTab>('projects');
   readonly selectedScene = signal<any>(null);
 
   constructor() {

@@ -1,6 +1,7 @@
+
 /**
  * Obsidian Glass: Procedural Asset Synthesis [DATA LAYER]
- * ID: PROCEDURAL_TEXTURES_V1.2
+ * ID: PROCEDURAL_TEXTURES_V1.3
  */
 
 export type TextureGenerator = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
@@ -162,71 +163,120 @@ export const HERO_SPRITE_SHEET: TextureGenerator = (ctx, w, h) => {
   }
 };
 
-// --- SLIME SOCCER ASSETS ---
+// --- SLIME SOCCER ASSETS (HARD REALISM) ---
 
+/**
+ * [REPAIR]: Slime Avatar redesign.
+ * Centered semi-sphere to align with Entity Center.
+ */
 export const SLIME_AVATAR: TextureGenerator = (ctx, w, h) => {
-  const cx = w/2, cy = h; 
-  // Slime Body (Semi-Circle)
-  ctx.fillStyle = '#ec4899';
+  const cx = w/2, cy = h/2 + 25; 
+  const r = w/2 - 10;
+  
+  // Gelatinous Body Gradient
+  const grad = ctx.createRadialGradient(cx, cy - r/2, 5, cx, cy, r);
+  grad.addColorStop(0, '#f472b6'); // Pink-400
+  grad.addColorStop(0.7, '#db2777'); // Pink-600
+  grad.addColorStop(1, '#9d174d'); // Pink-800
+  ctx.fillStyle = grad;
+  
   ctx.beginPath();
-  ctx.arc(cx, cy, w/2 - 4, Math.PI, 0);
+  ctx.arc(cx, cy, r, Math.PI, 0);
   ctx.fill();
   
-  // Highlight
-  ctx.fillStyle = '#fbcfe8';
+  // Glassy Rim Highlight
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.ellipse(cx - 20, cy - 40, 10, 6, Math.PI / 4, 0, Math.PI * 2);
+  ctx.arc(cx, cy, r - 2, Math.PI + 0.2, -0.2);
+  ctx.stroke();
+
+  // Internal Depth (Shadow)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - 5, r * 0.8, r * 0.4, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Eye
+  // The All-Seeing Eye (Cyclops)
+  const eyeX = cx, eyeY = cy - r/2 - 5;
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(cx + 15, cy - 30, 12, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#000';
-  ctx.beginPath(); ctx.arc(cx + 18, cy - 30, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eyeX, eyeY, 18, 0, Math.PI*2); ctx.fill();
+  
+  // Iris Depth
+  const irisGrad = ctx.createRadialGradient(eyeX, eyeY, 2, eyeX, eyeY, 10);
+  irisGrad.addColorStop(0, '#000');
+  irisGrad.addColorStop(1, '#1e293b');
+  ctx.fillStyle = irisGrad;
+  ctx.beginPath(); ctx.arc(eyeX + 2, eyeY, 8, 0, Math.PI*2); ctx.fill();
+  
+  // Specular Reflection
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(eyeX - 4, eyeY - 4, 3, 0, Math.PI*2); ctx.fill();
 };
 
 export const SOCCER_BALL: TextureGenerator = (ctx, w, h) => {
   const cx = w/2, cy = h/2;
   const r = w/2 - 2;
   
-  // White Base
-  ctx.fillStyle = '#f8fafc';
+  // Realistic Spherical Shading
+  const grad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.1, cx, cy, r);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.8, '#cbd5e1');
+  grad.addColorStop(1, '#64748b');
+  ctx.fillStyle = grad;
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
   
-  // Pentagons (Approx)
-  ctx.fillStyle = '#1e293b';
-  ctx.beginPath(); ctx.arc(cx, cy, r * 0.3, 0, Math.PI*2); ctx.fill(); // Center
+  // Classic Hex Pattern
+  ctx.fillStyle = '#0f172a';
+  ctx.globalAlpha = 0.9;
   
+  // Central Hex
+  const drawHex = (hx: number, hy: number, size: number) => {
+    ctx.beginPath(); 
+    for(let i=0; i<6; i++) {
+        const a = i * Math.PI / 3;
+        const px = hx + Math.cos(a) * size;
+        const py = hy + Math.sin(a) * size;
+        if(i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.fill();
+  };
+
+  drawHex(cx, cy, r * 0.35);
+  
+  // Perimeter Hexes
   for(let i=0; i<5; i++) {
-    const angle = (i * 2 * Math.PI) / 5;
-    const px = cx + Math.cos(angle) * (r * 0.7);
-    const py = cy + Math.sin(angle) * (r * 0.7);
-    ctx.beginPath(); ctx.arc(px, py, r * 0.25, 0, Math.PI*2); ctx.fill();
+    const angle = (i * 2 * Math.PI) / 5 - Math.PI/2;
+    drawHex(cx + Math.cos(angle) * r * 0.7, cy + Math.sin(angle) * r * 0.7, r * 0.3);
   }
   
-  // Outline
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 2;
+  ctx.globalAlpha = 1.0;
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 1;
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
 };
 
 export const SOCCER_GOAL: TextureGenerator = (ctx, w, h) => {
-  // Posts
-  ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = 6;
+  // Metallic Posts
+  const postGrad = ctx.createLinearGradient(0, 0, w, 0);
+  postGrad.addColorStop(0, '#94a3b8');
+  postGrad.addColorStop(0.5, '#f8fafc');
+  postGrad.addColorStop(1, '#94a3b8');
+  
+  ctx.strokeStyle = postGrad;
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(4, h); ctx.lineTo(4, 4); ctx.lineTo(w-4, 4); ctx.lineTo(w-4, h);
+  ctx.moveTo(8, h); ctx.lineTo(8, 8); ctx.lineTo(w-8, 8); ctx.lineTo(w-8, h);
   ctx.stroke();
   
-  // Net
-  ctx.strokeStyle = '#94a3b8';
+  // Netting
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
   ctx.lineWidth = 1;
-  ctx.globalAlpha = 0.5;
   ctx.beginPath();
-  for(let i=10; i<w; i+=10) { ctx.moveTo(i, 4); ctx.lineTo(i-5, h); }
-  for(let j=10; j<h; j+=10) { ctx.moveTo(4, j); ctx.lineTo(w-4, j); }
+  for(let i=12; i<w-8; i+=12) { ctx.moveTo(i, 8); ctx.lineTo(i, h); }
+  for(let j=16; j<h; j+=12) { ctx.moveTo(8, j); ctx.lineTo(w-8, j); }
   ctx.stroke();
-  ctx.globalAlpha = 1.0;
 };
 
 export const PROCEDURAL_REGISTRY: Record<string, TextureGenerator> = {

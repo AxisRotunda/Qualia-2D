@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { ComponentStoreService } from '../ecs/component-store.service';
 import { PhysicsEngine } from '../core/physics-engine.service';
@@ -6,9 +7,8 @@ import { PLAYER_ANIMATIONS } from '../../data/config/animation-config';
 import { BLUEPRINTS, EntityBlueprint } from '../../data/prefabs/entity-blueprints';
 
 /**
- * Qualia2D Entity Factory [V2.6]
- * [RUN_REF]: Assembler pattern updated with industry-standard physical property injection.
- * [RUN_REPAIR]: Fixed missing spawnGravityWell method.
+ * Qualia2D Entity Factory [V3.0]
+ * [RUN_REF]: Initializing prev/current transform pairs for temporal smoothing.
  */
 @Injectable({ providedIn: 'root' })
 export class EntityFactoryService {
@@ -31,7 +31,11 @@ export class EntityFactoryService {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
 
-    this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
+    // // CoT: Initializing prev and current to the same value to prevent first-frame "warp"
+    this.ecs.transforms.set(id, { 
+        x, y, rotation: 0, scaleX: 1, scaleY: 1,
+        prevX: x, prevY: y, prevRotation: 0
+    });
 
     const tags = new Set(bp.components.tags || []);
     tags.add(bp.category);
@@ -60,7 +64,9 @@ export class EntityFactoryService {
         const w = bp.components.sprite?.width || 1;
         const h = bp.components.sprite?.height || 1;
         
-        const col = this.physics.createCollider(id, rb, w, h);
+        // CoT: Pass the shape explicitly to the engine (default to cuboid if undefined)
+        const col = this.physics.createCollider(id, rb, w, h, p.shape || 'cuboid');
+        
         if (col) {
           if (p.restitution !== undefined) col.setRestitution(p.restitution);
           if (p.friction !== undefined) col.setFriction(p.friction);
@@ -90,19 +96,16 @@ export class EntityFactoryService {
     return id;
   }
 
-  /**
-   * Spawns a localized gravitational well.
-   * [RUN_PHYS]: Manual component attachment for dynamic force fields.
-   */
   spawnGravityWell(x: number, y: number, strength: number, radius: number): EntityId {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
     
-    // CoT: Manual assembly for procedural force field entities not defined in static blueprints.
-    this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
+    this.ecs.transforms.set(id, { 
+        x, y, rotation: 0, scaleX: 1, scaleY: 1,
+        prevX: x, prevY: y, prevRotation: 0 
+    });
     this.ecs.tags.set(id, { name: `GravityWell_${id}`, tags: new Set(['mechanism', 'gravity']) });
     
-    // Visual encoding: Attraction (Blue/Indigo), Repulsion (Red/Rose)
     this.ecs.sprites.set(id, { 
       color: strength > 0 ? '#6366f1' : '#f43f5e', 
       width: 0.5, 
@@ -126,7 +129,10 @@ export class EntityFactoryService {
     const id = EntityGenerator.generate();
     this.ecs.addEntity(id);
     
-    this.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
+    this.ecs.transforms.set(id, { 
+        x, y, rotation: 0, scaleX: 1, scaleY: 1,
+        prevX: x, prevY: y, prevRotation: 0
+    });
     this.ecs.sprites.set(id, { color: '#ffffff', textureId: 'tex_hero_sheet', width: 1.5, height: 1.5, layer: 2, opacity: 1 });
     this.ecs.tags.set(id, { name: 'Hero_Unit', tags: new Set(['player']) });
     this.ecs.players.set(id, { speed: 18, turnSpeed: 12, lastFireTime: 0, fireRate: 200 });

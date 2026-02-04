@@ -1,10 +1,14 @@
-
 export interface Transform2D {
   x: number;
   y: number;
   rotation: number; // Radians
   scaleX: number;
   scaleY: number;
+  
+  // [RUN_REF]: Temporal state for interpolation
+  prevX: number;
+  prevY: number;
+  prevRotation: number;
 }
 
 export interface Sprite2D {

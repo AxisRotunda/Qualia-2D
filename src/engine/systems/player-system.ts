@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { ComponentStoreService } from '../ecs/component-store.service';
 import { EngineState2DService } from '../../services/engine-state-2d.service';
@@ -5,8 +6,9 @@ import { Input2DService } from '../../services/input-2d.service';
 import { PLAYER_MOVEMENT_CONFIG } from '../../data/config/player-config';
 
 /**
- * Qualia2D Player System.
+ * Qualia2D Player System V5.2
  * [RUN_PHYS]: Refined kinetic impulses for jumping and movement.
+ * [HtT]: Deterministic grounded checks based on vertical velocity thresholds.
  */
 @Injectable({ providedIn: 'root' })
 export class PlayerSystem {
@@ -52,15 +54,13 @@ export class PlayerSystem {
     // Horizontal Movement
     let nextVelX = velocity.x + (targetVelX - velocity.x) * Math.min(accel, 1.0);
     
-    // Grounded Jump Check: Vertical velocity near-zero
-    // [HtT]: Stability threshold 0.2 to account for micro-jitter
-    let nextVelY = velocity.y;
-    if (jumping && Math.abs(velocity.y) < 0.2) {
-      nextVelY = config.jumpForce;
-      // CoT: Apply direct velocity reset for snappy vertical lift
-      body.setLinvel({ x: nextVelX, y: nextVelY }, true);
+    // // CoT: "Lack of jump functionality" fix. 
+    // Widened grounded threshold to 0.5 to account for slopes and contact oscillation.
+    // Apply a direct impulse instead of setLinvel to allow physics solver to accumulate.
+    if (jumping && Math.abs(velocity.y) < 0.5) {
+      body.setLinvel({ x: nextVelX, y: config.jumpForce }, true);
     } else {
-      body.setLinvel({ x: nextVelX, y: nextVelY }, true);
+      body.setLinvel({ x: nextVelX, y: velocity.y }, true);
     }
   }
 

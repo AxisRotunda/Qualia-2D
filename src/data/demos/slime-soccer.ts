@@ -1,3 +1,4 @@
+
 import { EntityGenerator } from '../../engine/ecs/entity';
 import type { Engine2DService } from '../../services/engine-2d.service';
 import type { ScenePreset2D } from '../../engine/scene.types';
@@ -10,6 +11,11 @@ export interface DemoManifest {
   scene: ScenePreset2D;
 }
 
+/**
+ * [RUN_UI]: Slime Soccer Overhaul.
+ * [REPAIR]: Fixed "Missing floor render" by repositioning ground to Sector-Alpha coordinates.
+ * [REPAIR]: Fixed "Improper sprite rendering" by centering Slime avatars.
+ */
 export const SLIME_SOCCER_SCENE: ScenePreset2D = {
   id: 'demo_slime_match',
   name: 'Slime Stadium',
@@ -21,12 +27,12 @@ export const SLIME_SOCCER_SCENE: ScenePreset2D = {
   config: {
     env: {
       type: 'atmosphere',
-      background: '#0f172a', 
-      horizon: '#3b82f6',
-      gridOpacity: 0.05
+      background: '#020617', 
+      horizon: '#1e3a8a',
+      gridOpacity: 0.1
     },
     physics: {
-      gravity: { x: 0, y: -15 } // Higher gravity for snappy jumps
+      gravity: { x: 0, y: -25 } // High gravity for snappy sports feel
     }
   },
 
@@ -34,59 +40,74 @@ export const SLIME_SOCCER_SCENE: ScenePreset2D = {
     engine.state.setTopology('platformer');
     
     // 1. Stadium Geometry (Floor & Walls)
-    const floorY = -6;
-    engine.spawnBox(0, floorY, '#334155', 30, 1, 'fixed'); // Ground
-    engine.spawnBox(-14, 0, '#1e293b', 1, 14, 'fixed'); // Left Wall
-    engine.spawnBox(14, 0, '#1e293b', 1, 14, 'fixed'); // Right Wall
-    engine.spawnBox(0, 7, '#1e293b', 30, 1, 'fixed'); // Ceiling
+    // [HtT]: Offset floor slightly higher to ensure it's comfortably within default viewport
+    const floorY = -4; 
+    engine.spawnBox(0, floorY, '#1e293b', 40, 2, 'fixed'); // Ground (Slate-800)
+    engine.spawnBox(-18, 5, '#0f172a', 1, 20, 'fixed'); // Left Wall
+    engine.spawnBox(18, 5, '#0f172a', 1, 20, 'fixed'); // Right Wall
+    engine.spawnBox(0, 15, '#0f172a', 40, 1, 'fixed'); // Ceiling
 
     // 2. Goals
-    const leftGoal = engine.spawnFromTemplate('sport_goal_post', -11, floorY + 2);
+    const leftGoal = engine.spawnFromTemplate('sport_goal_post', -15, floorY + 2.5);
     if (leftGoal) engine.updateEntityName(leftGoal, 'Goal_P1');
     
-    const rightGoal = engine.spawnFromTemplate('sport_goal_post', 11, floorY + 2);
+    const rightGoal = engine.spawnFromTemplate('sport_goal_post', 15, floorY + 2.5);
     if (rightGoal) {
         engine.updateEntityName(rightGoal, 'Goal_P2');
-        // Flip right goal
         const s = engine.ecs.getSprite(rightGoal);
         if (s) s.flipX = true;
     }
 
     // 3. The Ball
     const ballId = engine.spawnFromTemplate('sport_ball_std', 0, 0);
-    if (ballId) engine.updateEntityName(ballId, 'Match_Ball');
+    if (ballId) {
+      engine.updateEntityName(ballId, 'Match_Ball');
+      // High bounciness for arcade feel
+      const col = engine.ecs.colliders.get(ballId);
+      if (col) col.handle.setRestitution(0.9);
+    }
 
-    // 4. Player (Slime)
-    // Custom spawn logic for Slime Player to use 'tex_slime' and specific physics
-    const p1 = engine.factory.spawnPlayer(-5, -4);
-    engine.updateEntityName(p1, 'Player_1');
+    // 4. Player 1 (Slime)
+    const p1 = engine.factory.spawnPlayer(-8, floorY + 3);
+    engine.updateEntityName(p1, 'Pilot_Alpha');
     
-    // Override Player Visuals to Slime
+    // Disable flipbook animations to prevent "pink block" cropping
+    engine.ecs.animations.delete(p1); 
+    
     const p1Sprite = engine.ecs.getSprite(p1);
     if (p1Sprite) {
         p1Sprite.textureId = 'tex_slime';
-        p1Sprite.width = 2;
-        p1Sprite.height = 2;
+        p1Sprite.width = 2.4; // Slightly larger for better cyclops visibility
+        p1Sprite.height = 2.4;
     }
     
-    // Override Player Physics (Ball shape for smooth headers)
+    // Ball-physics for slimes
     const p1Rb = engine.ecs.rigidBodies.get(p1);
-    if (p1Rb) {
-       engine.physics.world?.removeCollider(engine.ecs.colliders.get(p1)?.handle, true);
-       const newCol = engine.physics.createCollider(p1, p1Rb.handle, 2, 2); // Creates Box by default in factory, need Ball logic?
-       // Factory uses createCollider which makes cuboids. 
-       // For this demo, we accept the cuboid approximation or would need a 'setColliderShape' method.
-       // Given the constraints, a cuboid slime is acceptable for V1.
+    const p1Col = engine.ecs.colliders.get(p1);
+    if (p1Rb && p1Col) {
+       engine.physics.world?.removeCollider(p1Col.handle, true);
+       engine.physics.createCollider(p1, p1Rb.handle, 2.2, 2.2, 'ball'); 
     }
 
-    // 5. Opponent (Dummy)
-    const p2 = engine.spawnBox(5, -4, '#f43f5e', 2, 2, 'dynamic');
-    engine.updateEntityName(p2, 'Opponent_Bot');
+    // 5. Opponent (Bot Slime)
+    const p2 = engine.factory.spawnPlayer(8, floorY + 3);
+    engine.updateEntityName(p2, 'Pilot_Beta');
+    engine.ecs.animations.delete(p2);
+    
     const p2Sprite = engine.ecs.getSprite(p2);
     if (p2Sprite) {
         p2Sprite.textureId = 'tex_slime';
-        p2Sprite.color = '#f43f5e'; // Tint red
+        p2Sprite.color = '#f43f5e'; // Rose tint
+        p2Sprite.width = 2.4;
+        p2Sprite.height = 2.4;
         p2Sprite.flipX = true;
+    }
+
+    const p2Rb = engine.ecs.rigidBodies.get(p2);
+    const p2Col = engine.ecs.colliders.get(p2);
+    if (p2Rb && p2Col) {
+       engine.physics.world?.removeCollider(p2Col.handle, true);
+       engine.physics.createCollider(p2, p2Rb.handle, 2.2, 2.2, 'ball');
     }
   }
 };

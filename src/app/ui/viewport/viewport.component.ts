@@ -5,6 +5,10 @@ import { Camera2DService } from '../../../services/camera-2d.service';
 import { Input2DService } from '../../../services/input-2d.service';
 import { Selection2DService } from '../../../services/selection-2d.service';
 
+/**
+ * Qualia2D Viewport Bridge.
+ * [INDUSTRY]: Implements stationary pivot-zoom for high-density editing.
+ */
 @Component({
   selector: 'app-viewport',
   standalone: true,
@@ -78,7 +82,7 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
     if (this.state.isOverlayOpen()) return;
     e.preventDefault();
     
-    const factor = e.deltaY > 0 ? 0.9 : 1.1;
+    const factor = e.deltaY > 0 ? 0.92 : 1.08;
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
     
     const worldPos = this.camera.screenToWorld(
@@ -88,6 +92,7 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
       this.engine.renderer.height
     );
     
+    // CoT: Pivot zoom keeps the world coordinate under the pointer stationary
     this.camera.zoomAt(factor, worldPos.x, worldPos.y);
   }
 
@@ -186,7 +191,7 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
       if (this.input.isDragging()) this.updateEntityDrag(e.touches[0].clientX, e.touches[0].clientY);
     } else if (e.touches.length === 2) {
       const dist = this.getDistance(e.touches[0], e.touches[1]);
-      const factor = dist / this.initialPinchDist;
+      const factor = dist / (this.initialPinchDist || 1);
       
       const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
       const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
@@ -198,6 +203,7 @@ export class ViewportComponent implements AfterViewInit, OnDestroy {
         this.engine.renderer.height
       );
 
+      // Recursive adjustment for smooth pinch-pivot
       this.camera.zoomAt(factor / (this.camera.zoom() / this.initialZoom), worldPos.x, worldPos.y);
       
       this.lastX = centerX;
