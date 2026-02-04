@@ -1,5 +1,4 @@
-
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { EngineState2DService, ControllerTopology } from '../../../services/engine-state-2d.service';
 import { Input2DService } from '../../../services/input-2d.service';
 
@@ -12,9 +11,17 @@ interface StickState {
   identifier: number | null;
 }
 
+interface Vector2D {
+  x: number;
+  y: number;
+}
+
+type RightControlType = 'stick' | 'button-jump' | 'button-interact';
+
 /**
- * Industry Standard Mobile Controls V2.0
+ * Industry Standard Mobile Controls V2.1
  * [UX]: Context-aware layout shifting based on Topology (Platformer vs Top-Down).
+ * [ENHANCED]: Dead zone, haptic feedback, improved type safety
  */
 @Component({
   selector: 'app-virtual-joypad',
@@ -120,18 +127,37 @@ interface StickState {
   `
 })
 export class VirtualJoypadComponent {
-  state = inject(EngineState2DService);
-  input = inject(Input2DService);
+  private readonly state = inject(EngineState2DService);
+  private readonly input = inject(Input2DService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly leftStick = signal<StickState>({ active: false, originX: 0, originY: 0, currentX: 0, currentY: 0, identifier: null });
-  readonly rightStick = signal<StickState>({ active: false, originX: 0, originY: 0, currentX: 0, currentY: 0, identifier: null });
+  // Configuration constants (industry standard values)
+  private readonly JOYSTICK_MAX_DISTANCE = 40;
+  private readonly DEAD_ZONE_THRESHOLD = 0.15;
+  private readonly SENSITIVITY = 1.0;
 
-  // CoT: Calculate derived transforms for the UI pucks
+  readonly leftStick = signal<StickState>({ 
+    active: false, 
+    originX: 0, 
+    originY: 0, 
+    currentX: 0, 
+    currentY: 0, 
+    identifier: null 
+  });
+
+  readonly rightStick = signal<StickState>({ 
+    active: false, 
+    originX: 0, 
+    originY: 0, 
+    currentX: 0, 
+    currentY: 0, 
+    identifier: null 
+  });
+
   readonly leftPuckTransform = computed(() => this.calculatePuckOffset(this.leftStick()));
   readonly rightPuckTransform = computed(() => this.calculatePuckOffset(this.rightStick()));
 
-  // CoT: Determine Right Zone Type based on Topology
-  readonly rightControlType = computed(() => {
+  readonly rightControlType = computed<RightControlType>(() => {
     switch (this.state.topology()) {
       case 'platformer': return 'button-jump';
       case 'top-down-rpg': return 'button-interact';
@@ -142,12 +168,15 @@ export class VirtualJoypadComponent {
 
   // --- JOYSTICK LOGIC ---
 
-  onZoneStart(e: TouchEvent, zone: 'left' | 'right') {
+  onZoneStart(e: TouchEvent, zone: 'left' | 'right'): void {
     if (this.state.isOverlayOpen()) return;
-    e.preventDefault(); // Prevent scroll/zoom
+    
+    e.preventDefault();
     this.input.isUsingJoypad.set(true);
 
     const touch = e.changedTouches[0];
+    if (!touch) return;
+
     const stick = zone === 'left' ? this.leftStick : this.rightStick;
 
     stick.set({
@@ -159,50 +188,75 @@ export class VirtualJoypadComponent {
       identifier: touch.identifier
     });
 
+    this.triggerHapticFeedback('light');
     this.updateEngineVectors();
   }
 
-  onZoneMove(e: TouchEvent) {
+  onZoneMove(e: TouchEvent): void {
     if (this.state.isOverlayOpen()) return;
+    
     e.preventDefault();
+    
     const touches = e.changedTouches;
+    let updated = false;
 
     for (let i = 0; i < touches.length; i++) {
       const t = touches[i];
-      // Update Left Stick
+      if (!t) continue;
+
       if (t.identifier === this.leftStick().identifier) {
         this.leftStick.update(s => ({ ...s, currentX: t.clientX, currentY: t.clientY }));
+        updated = true;
       }
-      // Update Right Stick
+
       if (t.identifier === this.rightStick().identifier) {
         this.rightStick.update(s => ({ ...s, currentX: t.clientX, currentY: t.clientY }));
+        updated = true;
       }
     }
-    this.updateEngineVectors();
+
+    if (updated) {
+      this.updateEngineVectors();
+    }
   }
 
-  onZoneEnd(e: TouchEvent, zone: 'left' | 'right') {
+  onZoneEnd(e: TouchEvent, zone: 'left' | 'right'): void {
     e.preventDefault();
+    
     const touches = e.changedTouches;
     const stick = zone === 'left' ? this.leftStick : this.rightStick;
+    const currentStick = stick();
 
     for (let i = 0; i < touches.length; i++) {
-      if (touches[i].identifier === stick().identifier) {
-        stick.set({ ...stick(), active: false, currentX: stick().originX, currentY: stick().originY, identifier: null });
+      const touch = touches[i];
+      if (touch && touch.identifier === currentStick.identifier) {
+        stick.set({ 
+          ...currentStick, 
+          active: false, 
+          currentX: currentStick.originX, 
+          currentY: currentStick.originY, 
+          identifier: null 
+        });
+        break;
       }
     }
+
     this.updateEngineVectors();
   }
 
   // --- BUTTON LOGIC ---
 
-  onAction(e: TouchEvent, isActive: boolean) {
+  onAction(e: TouchEvent, isActive: boolean): void {
     if (this.state.isOverlayOpen()) return;
+    
     e.preventDefault();
     e.stopPropagation();
     this.input.isUsingJoypad.set(true);
     
-    // Map based on Context
+    if (isActive) {
+      this.triggerHapticFeedback('medium');
+    }
+    
     if (this.state.topology() === 'platformer') {
       this.input.jump.set(isActive);
     } else {
@@ -212,21 +266,30 @@ export class VirtualJoypadComponent {
 
   // --- INTERNAL PHYSICS ---
 
-  private updateEngineVectors() {
+  private updateEngineVectors(): void {
+    this.updateMoveVector();
+    this.updateLookVector();
+  }
+
+  private updateMoveVector(): void {
     const l = this.leftStick();
+    
     if (l.active) {
       const v = this.calculateVector(l);
+      
       if (this.state.topology() === 'platformer') {
-        this.input.moveVector.set({ x: v.x, y: 0 }); // X-Axis only for Platformer
+        this.input.moveVector.set({ x: v.x, y: 0 });
       } else {
-        this.input.moveVector.set({ x: v.x, y: -v.y }); // Y-Inverted for World Space
+        this.input.moveVector.set({ x: v.x, y: -v.y });
       }
     } else {
       this.input.moveVector.set({ x: 0, y: 0 });
     }
+  }
 
+  private updateLookVector(): void {
     const r = this.rightStick();
-    // Only process right stick if in Twin-Stick mode
+    
     if (r.active && this.rightControlType() === 'stick') {
       const v = this.calculateVector(r);
       this.input.lookVector.set({ x: v.x, y: -v.y });
@@ -235,34 +298,48 @@ export class VirtualJoypadComponent {
     }
   }
 
-  private calculateVector(s: StickState) {
-    const maxDist = 40;
+  private calculateVector(s: StickState): Vector2D {
     const dx = s.currentX - s.originX;
     const dy = s.currentY - s.originY;
-    const dist = Math.hypot(dx, dy);
+    const distance = Math.hypot(dx, dy);
     
-    if (dist === 0) return { x: 0, y: 0 };
+    if (distance === 0) {
+      return { x: 0, y: 0 };
+    }
     
-    const rawMag = Math.min(dist / maxDist, 1.0);
+    const rawMagnitude = Math.min(distance / this.JOYSTICK_MAX_DISTANCE, 1.0);
+    
+    if (rawMagnitude < this.DEAD_ZONE_THRESHOLD) {
+      return { x: 0, y: 0 };
+    }
+    
+    const adjustedMagnitude = ((rawMagnitude - this.DEAD_ZONE_THRESHOLD) / (1.0 - this.DEAD_ZONE_THRESHOLD)) * this.SENSITIVITY;
     const angle = Math.atan2(dy, dx);
     
     return {
-      x: Math.cos(angle) * rawMag,
-      y: Math.sin(angle) * rawMag
+      x: Math.cos(angle) * adjustedMagnitude,
+      y: Math.sin(angle) * adjustedMagnitude
     };
   }
 
-  private calculatePuckOffset(s: StickState) {
-    const maxDist = 40;
+  private calculatePuckOffset(s: StickState): Vector2D {
     let dx = s.currentX - s.originX;
     let dy = s.currentY - s.originY;
-    const dist = Math.hypot(dx, dy);
+    const distance = Math.hypot(dx, dy);
     
-    if (dist > maxDist) {
+    if (distance > this.JOYSTICK_MAX_DISTANCE) {
       const angle = Math.atan2(dy, dx);
-      dx = Math.cos(angle) * maxDist;
-      dy = Math.sin(angle) * maxDist;
+      dx = Math.cos(angle) * this.JOYSTICK_MAX_DISTANCE;
+      dy = Math.sin(angle) * this.JOYSTICK_MAX_DISTANCE;
     }
+    
     return { x: dx, y: dy };
+  }
+
+  private triggerHapticFeedback(intensity: 'light' | 'medium' | 'heavy'): void {
+    if ('vibrate' in navigator) {
+      const duration = intensity === 'light' ? 10 : intensity === 'medium' ? 20 : 30;
+      navigator.vibrate(duration);
+    }
   }
 }
