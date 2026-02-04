@@ -1,5 +1,3 @@
-// /src/engine/systems/controller-system.service.ts
-
 import { Injectable, inject, effect, DestroyRef } from '@angular/core';
 import { EngineState2DService } from '../../services/engine-state-2d.service';
 import { ComponentStoreService } from '../ecs/component-store.service';
@@ -7,9 +5,28 @@ import { PhysicsEngine } from '../core/physics-engine.service';
 import { CommandRegistryService } from '../../services/command-registry.service';
 import { TOPOLOGY_BEHAVIORS } from '../../data/config/topology-config';
 
+// Controller System Configuration
+const CONTROLLER_CONFIG = {
+  TARGET_FPS: 60,
+  DAMPING: {
+    MIN_FACTOR: 0.01,
+    MAX_FACTOR: 1.0,
+    EPSILON: 1e-6, // Threshold for considering velocity effectively zero
+  },
+  DELTA_TIME: {
+    MIN: 0,
+    MAX: 1.0, // Maximum acceptable dt (1 second) to prevent physics explosions
+  },
+} as const;
+
 /**
- * Controller Orchestration System V2.0
- * [ENHANCED]: Memory-safe effects, frame-rate independence constants
+ * Controller Orchestration System V3.0
+ * [ENHANCED]: Memory-safe effects, frame-rate independent damping, validation guards
+ * 
+ * Responsibilities:
+ * - Topology-based physics rule application
+ * - Frame-rate independent damping calculations
+ * - Global velocity damping for all dynamic rigid bodies
  */
 @Injectable({ providedIn: 'root' })
 export class ControllerSystem2DService {
@@ -19,14 +36,17 @@ export class ControllerSystem2DService {
   private readonly commands = inject(CommandRegistryService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly TARGET_FPS = 60;
-  private readonly MIN_DAMPING_FACTOR = 0.01;
-  private readonly MAX_DAMPING_FACTOR = 1.0;
-
   constructor() {
+    this.initializeTopologyTracking();
+  }
+
+  /**
+   * Initializes memory-safe topology change tracking
+   */
+  private initializeTopologyTracking(): void {
     const topologyEffect = effect(() => {
-      const top = this.state.topology();
-      this.commands.execute('RUN_PHYS', `TOPOLOGY_SHIFT: ${top}`);
+      const topology = this.state.topology();
+      this.commands.execute('RUN_PHYS', `TOPOLOGY_SHIFT: ${topology}`);
     });
 
     this.destroyRef.onDestroy(() => {
@@ -34,48 +54,75 @@ export class ControllerSystem2DService {
     });
   }
 
+  /**
+   * Applies topology-specific physics rules and global damping
+   * @param dt - Delta time in seconds
+   */
   applyTopologyRules(dt: number): void {
-    if (!this.physics.world || dt <= 0 || dt > 1) return;
+    // Validation guards
+    if (!this.physics.world) return;
+    if (!this.isValidDeltaTime(dt)) return;
     
     const currentTopology = this.state.topology();
     const rules = TOPOLOGY_BEHAVIORS[currentTopology](this.state.gravityY());
     
-    // 1. Sync World Gravity
+    // Phase 1: Synchronize World Gravity
     this.physics.world.gravity = rules.gravity;
 
-    // 2. Apply Global Damping (Frame-Rate Independent)
+    // Phase 2: Apply Frame-Rate Independent Damping
     if (rules.damping > 0) {
-      const normalizedDt = dt * this.TARGET_FPS;
-      const dampFactor = Math.pow(
-        rules.damping, 
-        normalizedDt
-      );
-      
-      const clampedDampFactor = Math.max(
-        this.MIN_DAMPING_FACTOR,
-        Math.min(this.MAX_DAMPING_FACTOR, dampFactor)
-      );
-
-      this.applyDampingToRigidBodies(clampedDampFactor);
+      const dampingFactor = this.calculateDampingFactor(rules.damping, dt);
+      this.applyDampingToRigidBodies(dampingFactor);
     }
   }
 
+  /**
+   * Validates delta time to prevent physics instability
+   */
+  private isValidDeltaTime(dt: number): boolean {
+    return dt > CONTROLLER_CONFIG.DELTA_TIME.MIN && 
+           dt <= CONTROLLER_CONFIG.DELTA_TIME.MAX;
+  }
+
+  /**
+   * Calculates frame-rate independent damping factor
+   * Uses exponential decay: factor = damping^(dt * TARGET_FPS)
+   */
+  private calculateDampingFactor(damping: number, dt: number): number {
+    const normalizedDt = dt * CONTROLLER_CONFIG.TARGET_FPS;
+    const dampFactor = Math.pow(damping, normalizedDt);
+    
+    // Clamp to safe range to prevent numerical instability
+    return Math.max(
+      CONTROLLER_CONFIG.DAMPING.MIN_FACTOR,
+      Math.min(CONTROLLER_CONFIG.DAMPING.MAX_FACTOR, dampFactor)
+    );
+  }
+
+  /**
+   * Applies velocity damping to all dynamic rigid bodies
+   * @param dampFactor - Multiplicative damping factor (0-1 range)
+   */
   private applyDampingToRigidBodies(dampFactor: number): void {
     this.ecs.rigidBodies.forEach((rb) => {
       if (rb.bodyType !== 'dynamic' || !rb.handle) return;
 
       const vel = rb.handle.linvel();
-      const angVel = rb.handle.angvel();
-      
       if (!vel) return;
 
+      // Apply linear damping
       rb.handle.setLinvel({ 
         x: vel.x * dampFactor, 
         y: vel.y * dampFactor 
       }, true);
       
+      // Apply angular damping (if angular velocity exists)
+      const angVel = rb.handle.angvel();
       if (angVel !== undefined && angVel !== null) {
-        rb.handle.setAngvel(angVel * dampFactor, true);
+        // Only apply if velocity is above epsilon to avoid floating-point drift
+        if (Math.abs(angVel) > CONTROLLER_CONFIG.DAMPING.EPSILON) {
+          rb.handle.setAngvel(angVel * dampFactor, true);
+        }
       }
     });
   }
