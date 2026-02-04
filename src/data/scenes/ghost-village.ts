@@ -30,7 +30,8 @@ export const GHOST_VILLAGE: ScenePreset2D = {
         
         const id = EntityGenerator.generate();
         engine.ecs.addEntity(id);
-        engine.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1 });
+        // FIX: Initialize prevX, prevY, and prevRotation for interpolation
+        engine.ecs.transforms.set(id, { x, y, rotation: 0, scaleX: 1, scaleY: 1, prevX: x, prevY: y, prevRotation: 0 });
         engine.ecs.sprites.set(id, { color: '#064e3b', textureId: 'tex_tree', width: 2, height: 3, layer: 2, opacity: 1 });
         engine.ecs.rigidBodies.set(id, { handle: engine.physics.createBody(id, 'fixed', x, y), bodyType: 'fixed' });
         // Trees are solid
@@ -41,7 +42,8 @@ export const GHOST_VILLAGE: ScenePreset2D = {
     // 2. The Elder NPC
     const elderId = EntityGenerator.generate();
     engine.ecs.addEntity(elderId);
-    engine.ecs.transforms.set(elderId, { x: 5, y: 5, rotation: 0, scaleX: 1, scaleY: 1 });
+    // FIX: Initialize prevX, prevY, and prevRotation for interpolation
+    engine.ecs.transforms.set(elderId, { x: 5, y: 5, rotation: 0, scaleX: 1, scaleY: 1, prevX: 5, prevY: 5, prevRotation: 0 });
     engine.ecs.sprites.set(elderId, { color: '#fbbf24', textureId: 'tex_npc', width: 1.5, height: 1.5, layer: 2, opacity: 1 });
     engine.ecs.rigidBodies.set(elderId, { handle: engine.physics.createBody(elderId, 'fixed', 5, 5), bodyType: 'fixed' });
     const elderRb = engine.ecs.rigidBodies.get(elderId);
@@ -57,7 +59,8 @@ export const GHOST_VILLAGE: ScenePreset2D = {
     // 3. The Portal (Dungeon Entrance)
     const portalId = EntityGenerator.generate();
     engine.ecs.addEntity(portalId);
-    engine.ecs.transforms.set(portalId, { x: 0, y: 15, rotation: 0, scaleX: 1, scaleY: 1 });
+    // FIX: Initialize prevX, prevY, and prevRotation for interpolation
+    engine.ecs.transforms.set(portalId, { x: 0, y: 15, rotation: 0, scaleX: 1, scaleY: 1, prevX: 0, prevY: 15, prevRotation: 0 });
     engine.ecs.sprites.set(portalId, { color: '#10b981', textureId: 'tex_portal', width: 4, height: 4, layer: 1, opacity: 0.8 });
     
     // Portal Logic

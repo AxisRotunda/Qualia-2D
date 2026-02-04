@@ -25,7 +25,8 @@ export const PHYSICS_LAB: ScenePreset2D = {
     engine.state.setTopology('platformer');
     const floorId = EntityGenerator.generate();
     engine.ecs.addEntity(floorId);
-    engine.ecs.transforms.set(floorId, { x: 0, y: -6, rotation: 0, scaleX: 1, scaleY: 1 });
+    // FIX: Initialize prevX, prevY, and prevRotation for interpolation
+    engine.ecs.transforms.set(floorId, { x: 0, y: -6, rotation: 0, scaleX: 1, scaleY: 1, prevX: 0, prevY: -6, prevRotation: 0 });
     engine.ecs.sprites.set(floorId, { color: '#0f172a', width: 24, height: 2, layer: 0, opacity: 1 });
     const floorRb = engine.physics.createBody(floorId, 'fixed', 0, -6);
     if(floorRb) engine.physics.createCollider(floorId, floorRb, 24, 2);

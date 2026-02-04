@@ -1,5 +1,5 @@
 import { EntityGenerator } from '../../engine/ecs/entity';
-import type { Engine2DService } from '../../services/engine-2d.service';
+import type { Engine2DService } from '../../services/engine-d.service';
 import type { ScenePreset2D } from '../../engine/scene.types';
 
 export const NEON_HOTLINE: ScenePreset2D = {
@@ -39,7 +39,8 @@ export const NEON_HOTLINE: ScenePreset2D = {
     walls.forEach((w, i) => {
       const id = EntityGenerator.generate();
       engine.ecs.addEntity(id);
-      engine.ecs.transforms.set(id, { x: w.x, y: w.y, rotation: 0, scaleX: 1, scaleY: 1 });
+      // FIX: Initialize prevX, prevY, and prevRotation for interpolation
+      engine.ecs.transforms.set(id, { x: w.x, y: w.y, rotation: 0, scaleX: 1, scaleY: 1, prevX: w.x, prevY: w.y, prevRotation: 0 });
       engine.ecs.sprites.set(id, { color: '#0f172a', width: w.w, height: w.h, layer: 0, opacity: 1 });
       engine.ecs.tags.set(id, { name: `Wall_${i}`, tags: new Set(['static']) });
       const rb = engine.physics.createBody(id, 'fixed', w.x, w.y);
