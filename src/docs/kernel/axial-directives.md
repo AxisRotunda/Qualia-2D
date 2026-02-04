@@ -1,5 +1,5 @@
 # [T0] Axial Directives
-ID: AXIAL_CORE_V1.0 Role: Irreducible Foundations.
+ID: AXIAL_CORE_V1.1 Role: Irreducible Foundations.
 
 ## 0. PRINCIPLES
 
@@ -17,3 +17,6 @@ Memory is fundamental. Persistent issues or complex repair-loops must utilize de
 
 ### 0.5 SYNTACTIC_OPTIMIZATION
 Documentation is the syntax of the process-chain. It must be hyper-optimized for AI agent ingestion using high-density matrices, complex mapping, and machine-readable structures. Human readability is a secondary byproduct.
+
+### 0.6 DOCUMENTATION_IMMUTABILITY (NEW)
+Core structural documents (`project-hierarchy.md`, `axial-directives.md`, `qualia2d-manifesto.md`) are immutable in their intent. They may only be extended, never deprecated or reduced. Any agent action that causes "Context Leakage" (deletion of mapping data) is a fatal protocol violation.

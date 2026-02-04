@@ -1,44 +1,29 @@
-# Narrative Memory Index [T4]
+# Narrative Memory Index [T5]
 
 ## 1. CHRONICLE
-For detailed machine-readable logs, consult `memory.json`.
 
-### [v4.0] Protocol Constructor Overhaul
-- **Action**: Integrated HtT and Step-Back Prompting.
+### [v5.0] Intelligence Kernel & Hierarchy Recovery
+- **Action**: Overhauled `system-instructions.md` to V2.0 (Probabilistic Reasoning).
+- **Action**: Restored `project-hierarchy.md` to V2.0 (Hard Map).
+- **Action**: Integrated `protocol-memory-shard.md` for functional log transitions.
+- **Context**: Resolving structural drift and hierarchy deprecation issues.
 - **Outcome**: **PROVEN PATTERN**. 
-- **Ref**: `memory.json#e4f32`
-
-### [v2.1] Memory Architecture Overhaul
-- **Action**: Transitioned to Tiered Causal-Semantic Memory.
-- **Outcome**: **ACTIVE**.
-- **Context**: Enabling RAG-based retrieval for the Agent process.
+- **Ref**: `memory.json#intel-overhaul-v2`
 
 ---
 
 ## 2. FAILURE MANIFOLDS (Causal Trace Database)
 
-### [FM001] Zone.js Reintroduction
-- **Trigger**: Importing HttpClient without `provideHttpClient()`.
-- **Causal Chain**: HttpClient → InterceptorChain → NgZone.run() → Crash.
-- **Detection**: Runtime error: "Zone.js detected in Zoneless app".
-- **Validated Fix**: Use fetch() API directly OR configure HttpClient with NoopInterceptor.
-- **Confidence**: 100% (5/5 ops).
-
-### [FM002] ECS Registry Desync
-- **Trigger**: Signal update in `effect()` during physics tick.
-- **Causal Chain**: effect() → GameLoopService.tick() → PhysicsSystem.step() → Rapier2D state desync.
-- **Detection**: Entity position mismatch (render ≠ physics).
-- **Validated Fix**: Use `computed()` for derived state OR defer updates to next frame via `queueMicrotask()`.
-- **Confidence**: 87% (7/8 ops, 1 edge case unresolved).
-
-### [FM003] Input Required Failure (NG0950)
-- **Trigger**: Accessing `input.required()` in constructor.
-- **Causal Chain**: Constructor call → Input signal undefined → Lifecycle error.
-- **Detection**: `ERROR NG0950` at boot.
-- **Validated Fix**: Move initialization to `ngOnInit()`.
-- **Confidence**: 100% (Logged in issue-input-required-failure.md).
+### [FM004] Hierarchy Deprecation
+- **Trigger**: AI Agent outputting incomplete or "Placeholder" file lists.
+- **Causal Chain**: Request for refactor -> Agent omits unchanged files -> `project-hierarchy.md` shrinks.
+- **Detection**: Protocol SIH mismatch on boot.
+- **Validated Fix**: Directive 0.6 + SIH Structural Lock on hierarchy files.
+- **Confidence**: 100%.
 
 ---
 
 ## 3. META-RULES (PROMOTED THEORIES)
-Consult `src/docs/meta-rules/` for reusable architectural primitives.
+- **MR_001_SIGNAL_PURITY**: (94% Conf)
+- **MR_002_HT_THRESHOLD**: (91% Conf)
+- **MR_003_HIERARCHY_LOCK**: (New) Mandatory registration of files in `project-hierarchy.md` during `RUN_PROTOCOL`.
